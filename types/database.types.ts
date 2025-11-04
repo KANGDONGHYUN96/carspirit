@@ -18,6 +18,8 @@ export interface User {
   last_login: string | null
   auth_user_id: string
   profile_image_url: string | null
+  business_card_url: string | null
+  admin_memo: string | null
 }
 
 export interface CapitalPromotion {
@@ -113,6 +115,7 @@ export interface Contract {
   vehicle_trim: string | null
   brand: string
   capital: string
+  dealership: string | null
   contract_type: ContractType
   amount: number
   commission: number

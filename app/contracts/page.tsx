@@ -13,10 +13,19 @@ export default async function ContractsPage() {
 
   const supabase = await createClient()
 
-  const { data: contracts } = await supabase
+  // 관리자/매니저는 모든 계약 조회, 영업자는 본인 계약만 조회
+  const isManagerOrAdmin = user.role === 'manager' || user.role === 'admin'
+
+  let query = supabase
     .from('contracts')
     .select('*')
-    .order('created_at', { ascending: false })
+
+  // 영업자는 본인이 생성한 계약만 조회
+  if (!isManagerOrAdmin) {
+    query = query.eq('user_id', user.id)
+  }
+
+  const { data: contracts } = await query.order('created_at', { ascending: false })
 
   return (
     <DashboardLayout>

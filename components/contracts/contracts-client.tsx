@@ -12,6 +12,7 @@ interface Contract {
   phone: string | null
   contractor: string | null
   capital: string | null
+  dealership: string | null
   vehicle_name: string | null
   vehicle_price: number | null
   product_type: string | null
@@ -45,6 +46,7 @@ export default function ContractsClient({ contracts: initialContracts, userName 
     phone: '',
     contractor: userName,
     capital: '',
+    dealership: '',
     vehicle_name: '',
     vehicle_price: '',
     product_type: '',
@@ -108,13 +110,52 @@ export default function ContractsClient({ contracts: initialContracts, userName 
       }
 
       const data = await response.json()
-      setFormData({ ...formData, customer_documents: data.url })
+
+      // 기존 파일들을 배열로 파싱
+      let existingFiles: string[] = []
+      if (formData.customer_documents) {
+        try {
+          existingFiles = JSON.parse(formData.customer_documents)
+          if (!Array.isArray(existingFiles)) {
+            existingFiles = [formData.customer_documents]
+          }
+        } catch {
+          existingFiles = [formData.customer_documents]
+        }
+      }
+
+      // 새 파일 URL 추가
+      const updatedFiles = [...existingFiles, data.url]
+      setFormData({ ...formData, customer_documents: JSON.stringify(updatedFiles) })
       setAlert({ message: '파일 업로드 완료', type: 'success' })
     } catch (error: any) {
       setAlert({ message: `파일 업로드 실패: ${error.message}`, type: 'error' })
       console.error(error)
     } finally {
       setIsUploading(false)
+    }
+  }
+
+  // 파일 삭제 핸들러
+  const handleFileDelete = (fileUrl: string) => {
+    try {
+      let existingFiles: string[] = []
+      if (formData.customer_documents) {
+        try {
+          existingFiles = JSON.parse(formData.customer_documents)
+          if (!Array.isArray(existingFiles)) {
+            existingFiles = [formData.customer_documents]
+          }
+        } catch {
+          existingFiles = [formData.customer_documents]
+        }
+      }
+
+      const updatedFiles = existingFiles.filter(url => url !== fileUrl)
+      setFormData({ ...formData, customer_documents: updatedFiles.length > 0 ? JSON.stringify(updatedFiles) : '' })
+      setAlert({ message: '파일이 삭제되었습니다', type: 'success' })
+    } catch (error: any) {
+      setAlert({ message: '파일 삭제 실패', type: 'error' })
     }
   }
 
@@ -128,6 +169,7 @@ export default function ContractsClient({ contracts: initialContracts, userName 
         phone: contract.phone || '',
         contractor: contract.contractor || '',
         capital: contract.capital || '',
+        dealership: (contract as any).dealership || '',
         vehicle_name: contract.vehicle_name || '',
         vehicle_price: contract.vehicle_price?.toString() || '',
         product_type: contract.product_type || '',
@@ -151,6 +193,7 @@ export default function ContractsClient({ contracts: initialContracts, userName 
         phone: '',
         contractor: userName,
         capital: '',
+        dealership: '',
         vehicle_name: '',
         vehicle_price: '',
         product_type: '',
@@ -548,6 +591,16 @@ export default function ContractsClient({ contracts: initialContracts, userName 
                       placeholder="예: 하나캐피탈"
                     />
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600 mb-1">대리점</label>
+                    <input
+                      type="text"
+                      value={formData.dealership}
+                      onChange={(e) => setFormData({ ...formData, dealership: e.target.value })}
+                      className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300"
+                      placeholder="예: 서울현대대리점"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -645,27 +698,76 @@ export default function ContractsClient({ contracts: initialContracts, userName 
                   </div>
                   <div className="col-span-2">
                     <label className="block text-sm font-medium text-gray-600 mb-1">고객서류</label>
-                    <div className="flex gap-2">
-                      <input
-                        type="file"
-                        accept=".hwp,.hwpx,.pdf,.doc,.docx"
-                        onChange={handleFileUpload}
-                        disabled={isUploading}
-                        className="flex-1 px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                      />
-                      {isUploading && (
-                        <span className="text-sm text-blue-600 self-center">업로드 중...</span>
-                      )}
-                      {formData.customer_documents && (
-                        <a
-                          href={formData.customer_documents}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-4 py-2 text-sm text-blue-600 hover:text-blue-700 border border-blue-300 rounded-lg self-center hover:bg-blue-50 transition-all"
-                        >
-                          파일 보기
-                        </a>
-                      )}
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <input
+                          type="file"
+                          accept=".hwp,.hwpx,.pdf,.doc,.docx"
+                          onChange={handleFileUpload}
+                          disabled={isUploading}
+                          className="flex-1 px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                        />
+                        {isUploading && (
+                          <span className="text-sm text-blue-600 self-center">업로드 중...</span>
+                        )}
+                      </div>
+                      {formData.customer_documents && (() => {
+                        try {
+                          const files = JSON.parse(formData.customer_documents)
+                          const fileArray = Array.isArray(files) ? files : [formData.customer_documents]
+                          return (
+                            <div className="space-y-2">
+                              {fileArray.map((fileUrl, index) => (
+                                <div key={index} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                                  <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                  </svg>
+                                  <span className="flex-1 text-sm text-gray-700 truncate">파일 {index + 1}</span>
+                                  <a
+                                    href={fileUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="px-3 py-1 text-xs text-blue-600 hover:text-blue-700 border border-blue-300 rounded hover:bg-blue-50 transition-all"
+                                  >
+                                    보기
+                                  </a>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleFileDelete(fileUrl)}
+                                    className="px-3 py-1 text-xs text-red-600 hover:text-red-700 border border-red-300 rounded hover:bg-red-50 transition-all"
+                                  >
+                                    삭제
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )
+                        } catch {
+                          return (
+                            <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                              <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                              <span className="flex-1 text-sm text-gray-700">파일 1</span>
+                              <a
+                                href={formData.customer_documents}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-3 py-1 text-xs text-blue-600 hover:text-blue-700 border border-blue-300 rounded hover:bg-blue-50 transition-all"
+                              >
+                                보기
+                              </a>
+                              <button
+                                type="button"
+                                onClick={() => handleFileDelete(formData.customer_documents)}
+                                className="px-3 py-1 text-xs text-red-600 hover:text-red-700 border border-red-300 rounded hover:bg-red-50 transition-all"
+                              >
+                                삭제
+                              </button>
+                            </div>
+                          )
+                        }
+                      })()}
                     </div>
                   </div>
                 </div>
@@ -735,19 +837,6 @@ export default function ContractsClient({ contracts: initialContracts, userName 
                         value={calculateTotalCommission().toLocaleString()}
                         disabled
                         className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 font-semibold transition-all duration-300"
-                        placeholder="0"
-                      />
-                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">원</span>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-1">정산금</label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={formatNumber(formData.settlement_amount)}
-                        onChange={(e) => handleNumberInput('settlement_amount', e.target.value)}
-                        className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300"
                         placeholder="0"
                       />
                       <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">원</span>

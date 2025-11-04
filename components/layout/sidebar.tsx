@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { User } from '@/types/database.types'
-import { useState } from 'react'
 
 interface SidebarProps {
   user: User
@@ -52,15 +51,6 @@ const navigation = [
     icon: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-      </svg>
-    ),
-  },
-  {
-    name: '채팅 기록',
-    href: '/chat-history',
-    icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
       </svg>
     ),
   },
@@ -125,30 +115,18 @@ const adminNavigation = [
 
 export default function Sidebar({ user }: SidebarProps) {
   const pathname = usePathname()
-  const isAdmin = user.role === 'admin'
   const isManager = user.role === 'manager' || user.role === 'admin'
-  const [isExpanded, setIsExpanded] = useState(true)
 
   return (
-    <div
-      className={`flex h-screen flex-col bg-white border-r border-gray-200 transition-all duration-300 ${isExpanded ? 'w-64' : 'w-16'}`}
-      onMouseEnter={() => setIsExpanded(true)}
-      onMouseLeave={() => setIsExpanded(false)}
-    >
+    <div className="flex h-screen flex-col bg-white border-r border-gray-200 w-64">
       {/* 로고 */}
       <div className="flex h-16 items-center border-b border-gray-200 px-4">
-        {isExpanded ? (
-          <div className="flex items-center gap-3">
-            <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg p-2 flex items-center justify-center shadow-md">
-              <img src="/carspirit-logo.png" alt="카스피릿" className="w-6 h-6 object-contain" />
-            </div>
-            <h1 className="font-extrabold text-2xl tracking-tight bg-gradient-to-r from-gray-900 via-gray-600 to-gray-400 bg-clip-text text-transparent">카스피릿</h1>
-          </div>
-        ) : (
+        <div className="flex items-center gap-3">
           <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg p-2 flex items-center justify-center shadow-md">
             <img src="/carspirit-logo.png" alt="카스피릿" className="w-6 h-6 object-contain" />
           </div>
-        )}
+          <h1 className="font-extrabold text-2xl tracking-tight bg-gradient-to-r from-gray-900 via-gray-600 to-gray-400 bg-clip-text text-transparent">카스피릿</h1>
+        </div>
       </div>
 
       {/* 네비게이션 */}
@@ -165,11 +143,10 @@ export default function Sidebar({ user }: SidebarProps) {
                   isActive
                     ? 'bg-blue-50 text-blue-600 shadow-sm'
                     : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                } ${!isExpanded ? 'justify-center' : ''}`}
-                title={!isExpanded ? item.name : ''}
+                }`}
               >
                 {item.icon}
-                {isExpanded && <span>{item.name}</span>}
+                <span>{item.name}</span>
               </Link>
             )
           })}
@@ -178,11 +155,9 @@ export default function Sidebar({ user }: SidebarProps) {
         {/* 관리자 메뉴 */}
         {isManager && (
           <div className="pt-4 mt-4 border-t border-gray-200">
-            {isExpanded && (
-              <div className="px-3 pb-2 text-xs font-semibold uppercase text-gray-400 tracking-wider">
-                관리자
-              </div>
-            )}
+            <div className="px-3 pb-2 text-xs font-semibold uppercase text-gray-400 tracking-wider">
+              관리자
+            </div>
             <div className="space-y-1">
               {adminNavigation.map((item) => {
                 const isActive = pathname === item.href
@@ -194,11 +169,10 @@ export default function Sidebar({ user }: SidebarProps) {
                       isActive
                         ? 'bg-blue-50 text-blue-600 shadow-sm'
                         : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                    } ${!isExpanded ? 'justify-center' : ''}`}
-                    title={!isExpanded ? item.name : ''}
+                    }`}
                   >
                     {item.icon}
-                    {isExpanded && <span>{item.name}</span>}
+                    <span>{item.name}</span>
                   </Link>
                 )
               })}
@@ -209,18 +183,16 @@ export default function Sidebar({ user }: SidebarProps) {
 
       {/* 사용자 정보 */}
       <div className="border-t border-gray-200 p-4">
-        <div className={`flex items-center gap-3 ${!isExpanded ? 'justify-center' : ''}`}>
+        <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500 text-white flex-shrink-0 font-semibold text-sm shadow-md">
             {user.name.charAt(0)}
           </div>
-          {isExpanded && (
-            <div className="flex-1 overflow-hidden">
-              <p className="truncate text-sm font-medium text-gray-900">{user.name}</p>
-              <p className="truncate text-xs text-gray-500">
-                {user.role === 'admin' ? '관리자' : user.role === 'manager' ? '매니저' : '영업자'}
-              </p>
-            </div>
-          )}
+          <div className="flex-1 overflow-hidden">
+            <p className="truncate text-sm font-medium text-gray-900">{user.name}</p>
+            <p className="truncate text-xs text-gray-500">
+              {user.role === 'admin' ? '관리자' : user.role === 'manager' ? '매니저' : '영업자'}
+            </p>
+          </div>
         </div>
       </div>
     </div>

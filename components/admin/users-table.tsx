@@ -21,6 +21,11 @@ export default function UsersTable({ users, currentUserId }: UsersTableProps) {
   const [alert, setAlert] = useState<{ message: string; type: 'info' | 'success' | 'error' | 'warning' } | null>(null)
   const [confirm, setConfirm] = useState<{ message: string; onConfirm: () => void } | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false)
+  const [editedPhone, setEditedPhone] = useState('')
+  const [editedMemo, setEditedMemo] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
   const itemsPerPage = 50
 
   console.log('UsersTable received users:', users)
@@ -141,6 +146,47 @@ export default function UsersTable({ users, currentUserId }: UsersTableProps) {
         }
       }
     })
+  }
+
+  // 사용자 상세 모달 열기
+  const handleOpenUserModal = (user: User) => {
+    setSelectedUser(user)
+    setEditedPhone(user.phone || '')
+    setEditedMemo(user.admin_memo || '')
+    setIsUserModalOpen(true)
+  }
+
+  // 사용자 정보 저장
+  const handleSaveUserInfo = async () => {
+    if (!selectedUser) return
+
+    setIsSaving(true)
+    try {
+      const response = await fetch('/api/admin/users/update', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: selectedUser.id,
+          phone: editedPhone,
+          admin_memo: editedMemo
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('사용자 정보 업데이트 실패')
+      }
+
+      setAlert({ message: '사용자 정보가 업데이트되었습니다.', type: 'success' })
+      setIsUserModalOpen(false)
+
+      // 페이지 새로고침
+      setTimeout(() => window.location.reload(), 1000)
+    } catch (error) {
+      console.error('사용자 정보 업데이트 실패:', error)
+      setAlert({ message: '사용자 정보 업데이트에 실패했습니다.', type: 'error' })
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
@@ -287,7 +333,11 @@ export default function UsersTable({ users, currentUserId }: UsersTableProps) {
                 const isProcessing = isUpdating === user.id
 
                 return (
-                  <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                  <tr
+                    key={user.id}
+                    className="hover:bg-gray-50 transition-colors cursor-pointer"
+                    onClick={() => handleOpenUserModal(user)}
+                  >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">
@@ -446,6 +496,155 @@ export default function UsersTable({ users, currentUserId }: UsersTableProps) {
         onCancel={() => setConfirm(null)}
         type="info"
       />
+
+      {/* User Detail Modal */}
+      {isUserModalOpen && selectedUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+              <h2 className="text-xl font-bold text-gray-900">사용자 상세 정보</h2>
+              <button
+                onClick={() => setIsUserModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-6">
+              {/* Profile Section */}
+              <div className="flex items-center gap-4 pb-4 border-b border-gray-200">
+                <div className="w-20 h-20 rounded-full bg-blue-500 flex items-center justify-center text-white text-3xl font-semibold">
+                  {selectedUser.name.charAt(0)}
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900">{selectedUser.name}</h3>
+                  <p className="text-sm text-gray-500">{selectedUser.email}</p>
+                  <span className={`mt-1 inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                    selectedUser.role === 'admin' ? 'bg-purple-100 text-purple-700' :
+                    selectedUser.role === 'manager' ? 'bg-indigo-100 text-indigo-700' :
+                    'bg-cyan-100 text-cyan-700'
+                  }`}>
+                    {getRoleLabel(selectedUser.role)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Phone Number */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">전화번호</label>
+                <input
+                  type="tel"
+                  value={editedPhone}
+                  onChange={(e) => setEditedPhone(e.target.value)}
+                  placeholder="전화번호를 입력하세요"
+                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                />
+              </div>
+
+              {/* Business Card */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">명함</label>
+                {selectedUser.business_card_url ? (
+                  <div className="space-y-3">
+                    <div className="relative bg-gray-50 rounded-lg p-4 border-2 border-gray-200">
+                      <img
+                        src={selectedUser.business_card_url}
+                        alt="명함"
+                        className="w-full max-w-md mx-auto rounded-lg shadow-md"
+                      />
+                    </div>
+                    <a
+                      href={selectedUser.business_card_url}
+                      download={`명함_${selectedUser.name}.jpg`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors font-medium"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                      다운로드
+                    </a>
+                  </div>
+                ) : (
+                  <div className="bg-gray-50 rounded-lg p-8 border-2 border-dashed border-gray-300 text-center">
+                    <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    <p className="mt-2 text-sm text-gray-600">명함이 등록되지 않았습니다</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Admin Memo */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  관리자 메모
+                  <span className="ml-2 text-xs text-gray-500">(사용자에게 보이지 않음)</span>
+                </label>
+                <textarea
+                  value={editedMemo}
+                  onChange={(e) => setEditedMemo(e.target.value)}
+                  placeholder="관리자 전용 메모를 입력하세요..."
+                  rows={4}
+                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
+                />
+              </div>
+
+              {/* Additional Info */}
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 mb-1">상태</label>
+                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                    selectedUser.approved ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                  }`}>
+                    {selectedUser.approved ? '승인됨' : '대기중'}
+                  </span>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 mb-1">가입일</label>
+                  <p className="text-sm text-gray-900">
+                    {new Date(selectedUser.created_at).toLocaleDateString('ko-KR')}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="sticky bottom-0 bg-gray-50 px-6 py-4 flex items-center justify-end gap-3 border-t border-gray-200 rounded-b-2xl">
+              <button
+                onClick={() => setIsUserModalOpen(false)}
+                disabled={isSaving}
+                className="px-6 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleSaveUserInfo}
+                disabled={isSaving}
+                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {isSaving ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    저장 중...
+                  </>
+                ) : (
+                  '저장'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

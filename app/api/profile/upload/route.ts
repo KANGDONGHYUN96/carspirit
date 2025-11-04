@@ -14,6 +14,7 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData()
     const file = formData.get('file') as File
+    const type = formData.get('type') as string // 'profile' | 'card'
 
     if (!file) {
       return NextResponse.json({ error: '파일이 없습니다' }, { status: 400 })
@@ -27,7 +28,8 @@ export async function POST(request: NextRequest) {
 
     // Storage에 업로드 (UUID로 저장)
     const uniqueId = crypto.randomUUID()
-    const filePath = `profile-images/${user.id}/${uniqueId}.${fileExt}`
+    const folder = type === 'card' ? 'business-cards' : 'profile-images'
+    const filePath = `${folder}/${user.id}/${uniqueId}.${fileExt}`
 
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('company-files')
@@ -46,10 +48,11 @@ export async function POST(request: NextRequest) {
       .from('company-files')
       .getPublicUrl(filePath)
 
-    // users 테이블에 프로필 이미지 URL 업데이트
+    // users 테이블 업데이트
+    const updateField = type === 'card' ? 'business_card_url' : 'profile_image_url'
     const { error: dbError } = await supabase
       .from('users')
-      .update({ profile_image_url: publicUrl })
+      .update({ [updateField]: publicUrl })
       .eq('id', user.id)
 
     if (dbError) {
@@ -57,9 +60,11 @@ export async function POST(request: NextRequest) {
       throw dbError
     }
 
-    return NextResponse.json({ profile_image_url: publicUrl })
+    return NextResponse.json({
+      [type === 'card' ? 'business_card_url' : 'profile_image_url']: publicUrl
+    })
   } catch (error: any) {
-    console.error('프로필 사진 업로드 실패:', error)
+    console.error('파일 업로드 실패:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }

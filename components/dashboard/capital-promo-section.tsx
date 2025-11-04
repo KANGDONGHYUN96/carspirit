@@ -15,7 +15,7 @@ export default function CapitalPromoSection({ promotions }: CapitalPromoSectionP
   // 무한 루프를 위해 프로모션 배열을 3번 복제
   const infinitePromotions = [...promotions, ...promotions, ...promotions]
 
-  // 자동 슬라이드 (3초마다)
+  // 자동 슬라이드 (8초마다)
   useEffect(() => {
     if (promotions.length === 0) return
 
@@ -25,7 +25,7 @@ export default function CapitalPromoSection({ promotions }: CapitalPromoSectionP
       setTimeout(() => {
         setIsTransitioning(false)
       }, 500)
-    }, 3000)
+    }, 8000)
 
     return () => clearInterval(interval)
   }, [promotions.length])
