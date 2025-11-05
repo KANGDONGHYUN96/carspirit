@@ -2,6 +2,7 @@ import DashboardLayout from '@/components/layout/dashboard-layout'
 import CapitalPromoSection from '@/components/dashboard/capital-promo-section'
 import StrategicModelSection from '@/components/dashboard/strategic-model-section'
 import CompanyGallery from '@/components/dashboard/company-gallery'
+import VehicleGallerySection from '@/components/dashboard/vehicle-gallery-section'
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentUser } from '@/lib/auth/get-user'
 
@@ -29,6 +30,12 @@ export default async function DashboardPage() {
     .select('*')
     .order('display_order', { ascending: true })
 
+  // 출고 사진 갤러리 가져오기
+  const { data: vehicles } = await supabase
+    .from('vehicle_gallery')
+    .select('*')
+    .order('created_at', { ascending: false })
+
   return (
     <DashboardLayout>
       <div className="p-6 space-y-6">
@@ -40,6 +47,14 @@ export default async function DashboardPage() {
 
         {/* 3️⃣ 업체별 특이사항 갤러리 */}
         <CompanyGallery companies={companies || []} isAdmin={user?.role === 'admin'} />
+
+        {/* 4️⃣ 출고 사진 갤러리 */}
+        <VehicleGallerySection
+          vehicles={vehicles || []}
+          userId={user?.id || ''}
+          userName={user?.name || ''}
+          userRole={user?.role || 'salesperson'}
+        />
       </div>
     </DashboardLayout>
   )

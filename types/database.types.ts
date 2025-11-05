@@ -136,3 +136,18 @@ export interface Log {
   new_data: Record<string, unknown> | null
   timestamp: string
 }
+
+export interface VehicleGallery {
+  id: string
+  user_id: string
+  user_name: string
+  brand: string
+  model: string
+  exterior_color: string | null
+  interior_color: string | null
+  options: string | null
+  thumbnail_url: string
+  zip_file_url: string
+  created_at: string
+  updated_at: string
+}
