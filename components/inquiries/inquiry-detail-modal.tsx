@@ -138,7 +138,14 @@ export default function InquiryDetailModal({
         return
       }
 
-      const todayLockCount = todayLocks?.length || 0
+      // 현재 문의가 오늘 잠금한 목록에 포함되어 있는지 확인
+      const currentInquiryLockedToday = todayLocks?.some(lock => lock.id === inquiry.id)
+
+      // 현재 문의가 오늘 잠금한 것이 아닌 경우에만 카운트
+      const todayLockCount = currentInquiryLockedToday
+        ? (todayLocks?.length || 0) - 1  // 현재 문의 제외
+        : (todayLocks?.length || 0)
+
       if (todayLockCount >= 2) {
         setAlert({ message: '하루에 최대 2개까지만 잠금할 수 있습니다.', type: 'warning' })
         return
