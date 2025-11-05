@@ -162,13 +162,22 @@ export default function InquiryDetailModal({
             unlockAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000) // 현재 시간 + 7일
           }
 
+          // 이미 잠금된 문의인지 확인
+          const isAlreadyLocked = inquiry.locked_by === userId && inquiry.locked_at
+
+          const updateData: any = {
+            unlock_at: unlockAt.toISOString(),
+          }
+
+          // 처음 잠그는 경우에만 locked_at과 locked_by 업데이트
+          if (!isAlreadyLocked) {
+            updateData.locked_at = now.toISOString()
+            updateData.locked_by = userId
+          }
+
           const { error } = await supabase
             .from('inquiries')
-            .update({
-              locked_at: now.toISOString(),
-              locked_by: userId,
-              unlock_at: unlockAt.toISOString(),
-            })
+            .update(updateData)
             .eq('id', inquiry.id)
 
           if (error) throw error
