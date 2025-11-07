@@ -97,14 +97,32 @@ export default function OpenDBDetailModal({
 
   // 잠금 처리
   const handleLock = async () => {
-    // 관리자가 아닌 경우에만 제한 체크
-    if (!isAdmin && todayLockCount >= 2) {
-      setAlert({ message: '하루에 최대 2개까지만 잠금할 수 있습니다.', type: 'warning' })
-      return
+    if (!isAdmin) {
+      // 일반 사용자: 오늘 잠금 횟수 확인
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+
+      const { data: todayLocks, error: countError } = await supabase
+        .from('inquiries')
+        .select('id')
+        .eq('locked_by', userId)
+        .gte('locked_at', today.toISOString())
+
+      if (countError) {
+        console.error('잠금 횟수 확인 에러:', countError)
+        setAlert({ message: '잠금 횟수 확인 실패', type: 'error' })
+        return
+      }
+
+      const currentLockCount = todayLocks?.length || 0
+      if (currentLockCount >= 2) {
+        setAlert({ message: '하루에 최대 2개까지만 잠금할 수 있습니다.', type: 'warning' })
+        return
+      }
     }
 
     setConfirm({
-      message: '이 문의를 7일간 잠금하시겠습니까?\n잠금하면 나의문의 페이지로 이동합니다.',
+      message: '이 문의를 7일간 잠금하시겠습니까?',
       onConfirm: async () => {
         setConfirm(null)
         setIsLocking(true)
@@ -130,9 +148,9 @@ export default function OpenDBDetailModal({
             throw error
           }
 
-          console.log('잠금 성공! 나의문의로 이동합니다.')
-          router.push('/inquiries')
+          setAlert({ message: '문의가 잠금되었습니다. 나의문의에서 확인할 수 있습니다.', type: 'success' })
           router.refresh()
+          onClose()
         } catch (error) {
           console.error('Lock error:', error)
           setAlert({ message: '잠금 실패: ' + (error as Error).message, type: 'error' })

@@ -28,6 +28,12 @@ CREATE INDEX IF NOT EXISTS idx_vehicle_gallery_brand ON vehicle_gallery(brand);
 -- RLS 정책
 ALTER TABLE vehicle_gallery ENABLE ROW LEVEL SECURITY;
 
+-- 기존 정책 삭제 (있을 경우)
+DROP POLICY IF EXISTS "Anyone can view vehicle gallery" ON vehicle_gallery;
+DROP POLICY IF EXISTS "Users can insert their own vehicle gallery" ON vehicle_gallery;
+DROP POLICY IF EXISTS "Users can update their own vehicle gallery" ON vehicle_gallery;
+DROP POLICY IF EXISTS "Users can delete their own vehicle gallery" ON vehicle_gallery;
+
 -- 모든 인증된 사용자가 조회 가능
 CREATE POLICY "Anyone can view vehicle gallery"
   ON vehicle_gallery

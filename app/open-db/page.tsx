@@ -35,26 +35,24 @@ export default async function OpenDBPage() {
 
   // 필터링: 7일 지났고 잠금되지 않은 것만
   const openInquiries = (inquiries || []).filter(inquiry => {
-    const createdAt = new Date(inquiry.created_at)
-    const daysSinceCreated = (Date.now() - createdAt.getTime()) / (1000 * 60 * 60 * 24)
+    const now = new Date()
 
-    // 잠금된 문의는 무조건 숨김 (본인 것이든 타인 것이든)
-    if (inquiry.locked_at && inquiry.locked_by) {
-      const lockedAt = new Date(inquiry.locked_at)
-      const daysSinceLocked = (Date.now() - lockedAt.getTime()) / (1000 * 60 * 60 * 24)
+    // 잠금된 문의 확인 (unlock_at 기준으로 확인)
+    if (inquiry.locked_by && inquiry.unlock_at) {
+      const unlockAt = new Date(inquiry.unlock_at)
 
-      // 잠금이 7일 지났으면 공개
-      if (daysSinceLocked >= 7) return true
-
-      // 7일 안 지났으면 숨김 (본인/타인 상관없이)
-      return false
+      // unlock_at이 아직 안 지났으면 숨김
+      if (now < unlockAt) {
+        return false
+      }
     }
 
-    // 잠금 안 되어 있고 7일 지났으면 공개
-    if (daysSinceCreated >= 7) return true
+    // 생성일로부터 7일 확인
+    const createdAt = new Date(inquiry.created_at)
+    const daysSinceCreated = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24)
 
-    // 7일 안 지났으면 숨김
-    return false
+    // 7일 지났으면 공개
+    return daysSinceCreated >= 7
   })
 
   // 오늘 본인이 잠금한 개수 확인
