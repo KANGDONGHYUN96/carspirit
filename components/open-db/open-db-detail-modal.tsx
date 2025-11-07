@@ -104,9 +104,10 @@ export default function OpenDBDetailModal({
 
       const { data: todayLocks, error: countError } = await supabase
         .from('inquiries')
-        .select('id')
+        .select('id, locked_at')
         .eq('locked_by', userId)
         .gte('locked_at', today.toISOString())
+        .not('locked_at', 'is', null)
 
       if (countError) {
         console.error('잠금 횟수 확인 에러:', countError)

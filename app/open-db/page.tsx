@@ -37,22 +37,24 @@ export default async function OpenDBPage() {
   const openInquiries = (inquiries || []).filter(inquiry => {
     const now = new Date()
 
-    // 잠금된 문의 확인 (unlock_at 기준으로 확인)
-    if (inquiry.locked_by && inquiry.unlock_at) {
-      const unlockAt = new Date(inquiry.unlock_at)
+    // 생성일로부터 7일 확인
+    const createdAt = new Date(inquiry.created_at)
+    const daysSinceCreated = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24)
 
-      // unlock_at이 아직 안 지났으면 숨김
+    // 7일 안 지났으면 숨김
+    if (daysSinceCreated < 7) {
+      return false
+    }
+
+    // unlock_at이 있고 아직 안 지났으면 숨김 (잠금 중)
+    if (inquiry.unlock_at) {
+      const unlockAt = new Date(inquiry.unlock_at)
       if (now < unlockAt) {
         return false
       }
     }
 
-    // 생성일로부터 7일 확인
-    const createdAt = new Date(inquiry.created_at)
-    const daysSinceCreated = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24)
-
-    // 7일 지났으면 공개
-    return daysSinceCreated >= 7
+    return true
   })
 
   // 오늘 본인이 잠금한 개수 확인
@@ -61,9 +63,10 @@ export default async function OpenDBPage() {
 
   const { data: todayLocks } = await supabase
     .from('inquiries')
-    .select('id')
+    .select('id, locked_at')
     .eq('locked_by', user.id)
     .gte('locked_at', today.toISOString())
+    .not('locked_at', 'is', null)
 
   const todayLockCount = todayLocks?.length || 0
 
