@@ -257,7 +257,9 @@ export default function OpenDBTable({ inquiries, userId, userName, userRole, tod
             </thead>
             <tbody className="divide-y divide-gray-200">
               {currentInquiries.map((inquiry) => {
-                const isLocked = inquiry.locked_by && inquiry.locked_at
+                // unlock_at으로 잠금 상태 확인
+                const now = new Date()
+                const isLocked = inquiry.unlock_at && now < new Date(inquiry.unlock_at)
                 const isMyLock = inquiry.locked_by === userId
 
                 return (
@@ -288,7 +290,7 @@ export default function OpenDBTable({ inquiries, userId, userName, userRole, tod
                           </span>
                         </div>
                       ) : (
-                        <span className="text-sm text-gray-500">{getTimeRemaining(inquiry)}</span>
+                        <span className="px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full">공개됨</span>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
