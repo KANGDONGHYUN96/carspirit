@@ -33,7 +33,7 @@ export default async function OpenDBPage() {
     .select('*')
     .order('created_at', { ascending: false })
 
-  // 필터링: 7일 지났고 잠금되지 않은 것만
+  // 필터링: 7일 지났고 한 번도 잠금되지 않은 것만
   const openInquiries = (inquiries || []).filter(inquiry => {
     const now = new Date()
 
@@ -46,12 +46,10 @@ export default async function OpenDBPage() {
       return false
     }
 
-    // unlock_at이 있고 아직 안 지났으면 숨김 (잠금 중)
-    if (inquiry.unlock_at) {
-      const unlockAt = new Date(inquiry.unlock_at)
-      if (now < unlockAt) {
-        return false
-      }
+    // 한 번이라도 잠금되었던 문의는 영구적으로 숨김
+    // locked_by나 locked_at이 있으면 누군가 잠금한 적이 있음
+    if (inquiry.locked_by || inquiry.locked_at) {
+      return false
     }
 
     return true

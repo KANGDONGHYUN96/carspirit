@@ -30,7 +30,7 @@ async function getNextRotationUser(supabase: any) {
   // 2. users 테이블에서 영업자 정보 가져오기
   const { data: user, error: userError } = await supabase
     .from('users')
-    .select('id, name, phone, email')
+    .select('*')
     .eq('id', rotationUser.user_id)
     .single()
 
@@ -176,7 +176,7 @@ export async function POST(request: Request) {
     const rotationUser = await getNextRotationUser(supabase)
     const assignedUserId = rotationUser.user.id
     const assignedUserName = rotationUser.user.name
-    const assignedUserPhone = rotationUser.user.phone
+    // const assignedUserPhone = rotationUser.user.phone // TODO: phone 컬럼 확인 필요
 
     // 2. 문의 생성
     const { data: inquiry, error: inquiryError } = await supabase
@@ -203,7 +203,8 @@ export async function POST(request: Request) {
     await updateRotationState(supabase, assignedUserId)
 
     // 4. 카카오톡 알림 발송 (비동기로 실행, 실패해도 문의 접수는 성공)
-    sendKakaoNotification(assignedUserPhone, customer_name, content).catch(console.error)
+    // TODO: phone 컬럼 확인 후 활성화
+    // sendKakaoNotification(assignedUserPhone, customer_name, content).catch(console.error)
 
     return NextResponse.json({
       success: true,
