@@ -7,27 +7,41 @@ async function getNextRotationUser(supabase: any) {
   today.setHours(0, 0, 0, 0)
 
   // 1. 활성화된 영업자 목록 가져오기 (오늘 배정 개수 기준 오름차순)
-  const { data: users, error } = await supabase
+  const { data: rotationUsers, error: rotationError } = await supabase
     .from('user_rotation')
-    .select(`
-      *,
-      users!inner(id, name, phone, email)
-    `)
+    .select('*')
     .eq('is_active', true)
     .order('today_assigned_count', { ascending: true })
     .order('priority', { ascending: false })
     .limit(1)
 
-  if (error) {
-    console.error('영업자 조회 에러:', error)
-    throw new Error('영업자 배정 실패')
+  if (rotationError) {
+    console.error('user_rotation 조회 에러:', rotationError)
+    throw new Error('영업자 배정 실패: ' + rotationError.message)
   }
 
-  if (!users || users.length === 0) {
+  if (!rotationUsers || rotationUsers.length === 0) {
     throw new Error('활성화된 영업자가 없습니다')
   }
 
-  return users[0]
+  const rotationUser = rotationUsers[0]
+
+  // 2. users 테이블에서 영업자 정보 가져오기
+  const { data: user, error: userError } = await supabase
+    .from('users')
+    .select('id, name, phone, email')
+    .eq('id', rotationUser.user_id)
+    .single()
+
+  if (userError || !user) {
+    console.error('users 조회 에러:', userError)
+    throw new Error('영업자 정보 조회 실패')
+  }
+
+  return {
+    ...rotationUser,
+    user
+  }
 }
 
 // 로테이션 상태 업데이트
@@ -146,9 +160,9 @@ export async function POST(request: Request) {
 
     // 1. 다음 배정 영업자 선택
     const rotationUser = await getNextRotationUser(supabase)
-    const assignedUserId = rotationUser.users.id
-    const assignedUserName = rotationUser.users.name
-    const assignedUserPhone = rotationUser.users.phone
+    const assignedUserId = rotationUser.user.id
+    const assignedUserName = rotationUser.user.name
+    const assignedUserPhone = rotationUser.user.phone
 
     // 2. 문의 생성
     const { data: inquiry, error: inquiryError } = await supabase
