@@ -25,6 +25,7 @@ async function getNextRotationUser(supabase: any) {
   }
 
   const rotationUser = rotationUsers[0]
+  console.log('✅ 선택된 로테이션 사용자:', rotationUser)
 
   // 2. users 테이블에서 영업자 정보 가져오기
   const { data: user, error: userError } = await supabase
@@ -33,9 +34,22 @@ async function getNextRotationUser(supabase: any) {
     .eq('id', rotationUser.user_id)
     .single()
 
-  if (userError || !user) {
-    console.error('users 조회 에러:', userError)
-    throw new Error('영업자 정보 조회 실패')
+  console.log('📋 user 쿼리 결과:', { user, userError })
+
+  if (userError) {
+    console.error('❌ users 조회 에러:', {
+      message: userError.message,
+      details: userError.details,
+      hint: userError.hint,
+      code: userError.code,
+      user_id: rotationUser.user_id,
+    })
+    throw new Error('영업자 정보 조회 실패: ' + userError.message)
+  }
+
+  if (!user) {
+    console.error('❌ user가 null:', rotationUser.user_id)
+    throw new Error('영업자 정보를 찾을 수 없습니다')
   }
 
   return {
