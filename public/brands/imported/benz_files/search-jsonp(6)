@@ -1,0 +1,1 @@
+handle_naver_ads_response({"error":{"message":"java.util.concurrent.TimeoutException: Timeout waiting for task."}});

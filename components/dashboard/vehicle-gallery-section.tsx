@@ -15,6 +15,11 @@ interface VehicleGallerySectionProps {
 }
 
 export default function VehicleGallerySection({ vehicles, userId, userName, userRole }: VehicleGallerySectionProps) {
+  // 네비게이션 상태
+  const [selectedCategory, setSelectedCategory] = useState<'domestic' | 'imported' | null>(null)
+  const [selectedBrand, setSelectedBrand] = useState<string | null>(null)
+  const [selectedModel, setSelectedModel] = useState<string | null>(null)
+
   const [selectedVehicle, setSelectedVehicle] = useState<VehicleGallery | null>(null)
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
@@ -27,6 +32,7 @@ export default function VehicleGallerySection({ vehicles, userId, userName, user
   const [formData, setFormData] = useState({
     brand: '',
     model: '',
+    trim: '',
     exterior_color: '',
     interior_color: '',
     options: '',
@@ -38,6 +44,65 @@ export default function VehicleGallerySection({ vehicles, userId, userName, user
 
   const router = useRouter()
   const supabase = createClient()
+
+  // 브랜드 정보 (국산/수입 분류)
+  const brands = {
+    domestic: [
+      { name: '현대', logoPath: '/brands/domestic/hyundai.png' },
+      { name: '기아', logoPath: '/brands/domestic/kia.png' },
+      { name: '제네시스', logoPath: '/brands/domestic/genesis.png' },
+      { name: 'KGM', logoPath: '/brands/domestic/kgm.png' },
+      { name: '르노코리아', logoPath: '/brands/domestic/renault-korea.png' },
+      { name: '쉐보레', logoPath: '/brands/domestic/chevrolet.png' },
+    ],
+    imported: [
+      { name: 'BMW', logoPath: '/brands/imported/bmw.png' },
+      { name: '벤츠', logoPath: '/brands/imported/benz.png' },
+      { name: '아우디', logoPath: '/brands/imported/audi.png' },
+      { name: '테슬라', logoPath: '/brands/imported/tesla.png' },
+      { name: '볼보', logoPath: '/brands/imported/volvo.png' },
+      { name: '폴스타', logoPath: '/brands/imported/polestar.png' },
+    ],
+  }
+
+  // 브랜드별 차량 모델
+  const brandModels: { [key: string]: string[] } = {
+    '현대': ['아반떼', '싼타페', '그랜저', '쏘나타', '팰리세이드', '투싼', '코나', '포터2', '스타리아', '아이오닉5', '아이오닉9', '캐스퍼EV', '베뉴', '캐스퍼', '아이오닉6', '코나EV', '넥쏘', '포터2 EV', '아반떼N', '아이오닉6N'],
+    '기아': ['쏘렌토', '스포티지', '카니발', '셀토스', 'K5', 'K8', '레이', 'EV3', '봉고3', 'PV5', '모닝', 'EV5', '니로', 'EV4', '레이EV', 'EV6', '타스만', 'EV9', 'K9', '니로EV'],
+    '제네시스': ['GV80', 'GV70', 'G80', 'G70', 'G90', 'GV60', 'GV70 EV', 'G80 EV'],
+    'KGM': ['토레스', '액티언', '무쏘', '티볼리', '렉스턴'],
+    '르노코리아': ['그랑콜레오스', 'QM6', '아르카나', '세닉'],
+    '쉐보레': ['트랙스', '트레일블레이저', '콜로라도'],
+    'BMW': ['5 Series', '3 Series', 'X3', 'X5', 'X7', 'X4', '7 Series', 'i5', '4 Series', 'X1', 'iX3', 'X6', 'i4', 'iX1', 'iX', '1 Series', 'M3', 'X2', 'i7', '8 Series', 'iX2', 'Z4'],
+    '벤츠': ['E-Class', 'GLC-Class', 'S-Class', 'GLE-Class', 'C-Class', 'CLE', 'CLS-Class', 'Maybach S-Class', 'The New G-Class', 'GLB-Class', 'EQA', 'AMG GT', 'G-Class', 'Maybach GLS', 'EQB', 'A-Class', 'EQE', 'EQS'],
+    '아우디': ['A6', 'A5', 'Q6 e-tron', 'Q5', 'Q3', 'Q4 e-tron'],
+    '테슬라': ['Model Y', 'Model 3', 'Model X', '사이버트럭', 'Model S'],
+    '볼보': ['XC60', 'XC40', 'S90', 'XC90', 'EX30', 'V60', 'EX40', 'V90'],
+    '폴스타': ['폴스타4', '폴스타2'],
+  }
+
+  // 선택된 브랜드의 차량 데이터에서 모델 목록 추출
+  const getModelsForBrand = (brand: string) => {
+    const brandVehicles = vehicles.filter(v => v.brand === brand)
+    const uniqueModels = Array.from(new Set(brandVehicles.map(v => v.model)))
+    return uniqueModels
+  }
+
+  // 선택된 모델의 차량들 필터링
+  const getVehiclesForModel = (brand: string, model: string) => {
+    return vehicles.filter(v => v.brand === brand && v.model === model)
+  }
+
+  // 뒤로가기 핸들러
+  const handleBack = () => {
+    if (selectedModel) {
+      setSelectedModel(null)
+    } else if (selectedBrand) {
+      setSelectedBrand(null)
+    } else if (selectedCategory) {
+      setSelectedCategory(null)
+    }
+  }
 
   // 키보드 이벤트로 이미지 네비게이션
   useEffect(() => {
@@ -255,6 +320,7 @@ export default function VehicleGallerySection({ vehicles, userId, userName, user
   return (
     <>
       <section className="mt-8 mb-12 px-8 pb-12">
+        {/* 헤더 */}
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">출고 사진모음</h2>
@@ -268,14 +334,135 @@ export default function VehicleGallerySection({ vehicles, userId, userName, user
           </button>
         </div>
 
-        {/* 차량 카드 그리드 */}
-        {vehicles.length === 0 ? (
-          <div className="text-center py-12 bg-gray-50 rounded-lg">
-            <p className="text-gray-500">등록된 차량이 없습니다</p>
+        {/* 브레드크럼 네비게이션 */}
+        {(selectedCategory || selectedBrand || selectedModel) && (
+          <div className="mb-6 flex items-center gap-2">
+            <button
+              onClick={handleBack}
+              className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              뒤로
+            </button>
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              {selectedCategory && (
+                <span className="font-medium">{selectedCategory === 'domestic' ? '국산' : '수입'}</span>
+              )}
+              {selectedBrand && (
+                <>
+                  <span>›</span>
+                  <span className="font-medium">{selectedBrand}</span>
+                </>
+              )}
+              {selectedModel && (
+                <>
+                  <span>›</span>
+                  <span className="font-medium">{selectedModel}</span>
+                </>
+              )}
+            </div>
           </div>
-        ) : (
+        )}
+
+        {/* 1단계: 국산/수입 선택 + 브랜드 선택 */}
+        {!selectedCategory && (
+          <div className="space-y-8">
+            {/* 국산 브랜드 */}
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">국산</h3>
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+                {brands.domestic.map((brand) => (
+                  <button
+                    key={brand.name}
+                    onClick={() => {
+                      setSelectedCategory('domestic')
+                      setSelectedBrand(brand.name)
+                    }}
+                    className="bg-white border-2 border-gray-200 rounded-xl p-4 hover:border-blue-500 hover:shadow-lg transition-all flex flex-col items-center gap-2 group"
+                  >
+                    <div className="w-24 h-24 bg-white rounded-lg flex items-center justify-center group-hover:bg-blue-50 transition-colors overflow-hidden">
+                      <img
+                        src={brand.logoPath}
+                        alt={brand.name}
+                        className="w-full h-full object-contain p-3"
+                        onError={(e) => {
+                          // 이미지 로드 실패시 대체 이모지 표시
+                          e.currentTarget.style.display = 'none'
+                          e.currentTarget.parentElement!.innerHTML = '<span class="text-4xl text-gray-400">🚗</span>'
+                        }}
+                      />
+                    </div>
+                    <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600">{brand.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 수입 브랜드 */}
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">수입</h3>
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+                {brands.imported.map((brand) => (
+                  <button
+                    key={brand.name}
+                    onClick={() => {
+                      setSelectedCategory('imported')
+                      setSelectedBrand(brand.name)
+                    }}
+                    className="bg-white border-2 border-gray-200 rounded-xl p-4 hover:border-blue-500 hover:shadow-lg transition-all flex flex-col items-center gap-2 group"
+                  >
+                    <div className="w-24 h-24 bg-white rounded-lg flex items-center justify-center group-hover:bg-blue-50 transition-colors overflow-hidden">
+                      <img
+                        src={brand.logoPath}
+                        alt={brand.name}
+                        className="w-full h-full object-contain p-3"
+                        onError={(e) => {
+                          // 이미지 로드 실패시 대체 이모지 표시
+                          e.currentTarget.style.display = 'none'
+                          const emoji = brand.name === '테슬라' ? '⚡' : '🚗'
+                          e.currentTarget.parentElement!.innerHTML = `<span class="text-4xl text-gray-400">${emoji}</span>`
+                        }}
+                      />
+                    </div>
+                    <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600">{brand.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 2단계: 차량 모델 선택 */}
+        {selectedCategory && selectedBrand && !selectedModel && (
+          <div>
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-3">
+              {getModelsForBrand(selectedBrand).length === 0 ? (
+                <div className="col-span-full text-center py-12 bg-gray-50 rounded-lg">
+                  <p className="text-gray-500">{selectedBrand} 브랜드에 등록된 차량이 없습니다</p>
+                </div>
+              ) : (
+                getModelsForBrand(selectedBrand).map((model) => (
+                  <button
+                    key={model}
+                    onClick={() => setSelectedModel(model)}
+                    className="bg-white border-2 border-gray-200 rounded-lg px-3 py-2 hover:border-blue-500 hover:bg-blue-50 transition-all group text-center"
+                  >
+                    <p className="font-semibold text-gray-900 group-hover:text-blue-600 text-sm">
+                      {model} <span className="text-xs text-gray-500 font-normal">({getVehiclesForModel(selectedBrand, model).length}개)</span>
+                    </p>
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* 3단계: 출고사진 카드 */}
+        {selectedCategory && selectedBrand && selectedModel && (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-            {vehicles.map((vehicle) => (
+            {getVehiclesForModel(selectedBrand, selectedModel).map((vehicle) => (
               <div
                 key={vehicle.id}
                 onClick={() => setSelectedVehicle(vehicle)}
@@ -295,6 +482,9 @@ export default function VehicleGallerySection({ vehicles, userId, userName, user
                   <h3 className="text-sm font-bold text-gray-900 mb-1">
                     {vehicle.brand} {vehicle.model}
                   </h3>
+                  {vehicle.trim && (
+                    <p className="text-xs text-gray-600">등급: {vehicle.trim}</p>
+                  )}
                   {vehicle.exterior_color && (
                     <p className="text-xs text-gray-600">외장: {vehicle.exterior_color}</p>
                   )}
@@ -358,6 +548,12 @@ export default function VehicleGallerySection({ vehicles, userId, userName, user
               </h2>
 
               <div className="space-y-3 mb-6">
+                {selectedVehicle.trim && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">등급</label>
+                    <p className="text-gray-900">{selectedVehicle.trim}</p>
+                  </div>
+                )}
                 {selectedVehicle.exterior_color && (
                   <div>
                     <label className="text-sm font-medium text-gray-500">외장 색상</label>
@@ -438,13 +634,27 @@ export default function VehicleGallerySection({ vehicles, userId, userName, user
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     브랜드 <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="text"
+                  <select
                     value={formData.brand}
-                    onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="예: 기아"
-                  />
+                    onChange={(e) => setFormData({ ...formData, brand: e.target.value, model: '' })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                  >
+                    <option value="">브랜드를 선택하세요</option>
+                    <optgroup label="국산">
+                      {brands.domestic.map((brand) => (
+                        <option key={brand.name} value={brand.name}>
+                          {brand.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="수입">
+                      {brands.imported.map((brand) => (
+                        <option key={brand.name} value={brand.name}>
+                          {brand.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                  </select>
                 </div>
 
                 {/* 모델 */}
@@ -452,12 +662,44 @@ export default function VehicleGallerySection({ vehicles, userId, userName, user
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     모델 <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="text"
+                  <select
                     value={formData.model}
                     onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+                    disabled={!formData.brand}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  >
+                    <option value="">
+                      {formData.brand ? '모델을 선택하세요' : '먼저 브랜드를 선택하세요'}
+                    </option>
+                    {formData.brand && brandModels[formData.brand]?.map((model) => (
+                      <option key={model} value={model}>
+                        {model}
+                      </option>
+                    ))}
+                    {formData.brand && brandModels[formData.brand]?.length === 0 && (
+                      <option value="" disabled>등록된 모델이 없습니다 (직접 입력 가능)</option>
+                    )}
+                  </select>
+                  {formData.brand && brandModels[formData.brand]?.length === 0 && (
+                    <input
+                      type="text"
+                      value={formData.model}
+                      onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mt-2"
+                      placeholder="모델명을 직접 입력하세요"
+                    />
+                  )}
+                </div>
+
+                {/* 등급 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">등급</label>
+                  <input
+                    type="text"
+                    value={formData.trim}
+                    onChange={(e) => setFormData({ ...formData, trim: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="예: EV3"
+                    placeholder="예: 프레스티지, 익스클루시브"
                   />
                 </div>
 
