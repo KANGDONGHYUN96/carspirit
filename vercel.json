@@ -3,18 +3,5 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "framework": "nextjs",
-  "regions": ["icn1"],
-  "redirects": [
-    {
-      "source": "/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "carspirit.vercel.app"
-        }
-      ],
-      "destination": "https://carspiritadmin.com/:path*",
-      "permanent": true
-    }
-  ]
+  "regions": ["icn1"]
 }
