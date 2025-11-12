@@ -134,4 +134,4 @@ carspirit/
 Private - 내부용
 
 ---
-Last updated: 2025-01-12
+Last updated: 2025-01-12 (restored)
