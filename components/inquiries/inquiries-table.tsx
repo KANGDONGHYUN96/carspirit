@@ -62,7 +62,7 @@ export default function InquiriesTable({ inquiries, userId, userName, userRole }
 
     // 이미 공개됨
     if (now >= unlockAt) {
-      return '공개됨'
+      return '오픈'
     }
 
     // 남은 시간 계산
@@ -148,6 +148,20 @@ export default function InquiriesTable({ inquiries, userId, userName, userRole }
     if (diffHours < 24) return `${diffHours}시간 전`
     if (diffDays < 7) return `${diffDays}일 전`
     return date.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })
+  }
+
+  // 수정일자 기준 경과일수에 따른 배경색
+  const getRowBackgroundColor = (updatedAt: string) => {
+    const now = new Date()
+    const updated = new Date(updatedAt)
+    const diffMs = now.getTime() - updated.getTime()
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+
+    if (diffDays >= 30) return 'bg-purple-50'
+    if (diffDays >= 14) return 'bg-red-50'
+    if (diffDays >= 7) return 'bg-orange-50'
+    if (diffDays >= 3) return 'bg-yellow-50'
+    return ''
   }
 
   return (
@@ -244,10 +258,30 @@ export default function InquiriesTable({ inquiries, userId, userName, userRole }
         {/* 결과 요약 */}
         {filteredInquiries.length > 0 && (
           <div className="px-6 py-3 bg-gray-50 border-b border-gray-200">
-            <p className="text-sm text-gray-600">
-              전체 <span className="font-semibold text-gray-900">{filteredInquiries.length}</span>개 중
-              <span className="font-semibold text-gray-900"> {startIndex + 1}-{Math.min(endIndex, filteredInquiries.length)}</span>개 표시
-            </p>
+            <div className="flex items-center gap-4 flex-wrap">
+              <p className="text-sm text-gray-600">
+                전체 <span className="font-semibold text-gray-900">{filteredInquiries.length}</span>개 중
+                <span className="font-semibold text-gray-900"> {startIndex + 1}-{Math.min(endIndex, filteredInquiries.length)}</span>개 표시
+              </p>
+              <div className="flex items-center gap-3 text-sm text-gray-600">
+                <div className="flex items-center gap-1">
+                  <span>3일</span>
+                  <div className="w-4 h-4 bg-yellow-300 border border-gray-300 rounded"></div>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span>7일</span>
+                  <div className="w-4 h-4 bg-orange-300 border border-gray-300 rounded"></div>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span>14일</span>
+                  <div className="w-4 h-4 bg-red-300 border border-gray-300 rounded"></div>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span>30일</span>
+                  <div className="w-4 h-4 bg-purple-300 border border-gray-300 rounded"></div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
@@ -282,7 +316,7 @@ export default function InquiriesTable({ inquiries, userId, userName, userRole }
                 {currentInquiries.map((inquiry) => (
                   <tr
                     key={inquiry.id}
-                    className="hover:bg-gray-50 transition-all duration-300 cursor-pointer"
+                    className={`hover:bg-gray-100 transition-all duration-300 cursor-pointer ${getRowBackgroundColor(inquiry.updated_at)}`}
                     onClick={() => setSelectedInquiry(inquiry)}
                   >
                     <td className="px-6 py-4 whitespace-nowrap">

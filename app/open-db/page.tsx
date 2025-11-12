@@ -23,37 +23,23 @@ export default async function OpenDBPage() {
     redirect('/auth/pending')
   }
 
-  // 오픈DB 문의 가져오기
-  // 모든 사용자의 문의를 가져옴 (user_id 필터 없음)
-  const sevenDaysAgo = new Date()
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+  // unlock_at이 지난 문의의 user_id를 NULL로 자동 전환 (updated_at도 함께 업데이트)
+  const now = new Date()
+  await supabase
+    .from('inquiries')
+    .update({
+      user_id: null,
+      updated_at: now.toISOString()
+    })
+    .lt('unlock_at', now.toISOString())
+    .not('user_id', 'is', null)
 
-  const { data: inquiries } = await supabase
+  // 오픈DB 문의 가져오기 (user_id가 NULL인 것만)
+  const { data: openInquiries } = await supabase
     .from('inquiries')
     .select('*')
+    .is('user_id', null)
     .order('created_at', { ascending: false })
-
-  // 필터링: 7일 지났고 한 번도 잠금되지 않은 것만
-  const openInquiries = (inquiries || []).filter(inquiry => {
-    const now = new Date()
-
-    // 생성일로부터 7일 확인
-    const createdAt = new Date(inquiry.created_at)
-    const daysSinceCreated = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24)
-
-    // 7일 안 지났으면 숨김
-    if (daysSinceCreated < 7) {
-      return false
-    }
-
-    // 한 번이라도 잠금되었던 문의는 영구적으로 숨김
-    // locked_by나 locked_at이 있으면 누군가 잠금한 적이 있음
-    if (inquiry.locked_by || inquiry.locked_at) {
-      return false
-    }
-
-    return true
-  })
 
   // 오늘 본인이 잠금한 개수 확인
   const today = new Date()
@@ -91,7 +77,7 @@ export default async function OpenDBPage() {
 
         {/* 오픈DB 테이블 */}
         <OpenDBTable
-          inquiries={openInquiries}
+          inquiries={openInquiries || []}
           userId={user.id}
           userName={user.name}
           userRole={user.role}

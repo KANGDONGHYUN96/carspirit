@@ -130,6 +130,20 @@ export default function OpenDBTable({ inquiries, userId, userName, userRole, tod
     }
   }
 
+  // 수정일자 기준 경과일수에 따른 배경색
+  const getRowBackgroundColor = (updatedAt: string) => {
+    const now = new Date()
+    const updated = new Date(updatedAt)
+    const diffMs = now.getTime() - updated.getTime()
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+
+    if (diffDays >= 30) return 'bg-purple-50'
+    if (diffDays >= 14) return 'bg-red-50'
+    if (diffDays >= 7) return 'bg-orange-50'
+    if (diffDays >= 3) return 'bg-yellow-50'
+    return ''
+  }
+
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
       {/* 필터 및 검색 */}
@@ -223,10 +237,30 @@ export default function OpenDBTable({ inquiries, userId, userName, userRole, tod
       {/* 결과 요약 */}
       {filteredInquiries.length > 0 && (
         <div className="px-6 py-3 bg-gray-50 border-b border-gray-200">
-          <p className="text-sm text-gray-600">
-            전체 <span className="font-semibold text-gray-900">{filteredInquiries.length}</span>개 중
-            <span className="font-semibold text-gray-900"> {startIndex + 1}-{Math.min(endIndex, filteredInquiries.length)}</span>개 표시
-          </p>
+          <div className="flex items-center gap-4 flex-wrap">
+            <p className="text-sm text-gray-600">
+              전체 <span className="font-semibold text-gray-900">{filteredInquiries.length}</span>개 중
+              <span className="font-semibold text-gray-900"> {startIndex + 1}-{Math.min(endIndex, filteredInquiries.length)}</span>개 표시
+            </p>
+            <div className="flex items-center gap-3 text-sm text-gray-600">
+              <div className="flex items-center gap-1">
+                <span>3일</span>
+                <div className="w-4 h-4 bg-yellow-300 border border-gray-300 rounded"></div>
+              </div>
+              <div className="flex items-center gap-1">
+                <span>7일</span>
+                <div className="w-4 h-4 bg-orange-300 border border-gray-300 rounded"></div>
+              </div>
+              <div className="flex items-center gap-1">
+                <span>14일</span>
+                <div className="w-4 h-4 bg-red-300 border border-gray-300 rounded"></div>
+              </div>
+              <div className="flex items-center gap-1">
+                <span>30일</span>
+                <div className="w-4 h-4 bg-purple-300 border border-gray-300 rounded"></div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -245,12 +279,14 @@ export default function OpenDBTable({ inquiries, userId, userName, userRole, tod
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">매체</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">담당자</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">문의일자</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">공개 상태</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">상태</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">고객명</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">번호</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">문의내용</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">수정일자</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">공개상태</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">메모</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">액션</th>
               </tr>
@@ -265,14 +301,40 @@ export default function OpenDBTable({ inquiries, userId, userName, userRole, tod
                 return (
                   <tr
                     key={inquiry.id}
-                    className="hover:bg-gray-50 transition-all duration-300"
+                    className={`hover:bg-gray-100 transition-all duration-300 ${getRowBackgroundColor(inquiry.updated_at)}`}
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">{inquiry.source || '카스피릿'}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-700">{inquiry.assigned_to_name || '-'}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500">
                         {new Date(inquiry.created_at).toLocaleString('ko-KR', {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {getStatusBadge(inquiry.status)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">{inquiry.customer_name}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-600">{maskPhone(inquiry.customer_phone)}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900 line-clamp-2 max-w-md">{inquiry.content}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500">
+                        {new Date(inquiry.updated_at).toLocaleString('ko-KR', {
                           year: 'numeric',
                           month: '2-digit',
                           day: '2-digit',
@@ -290,20 +352,8 @@ export default function OpenDBTable({ inquiries, userId, userName, userRole, tod
                           </span>
                         </div>
                       ) : (
-                        <span className="px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full">공개됨</span>
+                        <span className="px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full">오픈</span>
                       )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {getStatusBadge(inquiry.status)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{inquiry.customer_name}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-600">{maskPhone(inquiry.customer_phone)}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900 line-clamp-2 max-w-md">{inquiry.content}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-600">
