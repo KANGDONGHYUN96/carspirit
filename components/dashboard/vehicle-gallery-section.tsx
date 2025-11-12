@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { VehicleGallery } from '@/types/database.types'
 import { createClient } from '@/lib/supabase/client'
 import CustomAlert from '@/components/common/custom-alert'
+import JSZip from 'jszip'
 
 interface VehicleGallerySectionProps {
   vehicles: VehicleGallery[]
@@ -18,6 +19,10 @@ export default function VehicleGallerySection({ vehicles, userId, userName, user
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [alert, setAlert] = useState<{ message: string; type: 'info' | 'success' | 'error' | 'warning' } | null>(null)
+  const [isZipPreviewOpen, setIsZipPreviewOpen] = useState(false)
+  const [zipImages, setZipImages] = useState<string[]>([])
+  const [isLoadingZip, setIsLoadingZip] = useState(false)
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null)
 
   const [formData, setFormData] = useState({
     brand: '',
@@ -33,6 +38,24 @@ export default function VehicleGallerySection({ vehicles, userId, userName, user
 
   const router = useRouter()
   const supabase = createClient()
+
+  // 키보드 이벤트로 이미지 네비게이션
+  useEffect(() => {
+    if (selectedImageIndex === null) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft' && selectedImageIndex > 0) {
+        setSelectedImageIndex(selectedImageIndex - 1)
+      } else if (e.key === 'ArrowRight' && selectedImageIndex < zipImages.length - 1) {
+        setSelectedImageIndex(selectedImageIndex + 1)
+      } else if (e.key === 'Escape') {
+        setSelectedImageIndex(null)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [selectedImageIndex, zipImages.length])
 
   // 썸네일 파일 선택
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -163,6 +186,70 @@ export default function VehicleGallerySection({ vehicles, userId, userName, user
     setThumbnailFile(null)
     setZipFile(null)
     setThumbnailPreview(null)
+  }
+
+  // ZIP 파일에서 이미지 추출 (최적화: 점진적 로딩)
+  const handleZipPreview = async (zipUrl: string) => {
+    setIsLoadingZip(true)
+    setIsZipPreviewOpen(true)
+    setZipImages([])
+
+    try {
+      // ZIP 파일 다운로드
+      const response = await fetch(zipUrl)
+      if (!response.ok) throw new Error('ZIP 파일을 불러올 수 없습니다')
+
+      const blob = await response.blob()
+      const zip = new JSZip()
+      const zipContent = await zip.loadAsync(blob)
+
+      // 이미지 파일만 필터링
+      const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp']
+      const imageFilesList: Array<{ filename: string; file: JSZip.JSZipObject }> = []
+
+      // 이미지 파일 목록 먼저 수집
+      for (const [filename, file] of Object.entries(zipContent.files)) {
+        if (file.dir) continue
+        const ext = filename.split('.').pop()?.toLowerCase()
+        if (ext && imageExtensions.includes(ext)) {
+          imageFilesList.push({ filename, file })
+        }
+      }
+
+      if (imageFilesList.length === 0) {
+        setAlert({ message: 'ZIP 파일에 이미지가 없습니다', type: 'warning' })
+        setIsZipPreviewOpen(false)
+        setIsLoadingZip(false)
+        return
+      }
+
+      // 로딩 완료 - 이미지는 나중에 로드
+      setIsLoadingZip(false)
+
+      // 이미지를 하나씩 점진적으로 로드
+      const imageUrls: string[] = []
+      for (let i = 0; i < imageFilesList.length; i++) {
+        const { file } = imageFilesList[i]
+
+        // Blob으로 변환 후 Object URL 생성 (Base64보다 훨씬 빠름)
+        const imageBlob = await file.async('blob')
+        const objectUrl = URL.createObjectURL(imageBlob)
+
+        imageUrls.push(objectUrl)
+
+        // 4개씩 로드할 때마다 UI 업데이트
+        if (imageUrls.length % 4 === 0 || i === imageFilesList.length - 1) {
+          setZipImages([...imageUrls])
+          // 브라우저가 렌더링할 시간 주기
+          await new Promise(resolve => setTimeout(resolve, 0))
+        }
+      }
+    } catch (error) {
+      console.error('ZIP 처리 에러:', error)
+      setAlert({ message: 'ZIP 파일을 처리할 수 없습니다', type: 'error' })
+      setIsZipPreviewOpen(false)
+      setIsLoadingZip(false)
+    }
   }
 
   return (
@@ -296,28 +383,36 @@ export default function VehicleGallerySection({ vehicles, userId, userName, user
               </div>
 
               {/* 버튼 */}
-              <div className="flex gap-3">
-                <a
-                  href={selectedVehicle.zip_file_url}
-                  download
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors text-center"
-                >
-                  ZIP 파일 다운로드
-                </a>
-                {(selectedVehicle.user_id === userId || userRole === 'admin' || userRole === 'manager') && (
-                  <button
-                    onClick={() => handleDelete(selectedVehicle.id)}
-                    className="px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors"
-                  >
-                    삭제
-                  </button>
-                )}
+              <div className="flex flex-col gap-3">
                 <button
-                  onClick={() => setSelectedVehicle(null)}
-                  className="px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
+                  onClick={() => handleZipPreview(selectedVehicle.zip_file_url)}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
                 >
-                  닫기
+                  이미지 미리보기
                 </button>
+                <div className="flex gap-3">
+                  <a
+                    href={selectedVehicle.zip_file_url}
+                    download
+                    className="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 px-4 rounded-lg transition-colors text-center"
+                  >
+                    ZIP 다운로드
+                  </a>
+                  {(selectedVehicle.user_id === userId || userRole === 'admin' || userRole === 'manager') && (
+                    <button
+                      onClick={() => handleDelete(selectedVehicle.id)}
+                      className="px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors"
+                    >
+                      삭제
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setSelectedVehicle(null)}
+                    className="px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
+                  >
+                    닫기
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -458,6 +553,154 @@ export default function VehicleGallerySection({ vehicles, userId, userName, user
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ZIP 이미지 미리보기 모달 */}
+      {isZipPreviewOpen && (
+        <div
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={() => {
+            // Object URL 메모리 해제
+            zipImages.forEach(url => URL.revokeObjectURL(url))
+            setZipImages([])
+            setIsZipPreviewOpen(false)
+          }}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* 헤더 */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">이미지 미리보기</h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  {isLoadingZip ? '이미지 로딩 중...' : `총 ${zipImages.length}개의 이미지`}
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  zipImages.forEach(url => URL.revokeObjectURL(url))
+                  setZipImages([])
+                  setIsZipPreviewOpen(false)
+                }}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* 이미지 그리드 */}
+            <div className="p-6">
+              {isLoadingZip ? (
+                <div className="flex items-center justify-center py-20">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p className="text-gray-500">이미지를 불러오는 중...</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {zipImages.map((imageUrl, index) => (
+                    <div
+                      key={index}
+                      className="aspect-square bg-gray-100 rounded-lg overflow-hidden border border-gray-200 hover:shadow-lg transition-all cursor-pointer"
+                      onClick={() => setSelectedImageIndex(index)}
+                    >
+                      <img
+                        src={imageUrl}
+                        alt={`Image ${index + 1}`}
+                        loading="lazy"
+                        className="w-full h-full object-cover hover:scale-105 transition-transform"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* 푸터 */}
+            {!isLoadingZip && zipImages.length > 0 && (
+              <div className="sticky bottom-0 bg-white border-t border-gray-200 p-6">
+                <button
+                  onClick={() => {
+                    zipImages.forEach(url => URL.revokeObjectURL(url))
+                    setZipImages([])
+                    setIsZipPreviewOpen(false)
+                  }}
+                  className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-4 rounded-lg transition-colors"
+                >
+                  닫기
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* 이미지 라이트박스 모달 */}
+      {selectedImageIndex !== null && zipImages.length > 0 && (
+        <div
+          className="fixed inset-0 bg-black/95 flex items-center justify-center z-[60] p-4"
+          onClick={() => setSelectedImageIndex(null)}
+        >
+          <div className="relative w-full h-full flex items-center justify-center">
+            {/* 닫기 버튼 */}
+            <button
+              onClick={() => setSelectedImageIndex(null)}
+              className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors z-10"
+            >
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* 이전 버튼 */}
+            {selectedImageIndex > 0 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setSelectedImageIndex(selectedImageIndex - 1)
+                }}
+                className="absolute left-4 text-white hover:text-gray-300 transition-colors bg-black/50 rounded-full p-3"
+              >
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+            )}
+
+            {/* 이미지 */}
+            <div className="max-w-7xl max-h-full" onClick={(e) => e.stopPropagation()}>
+              <img
+                src={zipImages[selectedImageIndex]}
+                alt={`Image ${selectedImageIndex + 1}`}
+                className="max-w-full max-h-[90vh] object-contain"
+              />
+              {/* 이미지 카운터 */}
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-full text-sm">
+                {selectedImageIndex + 1} / {zipImages.length}
+              </div>
+            </div>
+
+            {/* 다음 버튼 */}
+            {selectedImageIndex < zipImages.length - 1 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setSelectedImageIndex(selectedImageIndex + 1)
+                }}
+                className="absolute right-4 text-white hover:text-gray-300 transition-colors bg-black/50 rounded-full p-3"
+              >
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            )}
           </div>
         </div>
       )}
