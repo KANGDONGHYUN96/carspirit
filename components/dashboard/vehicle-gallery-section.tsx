@@ -244,6 +244,7 @@ export default function VehicleGallerySection({ vehicles, userId, userName, user
     setFormData({
       brand: '',
       model: '',
+      trim: '',
       exterior_color: '',
       interior_color: '',
       options: '',
