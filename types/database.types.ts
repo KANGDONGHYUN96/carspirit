@@ -143,6 +143,7 @@ export interface VehicleGallery {
   user_name: string
   brand: string
   model: string
+  trim: string | null
   exterior_color: string | null
   interior_color: string | null
   options: string | null
