@@ -37,6 +37,54 @@ export default function InquiryDetailModal({
   const [isLoadingMemos, setIsLoadingMemos] = useState(true)
   const [alert, setAlert] = useState<{ message: string; type: 'info' | 'success' | 'error' | 'warning' } | null>(null)
   const [confirm, setConfirm] = useState<{ message: string; onConfirm: () => void } | null>(null)
+  const [showContractForm, setShowContractForm] = useState(false)
+  const [contractFormData, setContractFormData] = useState({
+    // 기본정보
+    contractor: userName, // 담당 영업자
+    customer_name: inquiry.customer_name, // 고객명
+    media: inquiry.source || '카스피릿', // 매체
+    phone: inquiry.customer_phone || '', // 연락처
+    birth_date: '', // 생년월일
+    special_notes: '', // 특이사항
+
+    // 계약정보
+    sales_type: '', // 판매구분: 렌트/리스/일시불/할부
+    manufacturer: '', // 제조사
+    registration_type: '', // 등록유형: 법인/개인
+    contract_route: '', // 계약경로
+    vehicle_name: '', // 차량명
+    vehicle_price: '', // 차량가
+    contract_period: '', // 계약기간 (개월)
+    initial_cost_type: '', // 초기비용: 선납금/보증금/없음
+    initial_cost_amount: '', // 초기비용 금액
+    monthly_payment: '', // 월 납입료
+    collateral: '', // 대물
+    actual_driver: '', // 실운전자
+    annual_mileage: '', // 연간주행거리
+    contract_date: '', // 계약일
+    delivery_date: '', // 출고일
+    contract_memo: '', // 계약 메모
+
+    // 출고정보
+    delivery_type: '', // 출고유형: 대리점/특판/발주
+    delivery_status: '', // 출고상태: 계약/출고/정산대기/완료
+    dealer_name: '', // 대리점명
+    dealer_contact: '', // 대리점 딜러 연락처
+    delivery_memo: '', // 출고 메모
+
+    // 수수료정보
+    total_commission: '', // 총 수수료
+    ag_commission: '', // AG 수수료
+    customer_commission: '', // 고객 지원금
+    capital_commission: '', // 캐피탈 수당
+    dealer_commission: '', // 대리점 수당
+    payback: '', // 페이백
+    settlement_amount: '', // 정산금액
+
+    customer_documents: '',
+  })
+  const [isSavingContract, setIsSavingContract] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
 
   const supabase = createClient()
   const router = useRouter()
@@ -195,6 +243,141 @@ export default function InquiryDetailModal({
     })
   }
 
+  // 총 수수료 자동 계산
+  const calculateTotalCommission = () => {
+    const ag = parseInt(contractFormData.ag_commission) || 0
+    const capital = parseInt(contractFormData.capital_commission) || 0
+    const dealer = parseInt(contractFormData.dealer_commission) || 0
+    const payback = parseInt(contractFormData.payback) || 0
+    return ag + capital + dealer - payback
+  }
+
+  // 숫자 포맷팅
+  const formatNumber = (value: string) => {
+    const num = value.replace(/[^\d]/g, '')
+    if (!num) return ''
+    return parseInt(num).toLocaleString()
+  }
+
+  // 숫자 입력 핸들러
+  const handleNumberInput = (field: string, value: string) => {
+    const num = value.replace(/[^\d]/g, '')
+    setContractFormData({ ...contractFormData, [field]: num })
+  }
+
+  // 파일 업로드
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIsUploading(true)
+    try {
+      const formDataUpload = new FormData()
+      formDataUpload.append('file', file)
+
+      const response = await fetch('/api/contracts/upload', {
+        method: 'POST',
+        body: formDataUpload,
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: '알 수 없는 오류' }))
+        throw new Error(errorData.error || '파일 업로드 실패')
+      }
+
+      const data = await response.json()
+      let existingFiles: string[] = []
+      if (contractFormData.customer_documents) {
+        try {
+          existingFiles = JSON.parse(contractFormData.customer_documents)
+          if (!Array.isArray(existingFiles)) {
+            existingFiles = [contractFormData.customer_documents]
+          }
+        } catch {
+          existingFiles = [contractFormData.customer_documents]
+        }
+      }
+
+      const updatedFiles = [...existingFiles, data.url]
+      setContractFormData({ ...contractFormData, customer_documents: JSON.stringify(updatedFiles) })
+      setAlert({ message: '파일 업로드 완료', type: 'success' })
+    } catch (error: any) {
+      setAlert({ message: `파일 업로드 실패: ${error.message}`, type: 'error' })
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  // 파일 삭제
+  const handleFileDelete = (fileUrl: string) => {
+    try {
+      let existingFiles: string[] = []
+      if (contractFormData.customer_documents) {
+        try {
+          existingFiles = JSON.parse(contractFormData.customer_documents)
+          if (!Array.isArray(existingFiles)) {
+            existingFiles = [contractFormData.customer_documents]
+          }
+        } catch {
+          existingFiles = [contractFormData.customer_documents]
+        }
+      }
+
+      const updatedFiles = existingFiles.filter(url => url !== fileUrl)
+      setContractFormData({ ...contractFormData, customer_documents: updatedFiles.length > 0 ? JSON.stringify(updatedFiles) : '' })
+      setAlert({ message: '파일이 삭제되었습니다', type: 'success' })
+    } catch (error: any) {
+      setAlert({ message: '파일 삭제 실패', type: 'error' })
+    }
+  }
+
+  // 계약 저장
+  const handleSaveContract = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSavingContract(true)
+
+    try {
+      const payload = {
+        ...contractFormData,
+        vehicle_price: contractFormData.vehicle_price ? parseInt(contractFormData.vehicle_price) : null,
+        ag_commission: contractFormData.ag_commission ? parseInt(contractFormData.ag_commission) : 0,
+        capital_commission: contractFormData.capital_commission ? parseInt(contractFormData.capital_commission) : 0,
+        dealer_commission: contractFormData.dealer_commission ? parseInt(contractFormData.dealer_commission) : 0,
+        payback: contractFormData.payback ? parseInt(contractFormData.payback) : 0,
+        total_commission: calculateTotalCommission(),
+        settlement_amount: contractFormData.settlement_amount ? parseInt(contractFormData.settlement_amount) : 0,
+        contract_date: contractFormData.contract_date || null,
+        execution_date: contractFormData.execution_date || null,
+      }
+
+      const response = await fetch('/api/contracts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || '저장 실패')
+      }
+
+      // 문의 상태를 "계약"으로 업데이트
+      await supabase
+        .from('inquiries')
+        .update({ status: '계약', updated_at: new Date().toISOString() })
+        .eq('id', inquiry.id)
+
+      setAlert({ message: '계약이 등록되었습니다', type: 'success' })
+      router.refresh()
+      setTimeout(() => onClose(), 1500)
+    } catch (error) {
+      setAlert({ message: '계약 등록 실패', type: 'error' })
+      console.error(error)
+    } finally {
+      setIsSavingContract(false)
+    }
+  }
+
   // 시간 포맷팅 (년,월,일,시,분,초)
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString)
@@ -206,6 +389,516 @@ export default function InquiryDetailModal({
     const seconds = String(date.getSeconds()).padStart(2, '0')
 
     return `${year}.${month}.${day} ${hours}:${minutes}:${seconds}`
+  }
+
+  // 계약 폼 표시 중이면 계약 폼 렌더링
+  if (showContractForm) {
+    return (
+      <div
+        className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+        onClick={() => setShowContractForm(false)}
+      >
+        <div
+          className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="p-6 border-b border-gray-200">
+            <h2 className="text-2xl font-bold text-gray-900">계약 등록</h2>
+          </div>
+
+          <form onSubmit={handleSaveContract} className="p-8 space-y-8">
+            {/* 기본정보 */}
+            <div className="border-b border-gray-200 pb-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">기본 정보</h3>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <span className="text-red-500">*</span> 담당 영업자
+                  </label>
+                  <input
+                    type="text"
+                    value={contractFormData.contractor}
+                    onChange={(e) => setContractFormData({ ...contractFormData, contractor: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <span className="text-red-500">*</span> 고객명
+                  </label>
+                  <input
+                    type="text"
+                    value={contractFormData.customer_name}
+                    readOnly
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-md text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">매체</label>
+                  <input
+                    type="text"
+                    value={contractFormData.media}
+                    readOnly
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-md text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">연락처</label>
+                  <input
+                    type="text"
+                    value={contractFormData.phone}
+                    readOnly
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-md text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <span className="text-red-500">*</span> 고객 생년월일
+                  </label>
+                  <input
+                    type="text"
+                    value={contractFormData.birth_date}
+                    onChange={(e) => setContractFormData({ ...contractFormData, birth_date: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                    placeholder="1984-02-20"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">특이사항</label>
+                  <input
+                    type="text"
+                    value={contractFormData.special_notes}
+                    onChange={(e) => setContractFormData({ ...contractFormData, special_notes: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                    placeholder="특이사항 입력"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 계약정보 */}
+            <div className="border-b border-gray-200 pb-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">계약 정보</h3>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <span className="text-red-500">*</span> 판매구분
+                  </label>
+                  <div className="flex gap-2">
+                    {['렌트', '리스', '일시불', '할부'].map((type) => (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => setContractFormData({ ...contractFormData, sales_type: type })}
+                        className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                          contractFormData.sales_type === type
+                            ? 'bg-gray-800 text-white'
+                            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <span className="text-red-500">*</span> 제조사
+                  </label>
+                  <input
+                    type="text"
+                    value={contractFormData.manufacturer}
+                    onChange={(e) => setContractFormData({ ...contractFormData, manufacturer: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                    placeholder="현대"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">등록유형</label>
+                  <div className="flex gap-2">
+                    {['법인', '개인'].map((type) => (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => setContractFormData({ ...contractFormData, registration_type: type })}
+                        className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                          contractFormData.registration_type === type
+                            ? 'bg-gray-800 text-white'
+                            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <span className="text-red-500">*</span> 계약경로
+                  </label>
+                  <input
+                    type="text"
+                    value={contractFormData.contract_route}
+                    onChange={(e) => setContractFormData({ ...contractFormData, contract_route: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                    placeholder="하나캐피탈"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <span className="text-red-500">*</span> 차량명
+                  </label>
+                  <input
+                    type="text"
+                    value={contractFormData.vehicle_name}
+                    onChange={(e) => setContractFormData({ ...contractFormData, vehicle_name: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                    placeholder="그랜저"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">차량가</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={formatNumber(contractFormData.vehicle_price)}
+                      onChange={(e) => handleNumberInput('vehicle_price', e.target.value)}
+                      className="w-full px-4 py-2.5 pr-12 bg-white border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                      placeholder="0"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">원</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">계약기간</label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="number"
+                      value={contractFormData.contract_period}
+                      onChange={(e) => setContractFormData({ ...contractFormData, contract_period: e.target.value })}
+                      className="w-24 px-4 py-2.5 bg-white border border-gray-300 rounded-md text-sm text-center focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                      placeholder="60"
+                    />
+                    <span className="text-sm text-gray-600">개월</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">초기비용</label>
+                  <div className="flex gap-2">
+                    {['선납금', '보증금', '없음'].map((type) => (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => setContractFormData({ ...contractFormData, initial_cost_type: type, initial_cost_amount: type === '없음' ? '0' : contractFormData.initial_cost_amount })}
+                        className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                          contractFormData.initial_cost_type === type
+                            ? 'bg-gray-800 text-white'
+                            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+                  {(contractFormData.initial_cost_type === '선납금' || contractFormData.initial_cost_type === '보증금') && (
+                    <div className="relative mt-2">
+                      <input
+                        type="text"
+                        value={formatNumber(contractFormData.initial_cost_amount)}
+                        onChange={(e) => handleNumberInput('initial_cost_amount', e.target.value)}
+                        className="w-full px-4 py-2.5 pr-12 bg-white border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                        placeholder="0"
+                      />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">원</span>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">월 납입료</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={formatNumber(contractFormData.monthly_payment)}
+                      onChange={(e) => handleNumberInput('monthly_payment', e.target.value)}
+                      className="w-full px-4 py-2.5 pr-12 bg-white border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                      placeholder="0"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">원</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">대물</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={formatNumber(contractFormData.collateral)}
+                      onChange={(e) => handleNumberInput('collateral', e.target.value)}
+                      className="w-full px-4 py-2.5 pr-12 bg-white border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                      placeholder="100000000"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">억</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">실운전자</label>
+                  <input
+                    type="text"
+                    value={contractFormData.actual_driver}
+                    onChange={(e) => setContractFormData({ ...contractFormData, actual_driver: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                    placeholder="홍길동"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">연간주행거리</label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="number"
+                      value={contractFormData.annual_mileage}
+                      onChange={(e) => setContractFormData({ ...contractFormData, annual_mileage: e.target.value })}
+                      className="w-32 px-4 py-2.5 bg-white border border-gray-300 rounded-md text-sm text-right focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                      placeholder="10000"
+                    />
+                    <span className="text-sm text-gray-600">km</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <span className="text-red-500">*</span> 계약일
+                  </label>
+                  <input
+                    type="date"
+                    value={contractFormData.contract_date}
+                    onChange={(e) => setContractFormData({ ...contractFormData, contract_date: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">출고일</label>
+                  <input
+                    type="date"
+                    value={contractFormData.delivery_date}
+                    onChange={(e) => setContractFormData({ ...contractFormData, delivery_date: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">계약 메모</label>
+                  <textarea
+                    value={contractFormData.contract_memo}
+                    onChange={(e) => setContractFormData({ ...contractFormData, contract_memo: e.target.value })}
+                    rows={2}
+                    className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-gray-500 focus:border-transparent resize-none"
+                    placeholder="계약 관련 메모를 입력하세요"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 출고정보 */}
+            <div className="border-b border-gray-200 pb-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">출고 정보</h3>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <span className="text-red-500">*</span> 출고유형
+                  </label>
+                  <div className="flex gap-2">
+                    {['대리점', '특판', '발주'].map((type) => (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => setContractFormData({ ...contractFormData, delivery_type: type })}
+                        className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                          contractFormData.delivery_type === type
+                            ? 'bg-gray-800 text-white shadow-md'
+                            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">출고상태</label>
+                  <div className="flex gap-2">
+                    {['계약', '출고', '정산대기', '완료'].map((type) => (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => setContractFormData({ ...contractFormData, delivery_status: type })}
+                        className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-all ${
+                          contractFormData.delivery_status === type
+                            ? 'bg-gray-800 text-white shadow-md'
+                            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">대리점명</label>
+                  <input
+                    type="text"
+                    value={contractFormData.dealer_name}
+                    onChange={(e) => setContractFormData({ ...contractFormData, dealer_name: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="예: 서울모터스"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">대리점 딜러</label>
+                  <input
+                    type="text"
+                    value={contractFormData.dealer_contact}
+                    onChange={(e) => setContractFormData({ ...contractFormData, dealer_contact: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="이상훈 010-0000-0000"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">출고 메모</label>
+                  <textarea
+                    value={contractFormData.delivery_memo}
+                    onChange={(e) => setContractFormData({ ...contractFormData, delivery_memo: e.target.value })}
+                    rows={2}
+                    className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                    placeholder="출고 관련 메모를 입력하세요"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 수수료정보 */}
+            <div className="border-b border-gray-200 pb-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">수수료 정보</h3>
+              <div className="grid grid-cols-3 gap-x-6 gap-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">총 수수료</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={formatNumber(contractFormData.total_commission)}
+                      onChange={(e) => handleNumberInput('total_commission', e.target.value)}
+                      className="w-full px-4 py-2.5 pr-12 bg-white border border-gray-300 rounded-md text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="0"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium">원</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">AG 수수료</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={formatNumber(contractFormData.ag_commission)}
+                      onChange={(e) => handleNumberInput('ag_commission', e.target.value)}
+                      className="w-full px-4 py-2.5 pr-12 bg-white border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="0"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium">원</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">고객 지원금</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={formatNumber(contractFormData.customer_commission)}
+                      onChange={(e) => handleNumberInput('customer_commission', e.target.value)}
+                      className="w-full px-4 py-2.5 pr-12 bg-white border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="0"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium">원</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">캐피탈 수당</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={formatNumber(contractFormData.capital_commission)}
+                      onChange={(e) => handleNumberInput('capital_commission', e.target.value)}
+                      className="w-full px-4 py-2.5 pr-12 bg-white border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="0"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium">원</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">대리점 수당</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={formatNumber(contractFormData.dealer_commission)}
+                      onChange={(e) => handleNumberInput('dealer_commission', e.target.value)}
+                      className="w-full px-4 py-2.5 pr-12 bg-white border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="0"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium">원</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">페이백</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={formatNumber(contractFormData.payback)}
+                      onChange={(e) => handleNumberInput('payback', e.target.value)}
+                      className="w-full px-4 py-2.5 pr-12 bg-white border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="0"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium">원</span>
+                  </div>
+                </div>
+                <div className="col-span-3">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">정산금액</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={formatNumber(contractFormData.settlement_amount)}
+                      onChange={(e) => handleNumberInput('settlement_amount', e.target.value)}
+                      className="w-full px-4 py-2.5 pr-12 bg-white border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="0"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium">원</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 버튼 */}
+            <div className="flex gap-3 pt-4 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={() => setShowContractForm(false)}
+                className="flex-1 px-6 py-2.5 bg-white border border-gray-300 rounded text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors"
+              >
+                취소
+              </button>
+              <button
+                type="submit"
+                disabled={isSavingContract}
+                className="flex-1 px-6 py-2.5 bg-gray-800 hover:bg-gray-900 text-white rounded text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {isSavingContract ? '저장 중...' : '저장'}
+              </button>
+            </div>
+          </form>
+        </div>
+
+        {/* Custom Alert Modal */}
+        <CustomAlert
+          isOpen={alert !== null}
+          message={alert?.message || ''}
+          type={alert?.type}
+          onClose={() => setAlert(null)}
+        />
+      </div>
+    )
   }
 
   return (
@@ -377,20 +1070,26 @@ export default function InquiryDetailModal({
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+            className="flex-1 bg-gray-800 hover:bg-gray-900 disabled:bg-gray-400 text-white font-medium py-3 px-4 rounded transition-colors"
           >
             {isSaving ? '저장 중...' : '저장'}
           </button>
           <button
+            onClick={() => setShowContractForm(true)}
+            className="flex-1 bg-gray-700 hover:bg-gray-800 text-white font-medium py-3 px-4 rounded transition-colors"
+          >
+            계약
+          </button>
+          <button
             onClick={handleLock}
             disabled={isLocking}
-            className="flex-1 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+            className="flex-1 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white font-medium py-3 px-4 rounded transition-colors"
           >
-            {isLocking ? '처리 중...' : userRole === 'admin' ? '🔒 7일 잠금 (무제한)' : '🔒 7일 잠금'}
+            {isLocking ? '처리 중...' : userRole === 'admin' ? '7일 잠금 (무제한)' : '7일 잠금'}
           </button>
           <button
             onClick={onClose}
-            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-4 rounded-lg transition-colors"
+            className="flex-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-3 px-4 rounded transition-colors"
           >
             닫기
           </button>

@@ -95,31 +95,44 @@ async function updateRotationState(supabase: any, userId: string) {
     .limit(1)
 }
 
-// 카카오톡 알림 발송 (알리고 API)
-async function sendKakaoNotification(phone: string, customerName: string, content: string) {
+// 카카오톡 알림톡 발송 (알리고 API)
+async function sendKakaoAlimtalk(phone: string, assignedUserName: string, customerName: string, customerPhone: string, content: string) {
   // 알리고 API 설정이 있을 때만 발송
   const aligoKey = process.env.ALIGO_API_KEY
   const aligoUserId = process.env.ALIGO_USER_ID
-  const aligoSender = process.env.ALIGO_SENDER_PHONE
+  const aligoSenderKey = process.env.ALIGO_SENDER_KEY
+  const aligoSenderPhone = process.env.ALIGO_SENDER_PHONE
+  const aligoTemplateCode = process.env.ALIGO_TEMPLATE_CODE || 'TK_9999' // 기본 템플릿 코드
 
-  if (!aligoKey || !aligoUserId || !aligoSender) {
-    console.warn('카카오톡 알림 설정이 없습니다. 환경 변수를 확인하세요.')
-    return
+  if (!aligoKey || !aligoUserId || !aligoSenderKey || !aligoSenderPhone) {
+    console.warn('⚠️ 알림톡 설정이 없습니다. 환경 변수를 확인하세요.')
+    return { success: false, message: '알림톡 설정 없음' }
   }
 
   try {
     // 전화번호 포맷팅 (하이픈 제거)
     const formattedPhone = phone.replace(/-/g, '')
+    const formattedCustomerPhone = customerPhone.replace(/-/g, '')
+
+    console.log('📱 알림톡 발송 시도:', {
+      receiver: formattedPhone,
+      customer: customerName,
+      customerPhone: formattedCustomerPhone,
+    })
 
     const formData = new URLSearchParams()
     formData.append('apikey', aligoKey)
     formData.append('userid', aligoUserId)
-    formData.append('sender', aligoSender)
-    formData.append('receiver', formattedPhone)
-    formData.append('msg', `[카스피릿] 새 문의가 배정되었습니다!\n\n👤 고객: ${customerName}\n📝 내용: ${content.substring(0, 50)}${content.length > 50 ? '...' : ''}\n\n지금 바로 확인하세요!`)
-    formData.append('msg_type', 'SMS')
+    formData.append('senderkey', aligoSenderKey)
+    formData.append('tpl_code', aligoTemplateCode)
+    formData.append('sender', aligoSenderPhone)
+    formData.append('receiver_1', formattedPhone)
+    formData.append('subject_1', '[카스피릿] 신규문의')
+    // 템플릿 변수를 실제 값으로 치환해서 전송
+    const truncatedContent = content.length > 100 ? content.substring(0, 100) + '...' : content
+    formData.append('message_1', `[카스피릿] 신규문의\n\n안녕하세요 ${assignedUserName}님!\n새로운 고객 문의가 배정되었습니다.\n\n고객명: ${customerName}\n연락처: ${formattedCustomerPhone}\n문의내용: ${truncatedContent}\n\n지금 바로 확인하세요!`)
 
-    const response = await fetch('https://apis.aligo.in/send/', {
+    const response = await fetch('https://kakaoapi.aligo.in/akv10/alimtalk/send/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -128,19 +141,36 @@ async function sendKakaoNotification(phone: string, customerName: string, conten
     })
 
     const result = await response.json()
+    console.log('📤 알림톡 API 응답:', result)
 
-    if (result.result_code !== '1') {
-      console.error('카카오톡 알림 발송 실패:', result)
+    if (result.code === '0' || result.result_code === '1') {
+      console.log('✅ 알림톡 발송 성공!')
+      return { success: true, result }
     } else {
-      console.log('카카오톡 알림 발송 성공:', result)
+      console.error('❌ 알림톡 발송 실패:', result)
+      return { success: false, result }
     }
   } catch (error) {
-    console.error('카카오톡 알림 발송 에러:', error)
-    // 알림 실패해도 문의 접수는 계속 진행
+    console.error('❌ 알림톡 발송 에러:', error)
+    return { success: false, error }
   }
 }
 
+// CORS 헤더
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, X-API-Key',
+}
+
+// OPTIONS 요청 처리 (CORS preflight)
+export async function OPTIONS() {
+  return new Response(null, { status: 200, headers: corsHeaders })
+}
+
 export async function POST(request: Request) {
+  const headers = corsHeaders
+
   try {
     // API Key 검증 (마케팅 업체용)
     const apiKey = request.headers.get('X-API-Key')
@@ -155,7 +185,7 @@ export async function POST(request: Request) {
     if (!apiKey || !validKeys.includes(apiKey)) {
       return NextResponse.json(
         { error: 'Unauthorized - Invalid API Key' },
-        { status: 401 }
+        { status: 401, headers }
       )
     }
 
@@ -166,7 +196,7 @@ export async function POST(request: Request) {
     if (!customer_name || !customer_phone || !content) {
       return NextResponse.json(
         { error: '필수 항목을 모두 입력해주세요' },
-        { status: 400 }
+        { status: 400, headers }
       )
     }
 
@@ -176,7 +206,7 @@ export async function POST(request: Request) {
     const rotationUser = await getNextRotationUser(supabase)
     const assignedUserId = rotationUser.user.id
     const assignedUserName = rotationUser.user.name
-    // const assignedUserPhone = rotationUser.user.phone // TODO: phone 컬럼 확인 필요
+    const assignedUserPhone = rotationUser.user.phone // 영업자 전화번호
 
     // 2. 문의 생성
     const { data: inquiry, error: inquiryError } = await supabase
@@ -202,20 +232,34 @@ export async function POST(request: Request) {
     // 3. 로테이션 상태 업데이트
     await updateRotationState(supabase, assignedUserId)
 
-    // 4. 카카오톡 알림 발송 (비동기로 실행, 실패해도 문의 접수는 성공)
-    // TODO: phone 컬럼 확인 후 활성화
-    // sendKakaoNotification(assignedUserPhone, customer_name, content).catch(console.error)
+    // 4. 카카오톡 알림톡 발송 (비동기로 실행, 실패해도 문의 접수는 성공)
+    if (assignedUserPhone) {
+      sendKakaoAlimtalk(
+        assignedUserPhone,
+        assignedUserName,
+        customer_name,
+        customer_phone,
+        content
+      ).catch(err => {
+        console.error('알림톡 발송 중 에러 발생 (문의 접수는 성공):', err)
+      })
+    } else {
+      console.warn('⚠️ 담당자 전화번호가 없어서 알림톡을 발송하지 못했습니다.')
+    }
 
-    return NextResponse.json({
-      success: true,
-      inquiry_id: inquiry.id,
-      assigned_to: assignedUserName,
-    })
+    return NextResponse.json(
+      {
+        success: true,
+        inquiry_id: inquiry.id,
+        assigned_to: assignedUserName,
+      },
+      { headers }
+    )
   } catch (error) {
     console.error('문의 접수 API 에러:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : '문의 접수 중 오류가 발생했습니다' },
-      { status: 500 }
+      { status: 500, headers }
     )
   }
 }
