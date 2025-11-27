@@ -25,14 +25,30 @@ export default async function OpenDBPage() {
 
   // unlock_at이 지난 문의의 user_id를 NULL로 자동 전환 (updated_at도 함께 업데이트)
   const now = new Date()
+  const sevenDaysAgo = new Date()
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+
+  // 1. unlock_at이 설정된 문의 중 기간이 지난 것
   await supabase
     .from('inquiries')
     .update({
       user_id: null,
       updated_at: now.toISOString()
     })
-    .lt('unlock_at', now.toISOString())
     .not('user_id', 'is', null)
+    .not('unlock_at', 'is', null)
+    .lt('unlock_at', now.toISOString())
+
+  // 2. unlock_at이 NULL인 문의 중 created_at이 7일 이상 지난 것 (기존 데이터 처리)
+  await supabase
+    .from('inquiries')
+    .update({
+      user_id: null,
+      updated_at: now.toISOString()
+    })
+    .not('user_id', 'is', null)
+    .is('unlock_at', null)
+    .lt('created_at', sevenDaysAgo.toISOString())
 
   // 오픈DB 문의 가져오기 (user_id가 NULL인 것만)
   const { data: openInquiries } = await supabase

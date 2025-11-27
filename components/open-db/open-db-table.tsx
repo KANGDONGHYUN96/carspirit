@@ -13,10 +13,10 @@ interface OpenDBTableProps {
   todayLockCount: number
 }
 
-type FilterStatus = 'all' | '신규' | '관리' | '부재' | '심사' | '가망' | '계약'
+type FilterDays = 'all' | '3' | '7' | '14' | '30'
 
 export default function OpenDBTable({ inquiries, userId, userName, userRole, todayLockCount }: OpenDBTableProps) {
-  const [filter, setFilter] = useState<FilterStatus>('all')
+  const [filter, setFilter] = useState<FilterDays>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null)
   const [memoCounts, setMemoCounts] = useState<Record<string, number>>({})
@@ -49,9 +49,29 @@ export default function OpenDBTable({ inquiries, userId, userName, userRole, tod
     fetchMemoCounts()
   }, [inquiries])
 
-  // 필터링
+  // 경과일 계산
+  const getDaysSinceUpdate = (updatedAt: string) => {
+    const now = new Date()
+    const updated = new Date(updatedAt)
+    const diffMs = now.getTime() - updated.getTime()
+    return Math.floor(diffMs / (1000 * 60 * 60 * 24))
+  }
+
+  // 필터링 (경과일 기준)
   const filteredInquiries = inquiries.filter((inquiry) => {
-    const matchesFilter = filter === 'all' || inquiry.status === filter
+    const days = getDaysSinceUpdate(inquiry.updated_at)
+    let matchesFilter = true
+
+    if (filter === '3') {
+      matchesFilter = days >= 3 && days < 7
+    } else if (filter === '7') {
+      matchesFilter = days >= 7 && days < 14
+    } else if (filter === '14') {
+      matchesFilter = days >= 14 && days < 30
+    } else if (filter === '30') {
+      matchesFilter = days >= 30
+    }
+
     const matchesSearch =
       inquiry.customer_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       inquiry.customer_phone?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -70,15 +90,13 @@ export default function OpenDBTable({ inquiries, userId, userName, userRole, tod
     setCurrentPage(1)
   }, [filter, searchQuery])
 
-  // 상태별 카운트
+  // 경과일별 카운트
   const counts = {
     all: inquiries.length,
-    신규: inquiries.filter(i => i.status === '신규').length,
-    관리: inquiries.filter(i => i.status === '관리').length,
-    부재: inquiries.filter(i => i.status === '부재').length,
-    심사: inquiries.filter(i => i.status === '심사').length,
-    가망: inquiries.filter(i => i.status === '가망').length,
-    계약: inquiries.filter(i => i.status === '계약').length,
+    '3': inquiries.filter(i => { const d = getDaysSinceUpdate(i.updated_at); return d >= 3 && d < 7 }).length,
+    '7': inquiries.filter(i => { const d = getDaysSinceUpdate(i.updated_at); return d >= 7 && d < 14 }).length,
+    '14': inquiries.filter(i => { const d = getDaysSinceUpdate(i.updated_at); return d >= 14 && d < 30 }).length,
+    '30': inquiries.filter(i => getDaysSinceUpdate(i.updated_at) >= 30).length,
   }
 
   // 전화번호 마스킹
@@ -149,7 +167,7 @@ export default function OpenDBTable({ inquiries, userId, userName, userRole, tod
       {/* 필터 및 검색 */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex flex-col sm:flex-row gap-4 justify-between">
-          {/* 상태 필터 */}
+          {/* 경과일 필터 */}
           <div className="flex gap-2 flex-wrap">
             <button
               onClick={() => setFilter('all')}
@@ -159,67 +177,47 @@ export default function OpenDBTable({ inquiries, userId, userName, userRole, tod
                   : 'bg-gray-50 border border-gray-200 text-gray-600 hover:bg-gray-100 hover:text-gray-900'
               }`}
             >
-              전체 ({counts.all})
+              전체
             </button>
             <button
-              onClick={() => setFilter('신규')}
+              onClick={() => setFilter('3')}
               className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                filter === '신규'
-                  ? 'bg-blue-500 text-white shadow-sm'
-                  : 'bg-gray-50 border border-gray-200 text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                filter === '3'
+                  ? 'bg-yellow-500 text-white shadow-sm'
+                  : 'bg-yellow-50 border border-yellow-200 text-yellow-700 hover:bg-yellow-100'
               }`}
             >
-              신규 ({counts.신규})
+              3일
             </button>
             <button
-              onClick={() => setFilter('관리')}
+              onClick={() => setFilter('7')}
               className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                filter === '관리'
-                  ? 'bg-blue-500 text-white shadow-sm'
-                  : 'bg-gray-50 border border-gray-200 text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                filter === '7'
+                  ? 'bg-orange-500 text-white shadow-sm'
+                  : 'bg-orange-50 border border-orange-200 text-orange-700 hover:bg-orange-100'
               }`}
             >
-              관리 ({counts.관리})
+              7일
             </button>
             <button
-              onClick={() => setFilter('부재')}
+              onClick={() => setFilter('14')}
               className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                filter === '부재'
-                  ? 'bg-blue-500 text-white shadow-sm'
-                  : 'bg-gray-50 border border-gray-200 text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                filter === '14'
+                  ? 'bg-red-500 text-white shadow-sm'
+                  : 'bg-red-50 border border-red-200 text-red-700 hover:bg-red-100'
               }`}
             >
-              부재 ({counts.부재})
+              14일
             </button>
             <button
-              onClick={() => setFilter('심사')}
+              onClick={() => setFilter('30')}
               className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                filter === '심사'
-                  ? 'bg-blue-500 text-white shadow-sm'
-                  : 'bg-gray-50 border border-gray-200 text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                filter === '30'
+                  ? 'bg-purple-500 text-white shadow-sm'
+                  : 'bg-purple-50 border border-purple-200 text-purple-700 hover:bg-purple-100'
               }`}
             >
-              심사 ({counts.심사})
-            </button>
-            <button
-              onClick={() => setFilter('가망')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                filter === '가망'
-                  ? 'bg-blue-500 text-white shadow-sm'
-                  : 'bg-gray-50 border border-gray-200 text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-              }`}
-            >
-              가망 ({counts.가망})
-            </button>
-            <button
-              onClick={() => setFilter('계약')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                filter === '계약'
-                  ? 'bg-blue-500 text-white shadow-sm'
-                  : 'bg-gray-50 border border-gray-200 text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-              }`}
-            >
-              계약 ({counts.계약})
+              30일
             </button>
           </div>
 
@@ -301,7 +299,8 @@ export default function OpenDBTable({ inquiries, userId, userName, userRole, tod
                 return (
                   <tr
                     key={inquiry.id}
-                    className={`hover:bg-gray-100 transition-all duration-300 ${getRowBackgroundColor(inquiry.updated_at)}`}
+                    className={`hover:bg-gray-100 transition-all duration-300 cursor-pointer ${getRowBackgroundColor(inquiry.updated_at)}`}
+                    onClick={() => setSelectedInquiry(inquiry)}
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">{inquiry.source || '카스피릿'}</div>
@@ -367,12 +366,9 @@ export default function OpenDBTable({ inquiries, userId, userName, userRole, tod
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <button
-                        onClick={() => setSelectedInquiry(inquiry)}
-                        className="text-blue-600 hover:text-blue-800 font-medium text-sm"
-                      >
+                      <span className="text-blue-600 font-medium text-sm">
                         상세보기
-                      </button>
+                      </span>
                     </td>
                   </tr>
                 )

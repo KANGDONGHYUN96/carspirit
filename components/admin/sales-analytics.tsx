@@ -42,7 +42,8 @@ interface SalesAnalyticsProps {
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6']
 
-export default function SalesAnalytics({ contracts, users }: SalesAnalyticsProps) {
+export default function SalesAnalytics({ contracts: initialContracts, users }: SalesAnalyticsProps) {
+  const [contracts, setContracts] = useState(initialContracts)
   const [selectedPeriod, setSelectedPeriod] = useState<'all' | 'year' | 'month' | 'week'>('month')
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
@@ -51,6 +52,29 @@ export default function SalesAnalytics({ contracts, users }: SalesAnalyticsProps
   const [activeTab, setActiveTab] = useState<'sales' | 'settlement'>('sales')
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null)
   const [isContractModalOpen, setIsContractModalOpen] = useState(false)
+  const [isEditMode, setIsEditMode] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [editFormData, setEditFormData] = useState<{
+    status: string
+    ag_commission: string
+    capital_commission: string
+    dealer_commission: string
+    payback: string
+    total_commission: string
+    settlement_amount: string
+    contract_date: string
+    execution_date: string
+  }>({
+    status: '',
+    ag_commission: '',
+    capital_commission: '',
+    dealer_commission: '',
+    payback: '',
+    total_commission: '',
+    settlement_amount: '',
+    contract_date: '',
+    execution_date: '',
+  })
   const itemsPerPage = 20
 
   // 기간별 필터링
@@ -181,6 +205,101 @@ export default function SalesAnalytics({ contracts, users }: SalesAnalyticsProps
 
   const formatCurrency = (amount: number) => {
     return `₩${amount.toLocaleString()}`
+  }
+
+  // 숫자 포맷팅 함수 (콤마 추가)
+  const formatNumber = (value: string | number | null | undefined) => {
+    if (value === null || value === undefined || value === '') return ''
+    const strValue = String(value)
+    const num = strValue.replace(/[^\d]/g, '')
+    if (!num) return ''
+    return parseInt(num).toLocaleString()
+  }
+
+  // 숫자 입력 핸들러
+  const handleNumberInput = (field: keyof typeof editFormData, value: string) => {
+    const num = value.replace(/[^\d]/g, '')
+    setEditFormData({ ...editFormData, [field]: num })
+  }
+
+  // 총 수수료 자동 계산
+  const calculateTotalCommission = () => {
+    const ag = parseInt(editFormData.ag_commission) || 0
+    const capital = parseInt(editFormData.capital_commission) || 0
+    const dealer = parseInt(editFormData.dealer_commission) || 0
+    const payback = parseInt(editFormData.payback) || 0
+    return ag + capital + dealer - payback
+  }
+
+  // 수정 모드 시작
+  const startEditMode = () => {
+    if (selectedContract) {
+      setEditFormData({
+        status: selectedContract.status || '',
+        ag_commission: selectedContract.ag_commission?.toString() || '',
+        capital_commission: selectedContract.capital_commission?.toString() || '',
+        dealer_commission: selectedContract.dealer_commission?.toString() || '',
+        payback: selectedContract.payback?.toString() || '',
+        total_commission: selectedContract.total_commission?.toString() || '',
+        settlement_amount: selectedContract.settlement_amount?.toString() || '',
+        contract_date: selectedContract.contract_date || '',
+        execution_date: selectedContract.execution_date || '',
+      })
+      setIsEditMode(true)
+    }
+  }
+
+  // 수정 취소
+  const cancelEditMode = () => {
+    setIsEditMode(false)
+  }
+
+  // 계약 저장
+  const handleSaveContract = async () => {
+    if (!selectedContract) return
+
+    setIsSaving(true)
+    try {
+      const payload = {
+        status: editFormData.status,
+        ag_commission: editFormData.ag_commission ? parseInt(editFormData.ag_commission) : 0,
+        capital_commission: editFormData.capital_commission ? parseInt(editFormData.capital_commission) : 0,
+        dealer_commission: editFormData.dealer_commission ? parseInt(editFormData.dealer_commission) : 0,
+        payback: editFormData.payback ? parseInt(editFormData.payback) : 0,
+        total_commission: calculateTotalCommission(),
+        settlement_amount: editFormData.settlement_amount ? parseInt(editFormData.settlement_amount) : 0,
+        contract_date: editFormData.contract_date || null,
+        execution_date: editFormData.execution_date || null,
+      }
+
+      const response = await fetch(`/api/contracts/${selectedContract.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+
+      if (!response.ok) {
+        throw new Error('저장 실패')
+      }
+
+      // 로컬 상태 업데이트
+      const updatedContracts = contracts.map(c =>
+        c.id === selectedContract.id
+          ? { ...c, ...payload }
+          : c
+      )
+      setContracts(updatedContracts)
+
+      // 선택된 계약 업데이트
+      setSelectedContract({ ...selectedContract, ...payload })
+      setIsEditMode(false)
+      alert('저장되었습니다.')
+    } catch (error) {
+      console.error('저장 실패:', error)
+      alert('저장에 실패했습니다.')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const getStatusLabel = (status: string) => {
@@ -504,9 +623,17 @@ export default function SalesAnalytics({ contracts, users }: SalesAnalyticsProps
           <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
-              <h2 className="text-xl font-bold text-gray-900">계약 상세 정보</h2>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">
+                  {isEditMode ? '계약 정보 수정' : '계약 상세 정보'}
+                </h2>
+                {isEditMode && <p className="text-sm text-gray-500 mt-1">관리자 전용 수정 모드</p>}
+              </div>
               <button
-                onClick={() => setIsContractModalOpen(false)}
+                onClick={() => {
+                  setIsContractModalOpen(false)
+                  setIsEditMode(false)
+                }}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -613,7 +740,7 @@ export default function SalesAnalytics({ contracts, users }: SalesAnalyticsProps
                 </div>
               </div>
 
-              {/* 계약 정보 */}
+              {/* 계약 정보 (수정 가능) */}
               <div className="mb-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                   <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -644,26 +771,68 @@ export default function SalesAnalytics({ contracts, users }: SalesAnalyticsProps
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-500 mb-1">상태</label>
-                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(selectedContract.status)}`}>
-                      {getStatusLabel(selectedContract.status)}
-                    </span>
+                    {isEditMode ? (
+                      <div className="flex gap-2 flex-wrap">
+                        {[
+                          { value: 'contract', label: '계약', color: 'blue' },
+                          { value: 'delivery', label: '출고', color: 'purple' },
+                          { value: 'waiting', label: '정산대기', color: 'yellow' },
+                          { value: 'completed', label: '완료', color: 'green' },
+                        ].map((item) => (
+                          <button
+                            key={item.value}
+                            type="button"
+                            onClick={() => setEditFormData({ ...editFormData, status: item.value })}
+                            className={`px-3 py-1 text-xs rounded-full font-medium transition-all ${
+                              editFormData.status === item.value
+                                ? 'bg-gray-800 text-white'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                          >
+                            {item.label}
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(selectedContract.status)}`}>
+                        {getStatusLabel(selectedContract.status)}
+                      </span>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-500 mb-1">계약일</label>
-                    <p className="text-sm text-gray-900 font-medium">
-                      {selectedContract.contract_date ? new Date(selectedContract.contract_date).toLocaleDateString('ko-KR') : '-'}
-                    </p>
+                    {isEditMode ? (
+                      <input
+                        type="date"
+                        value={editFormData.contract_date}
+                        onChange={(e) => setEditFormData({ ...editFormData, contract_date: e.target.value })}
+                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    ) : (
+                      <p className="text-sm text-gray-900 font-medium">
+                        {selectedContract.contract_date ? new Date(selectedContract.contract_date).toLocaleDateString('ko-KR') : '-'}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-500 mb-1">출고일</label>
-                    <p className="text-sm text-gray-900 font-medium">
-                      {selectedContract.execution_date ? new Date(selectedContract.execution_date).toLocaleDateString('ko-KR') : '-'}
-                    </p>
+                    {isEditMode ? (
+                      <input
+                        type="date"
+                        value={editFormData.execution_date}
+                        onChange={(e) => setEditFormData({ ...editFormData, execution_date: e.target.value })}
+                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    ) : (
+                      <p className="text-sm text-gray-900 font-medium">
+                        {selectedContract.execution_date ? new Date(selectedContract.execution_date).toLocaleDateString('ko-KR') : '-'}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
 
-              {/* 수수료 정보 */}
+              {/* 수수료 정보 (수정 가능) */}
               <div className="mb-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                   <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -674,27 +843,97 @@ export default function SalesAnalytics({ contracts, users }: SalesAnalyticsProps
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-500 mb-1">AG 수수료</label>
-                    <p className="text-sm text-gray-900 font-semibold">{formatCurrency(selectedContract.ag_commission)}</p>
+                    {isEditMode ? (
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={formatNumber(editFormData.ag_commission)}
+                          onChange={(e) => handleNumberInput('ag_commission', e.target.value)}
+                          className="w-full px-3 py-2 pr-8 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="0"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">원</span>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-900 font-semibold">{formatCurrency(selectedContract.ag_commission)}</p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-500 mb-1">캐피탈 수수료</label>
-                    <p className="text-sm text-gray-900 font-semibold">{formatCurrency(selectedContract.capital_commission)}</p>
+                    {isEditMode ? (
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={formatNumber(editFormData.capital_commission)}
+                          onChange={(e) => handleNumberInput('capital_commission', e.target.value)}
+                          className="w-full px-3 py-2 pr-8 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="0"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">원</span>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-900 font-semibold">{formatCurrency(selectedContract.capital_commission)}</p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-500 mb-1">딜러 수수료</label>
-                    <p className="text-sm text-gray-900 font-semibold">{formatCurrency(selectedContract.dealer_commission)}</p>
+                    {isEditMode ? (
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={formatNumber(editFormData.dealer_commission)}
+                          onChange={(e) => handleNumberInput('dealer_commission', e.target.value)}
+                          className="w-full px-3 py-2 pr-8 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="0"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">원</span>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-900 font-semibold">{formatCurrency(selectedContract.dealer_commission)}</p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-500 mb-1">페이백</label>
-                    <p className="text-sm text-gray-900 font-semibold">{formatCurrency(selectedContract.payback)}</p>
+                    {isEditMode ? (
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={formatNumber(editFormData.payback)}
+                          onChange={(e) => handleNumberInput('payback', e.target.value)}
+                          className="w-full px-3 py-2 pr-8 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="0"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">원</span>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-900 font-semibold">{formatCurrency(selectedContract.payback)}</p>
+                    )}
                   </div>
                   <div className="col-span-2 pt-4 border-t border-gray-200">
                     <label className="block text-sm font-medium text-gray-500 mb-1">총 수수료</label>
-                    <p className="text-lg text-blue-600 font-bold">{formatCurrency(selectedContract.total_commission)}</p>
+                    {isEditMode ? (
+                      <p className="text-lg text-blue-600 font-bold">{formatCurrency(calculateTotalCommission())}</p>
+                    ) : (
+                      <p className="text-lg text-blue-600 font-bold">{formatCurrency(selectedContract.total_commission)}</p>
+                    )}
+                    {isEditMode && <p className="text-xs text-gray-400 mt-1">※ AG + 캐피탈 + 딜러 - 페이백 (자동계산)</p>}
                   </div>
                   <div className="col-span-2">
                     <label className="block text-sm font-medium text-gray-500 mb-1">정산 금액</label>
-                    <p className="text-lg text-green-600 font-bold">{formatCurrency(selectedContract.settlement_amount)}</p>
+                    {isEditMode ? (
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={formatNumber(editFormData.settlement_amount)}
+                          onChange={(e) => handleNumberInput('settlement_amount', e.target.value)}
+                          className="w-full px-3 py-2 pr-8 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          placeholder="0"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">원</span>
+                      </div>
+                    ) : (
+                      <p className="text-lg text-green-600 font-bold">{formatCurrency(selectedContract.settlement_amount)}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -702,12 +941,38 @@ export default function SalesAnalytics({ contracts, users }: SalesAnalyticsProps
 
             {/* Modal Footer */}
             <div className="sticky bottom-0 bg-gray-50 px-6 py-4 flex items-center justify-end gap-3 border-t border-gray-200 rounded-b-2xl">
-              <button
-                onClick={() => setIsContractModalOpen(false)}
-                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
-              >
-                닫기
-              </button>
+              {isEditMode ? (
+                <>
+                  <button
+                    onClick={cancelEditMode}
+                    className="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg font-medium transition-colors hover:bg-gray-50"
+                  >
+                    취소
+                  </button>
+                  <button
+                    onClick={handleSaveContract}
+                    disabled={isSaving}
+                    className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+                  >
+                    {isSaving ? '저장 중...' : '저장'}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={startEditMode}
+                    className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium transition-colors"
+                  >
+                    수정
+                  </button>
+                  <button
+                    onClick={() => setIsContractModalOpen(false)}
+                    className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                  >
+                    닫기
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

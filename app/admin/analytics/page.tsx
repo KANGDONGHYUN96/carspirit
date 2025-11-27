@@ -31,9 +31,9 @@ export default async function SalesPage() {
       <div className="p-6 bg-snow-bg min-h-screen">
         {/* 헤더 */}
         <div className="mt-8 mb-6 px-2">
-          <h1 className="text-3xl font-bold text-gray-900">매출 분석</h1>
+          <h1 className="text-3xl font-bold text-gray-900">매출관리</h1>
           <p className="text-gray-600 mt-1">
-            계약 데이터 기반 매출 통계 및 분석
+            계약 데이터 관리 및 수정 (관리자 전용)
           </p>
         </div>
 

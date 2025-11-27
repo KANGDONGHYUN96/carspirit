@@ -208,7 +208,10 @@ export async function POST(request: Request) {
     const assignedUserName = rotationUser.user.name
     const assignedUserPhone = rotationUser.user.phone // 영업자 전화번호
 
-    // 2. 문의 생성
+    // 2. 문의 생성 (7일 후 자동 오픈)
+    const unlockAt = new Date()
+    unlockAt.setDate(unlockAt.getDate() + 7)
+
     const { data: inquiry, error: inquiryError } = await supabase
       .from('inquiries')
       .insert({
@@ -220,6 +223,7 @@ export async function POST(request: Request) {
         assigned_to: assignedUserId,
         assigned_to_name: assignedUserName,
         status: '신규',
+        unlock_at: unlockAt.toISOString(),
       })
       .select()
       .single()

@@ -23,6 +23,33 @@ export default async function InquiriesPage() {
     redirect('/auth/pending')
   }
 
+  // unlock_at이 지난 문의의 user_id를 NULL로 자동 전환 (오픈DB로 이동)
+  const now = new Date()
+  const sevenDaysAgo = new Date()
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+
+  // 1. unlock_at이 설정된 문의 중 기간이 지난 것
+  await supabase
+    .from('inquiries')
+    .update({
+      user_id: null,
+      updated_at: now.toISOString()
+    })
+    .eq('user_id', user.id)
+    .not('unlock_at', 'is', null)
+    .lt('unlock_at', now.toISOString())
+
+  // 2. unlock_at이 NULL인 문의 중 created_at이 7일 이상 지난 것 (기존 데이터 처리)
+  await supabase
+    .from('inquiries')
+    .update({
+      user_id: null,
+      updated_at: now.toISOString()
+    })
+    .eq('user_id', user.id)
+    .is('unlock_at', null)
+    .lt('created_at', sevenDaysAgo.toISOString())
+
   // 나의 문의 가져오기 (user_id = 본인)
   // 신규 문의 (7일 이내) + 내가 잠금한 문의
   const { data: inquiries } = await supabase

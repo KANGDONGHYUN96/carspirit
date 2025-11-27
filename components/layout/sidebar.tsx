@@ -103,7 +103,7 @@ const adminNavigation = [
     ),
   },
   {
-    name: '매출분석',
+    name: '매출관리',
     href: '/admin/analytics',
     icon: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
