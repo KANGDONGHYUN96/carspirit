@@ -43,6 +43,7 @@ export async function POST(request: NextRequest) {
       .from('contracts')
       .insert({
         ...body,
+        user_id: user.id,
         created_by: user.id
       })
       .select()

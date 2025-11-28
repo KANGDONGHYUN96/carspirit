@@ -63,6 +63,7 @@ export default function InquiryDetailModal({
     annual_mileage: '',
     initial_cost_type: '', // 선납금/보증금/없음
     initial_cost_amount: '',
+    monthly_payment: '', // 월납입료
     insurance_age: '', // 만21세/만26세/자체가입
     car_tax_included: '', // 포함/미포함
     customer_support: '', // 페이백/대납/용품/없음
@@ -443,6 +444,7 @@ export default function InquiryDetailModal({
         annual_mileage: contractFormData.annual_mileage ? parseInt(contractFormData.annual_mileage) : null,
         initial_cost_type: contractFormData.initial_cost_type,
         initial_cost_amount: contractFormData.initial_cost_amount ? parseInt(contractFormData.initial_cost_amount) : null,
+        monthly_payment: contractFormData.monthly_payment ? parseInt(contractFormData.monthly_payment) : null,
         insurance_age: contractFormData.insurance_age,
         car_tax_included: contractFormData.car_tax_included,
         customer_support: contractFormData.customer_support,
@@ -769,6 +771,20 @@ export default function InquiryDetailModal({
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">원</span>
                       </div>
                     )}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs text-gray-500 mb-2">월납입료</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={formatNumber(contractFormData.monthly_payment)}
+                      onChange={(e) => handleNumberInput('monthly_payment', e.target.value)}
+                      className="w-full px-3 py-2 pr-10 bg-white border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-400 focus:border-gray-400"
+                      placeholder="월납입료 입력"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">원</span>
                   </div>
                 </div>
 

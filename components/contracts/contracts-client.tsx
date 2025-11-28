@@ -68,6 +68,7 @@ export default function ContractsClient({ contracts: initialContracts, userName,
     annual_mileage: '',
     initial_cost_type: '',
     initial_cost_amount: '',
+    monthly_payment: '',
     insurance_age: '',
     car_tax_included: '',
     customer_support: '',
@@ -306,6 +307,7 @@ export default function ContractsClient({ contracts: initialContracts, userName,
         annual_mileage: (contract as any).annual_mileage || '',
         initial_cost_type: (contract as any).initial_cost_type || '',
         initial_cost_amount: (contract as any).initial_cost_amount || '',
+        monthly_payment: (contract as any).monthly_payment || '',
         insurance_age: (contract as any).insurance_age || '',
         car_tax_included: (contract as any).car_tax_included || '',
         customer_support: (contract as any).customer_support || '',
@@ -359,6 +361,7 @@ export default function ContractsClient({ contracts: initialContracts, userName,
         annual_mileage: '',
         initial_cost_type: '',
         initial_cost_amount: '',
+        monthly_payment: '',
         insurance_age: '',
         car_tax_included: '',
         customer_support: '',
@@ -450,6 +453,7 @@ export default function ContractsClient({ contracts: initialContracts, userName,
         vehicle_price: formData.vehicle_price ? parseInt(formData.vehicle_price) : null,
         annual_mileage: formData.annual_mileage ? parseInt(formData.annual_mileage) : null,
         initial_cost_amount: formData.initial_cost_amount ? parseInt(formData.initial_cost_amount) : null,
+        monthly_payment: formData.monthly_payment ? parseInt(formData.monthly_payment) : null,
         ag_commission: formData.ag_commission ? parseInt(formData.ag_commission) : 0,
         finance_commission: formData.finance_commission ? parseInt(formData.finance_commission) : 0,
         dealer_commission: formData.dealer_commission ? parseInt(formData.dealer_commission) : 0,
@@ -472,10 +476,11 @@ export default function ContractsClient({ contracts: initialContracts, userName,
         throw new Error(errorData.error || '저장 실패')
       }
 
+      setAlert({ message: editingContract ? '계약이 수정되었습니다.' : '계약이 등록되었습니다.', type: 'success' })
       closeModal()
       router.refresh()
-    } catch (error) {
-      setAlert({ message: '저장 실패', type: 'error' })
+    } catch (error: any) {
+      setAlert({ message: error.message || '저장 실패', type: 'error' })
       console.error(error)
     } finally {
       setIsSaving(false)
@@ -922,6 +927,15 @@ export default function ContractsClient({ contracts: initialContracts, userName,
                     <span className="text-sm text-gray-500">초기비용</span>
                   </div>
                   <span className="flex-1 text-sm text-gray-900">{formData.initial_cost_type || '-'} {formData.initial_cost_amount ? `(₩${formatNumber(formData.initial_cost_amount)})` : ''}</span>
+                </div>
+                <div className="flex items-center py-2.5 border-b border-gray-100 hover:bg-gray-50 -mx-6 px-6">
+                  <div className="flex items-center gap-2 w-40">
+                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-sm text-gray-500">월납입료</span>
+                  </div>
+                  <span className="flex-1 text-sm text-gray-900">{formData.monthly_payment ? `₩${formatNumber(formData.monthly_payment)}` : '-'}</span>
                 </div>
                 <div className="flex items-center py-2.5 border-b border-gray-100 hover:bg-gray-50 -mx-6 px-6">
                   <div className="flex items-center gap-2 w-40">
@@ -1472,6 +1486,20 @@ export default function ContractsClient({ contracts: initialContracts, userName,
                           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">원</span>
                         </div>
                       )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-2">월납입료</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={formatNumber(formData.monthly_payment)}
+                        onChange={(e) => handleNumberInput('monthly_payment', e.target.value)}
+                        className="w-full px-3 py-2 pr-10 bg-white border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-400 focus:border-gray-400"
+                        placeholder="월납입료 입력"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">원</span>
                     </div>
                   </div>
 
