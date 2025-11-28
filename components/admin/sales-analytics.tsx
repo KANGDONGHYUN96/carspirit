@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Area, AreaChart } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LabelList } from 'recharts'
 
 interface Contract {
   id: string
@@ -78,10 +78,19 @@ const COLORS = {
 
 export default function SalesAnalytics({ contracts: initialContracts, users }: SalesAnalyticsProps) {
   const [contracts, setContracts] = useState(initialContracts)
-  const [selectedPeriod, setSelectedPeriod] = useState<'all' | 'year' | 'month' | 'week'>('month')
+  const [selectedPeriod, setSelectedPeriod] = useState<'all' | 'year' | 'month'>('month')
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
-  const [selectedUser, setSelectedUser] = useState<string>('all')
+  const [selectedContractor, setSelectedContractor] = useState<string>('all')
+
+  // 담당자 목록 추출 (contractor 컬럼 기준)
+  const contractorList = useMemo(() => {
+    const contractors = new Set<string>()
+    contracts.forEach(c => {
+      if (c.contractor) contractors.add(c.contractor)
+    })
+    return Array.from(contractors).sort()
+  }, [contracts])
   const [currentPage, setCurrentPage] = useState(1)
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null)
   const [isContractModalOpen, setIsContractModalOpen] = useState(false)
@@ -114,19 +123,15 @@ export default function SalesAnalytics({ contracts: initialContracts, users }: S
   const filteredContracts = useMemo(() => {
     let filtered = contracts.filter(c => c.contract_date || c.execution_date)
 
-    if (selectedUser !== 'all') {
-      filtered = filtered.filter(c => c.user_id === selectedUser)
+    // 담당자(contractor) 기준 필터링
+    if (selectedContractor !== 'all') {
+      filtered = filtered.filter(c => c.contractor === selectedContractor)
     }
 
-    const now = new Date()
     filtered = filtered.filter(contract => {
       const date = new Date(contract.contract_date || contract.execution_date!)
 
       switch (selectedPeriod) {
-        case 'week':
-          const weekAgo = new Date(now)
-          weekAgo.setDate(now.getDate() - 7)
-          return date >= weekAgo
         case 'month':
           return date.getFullYear() === selectedYear && date.getMonth() + 1 === selectedMonth
         case 'year':
@@ -138,27 +143,20 @@ export default function SalesAnalytics({ contracts: initialContracts, users }: S
     })
 
     return filtered
-  }, [contracts, selectedPeriod, selectedYear, selectedMonth, selectedUser])
+  }, [contracts, selectedPeriod, selectedYear, selectedMonth, selectedContractor])
 
   // 이전 기간 데이터 (비교용)
   const previousPeriodContracts = useMemo(() => {
     let filtered = contracts.filter(c => c.contract_date || c.execution_date)
 
-    if (selectedUser !== 'all') {
-      filtered = filtered.filter(c => c.user_id === selectedUser)
+    if (selectedContractor !== 'all') {
+      filtered = filtered.filter(c => c.contractor === selectedContractor)
     }
 
-    const now = new Date()
     filtered = filtered.filter(contract => {
       const date = new Date(contract.contract_date || contract.execution_date!)
 
       switch (selectedPeriod) {
-        case 'week':
-          const twoWeeksAgo = new Date(now)
-          twoWeeksAgo.setDate(now.getDate() - 14)
-          const weekAgo = new Date(now)
-          weekAgo.setDate(now.getDate() - 7)
-          return date >= twoWeeksAgo && date < weekAgo
         case 'month':
           const prevMonth = selectedMonth === 1 ? 12 : selectedMonth - 1
           const prevYear = selectedMonth === 1 ? selectedYear - 1 : selectedYear
@@ -172,7 +170,7 @@ export default function SalesAnalytics({ contracts: initialContracts, users }: S
     })
 
     return filtered
-  }, [contracts, selectedPeriod, selectedYear, selectedMonth, selectedUser])
+  }, [contracts, selectedPeriod, selectedYear, selectedMonth, selectedContractor])
 
   // 통계 계산
   const stats = useMemo(() => {
@@ -296,68 +294,155 @@ export default function SalesAnalytics({ contracts: initialContracts, users }: S
     }
   }, [filteredContracts, previousPeriodContracts, users])
 
-  // 차트 데이터 준비
-  const capitalChartData = Object.entries(stats.byCapital)
-    .sort((a, b) => b[1].commission - a[1].commission)
-    .slice(0, 6)
-    .map(([name, data]) => ({
-      name: name.length > 8 ? name.substring(0, 8) + '...' : name,
-      fullName: name,
-      매출: data.commission,
-      정산: data.settlement,
-      건수: data.count
-    }))
 
-  const salespersonChartData = Object.entries(stats.bySalesperson)
-    .sort((a, b) => b[1].commission - a[1].commission)
-    .map(([name, data]) => ({
+  // 상태별 도넛 차트 데이터
+  const statusDonutData = useMemo(() => {
+    const statusLabels: Record<string, string> = {
+      contract: '계약',
+      delivery: '출고',
+      waiting: '정산대기',
+      completed: '완료'
+    }
+
+    return Object.entries(stats.byStatus).map(([status, data]) => ({
+      name: statusLabels[status] || status,
+      value: data.count
+    }))
+  }, [stats.byStatus])
+
+  // 매체별 유입 순위 도넛 차트 데이터 (계약률 포함)
+  const mediaDonutData = useMemo(() => {
+    const totalCount = filteredContracts.length
+    const completedByMedia: Record<string, number> = {}
+
+    // 완료된 계약 건수 계산
+    filteredContracts.forEach(c => {
+      const media = c.media || '직접영업'
+      if (c.status === 'completed') {
+        completedByMedia[media] = (completedByMedia[media] || 0) + 1
+      }
+    })
+
+    return Object.entries(stats.byMedia)
+      .sort((a, b) => b[1].count - a[1].count)
+      .map(([media, data]) => {
+        const completed = completedByMedia[media] || 0
+        const contractRate = data.count > 0 ? Math.round((completed / data.count) * 100) : 0
+        return {
+          name: media,
+          value: data.count,
+          percentage: totalCount > 0 ? Math.round((data.count / totalCount) * 100) : 0,
+          contractRate
+        }
+      })
+  }, [filteredContracts, stats.byMedia])
+
+  // 연령대별 계약 데이터
+  const ageGroupData = useMemo(() => {
+    const ageGroups: Record<string, { count: number; completed: number }> = {
+      '20대': { count: 0, completed: 0 },
+      '30대': { count: 0, completed: 0 },
+      '40대': { count: 0, completed: 0 },
+      '50대': { count: 0, completed: 0 },
+      '60대+': { count: 0, completed: 0 },
+    }
+
+    const currentYear = new Date().getFullYear()
+
+    filteredContracts.forEach(contract => {
+      if (contract.birth_date) {
+        const birthYear = parseInt(contract.birth_date.split('-')[0])
+        const age = currentYear - birthYear
+        let group = '60대+'
+
+        if (age < 30) group = '20대'
+        else if (age < 40) group = '30대'
+        else if (age < 50) group = '40대'
+        else if (age < 60) group = '50대'
+
+        ageGroups[group].count++
+        if (contract.status === 'completed') {
+          ageGroups[group].completed++
+        }
+      }
+    })
+
+    const totalCount = filteredContracts.length
+
+    return Object.entries(ageGroups)
+      .filter(([, data]) => data.count > 0)
+      .map(([name, data]) => ({
+        name,
+        value: data.count,
+        percentage: totalCount > 0 ? Math.round((data.count / totalCount) * 100) : 0,
+        contractRate: data.count > 0 ? Math.round((data.completed / data.count) * 100) : 0
+      }))
+  }, [filteredContracts])
+
+  // 도넛 차트 컬러 - 화이트 기반 모던 컬러 팔레트
+  const DONUT_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6']
+  const MEDIA_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4']
+  const AGE_COLORS = ['#06B6D4', '#6366F1', '#EC4899', '#84CC16', '#F97316']
+
+  // 1년치 월별 매출 데이터 (필터 연동)
+  const yearlyMonthlyData = useMemo(() => {
+    const targetYear = selectedYear
+    const monthlyData: Record<string, number> = {}
+
+    // 12개월 초기화
+    for (let i = 1; i <= 12; i++) {
+      monthlyData[`${targetYear}년 ${i}월`] = 0
+    }
+
+    // 담당자 필터를 적용한 계약에서 선택된 연도 데이터만 집계
+    let filtered = contracts.filter(c => c.contract_date || c.execution_date)
+
+    if (selectedContractor !== 'all') {
+      filtered = filtered.filter(c => c.contractor === selectedContractor)
+    }
+
+    filtered.forEach(contract => {
+      const date = new Date(contract.contract_date || contract.execution_date!)
+      if (date.getFullYear() === targetYear) {
+        const monthKey = `${targetYear}년 ${date.getMonth() + 1}월`
+        monthlyData[monthKey] += contract.total_commission || 0
+      }
+    })
+
+    // formatCurrency 인라인 함수
+    const fmtCurrency = (amount: number) => {
+      if (amount >= 100000000) {
+        const billions = Math.floor(amount / 100000000)
+        const remainder = Math.floor((amount % 100000000) / 10000)
+        if (remainder > 0) {
+          return `${billions}억 ${remainder.toLocaleString()}만`
+        }
+        return `${billions}억`
+      }
+      if (amount >= 10000) {
+        return `${Math.floor(amount / 10000).toLocaleString()}만`
+      }
+      return amount.toLocaleString()
+    }
+
+    return Object.entries(monthlyData).map(([name, value]) => ({
       name,
-      매출: data.commission,
-      정산: data.settlement,
-      건수: data.count
+      value,
+      displayValue: fmtCurrency(value)
     }))
-
-  const mediaChartData = Object.entries(stats.byMedia)
-    .sort((a, b) => b[1].count - a[1].count)
-    .map(([name, data]) => ({
-      name,
-      value: data.count,
-      commission: data.commission
-    }))
-
-  const productTypeData = Object.entries(stats.byProductType)
-    .map(([name, data]) => ({
-      name,
-      value: data.count,
-      commission: data.commission
-    }))
-
-  const monthlyTrendData = Object.entries(stats.monthlyTrend)
-    .sort((a, b) => a[0].localeCompare(b[0]))
-    .map(([month, data]) => ({
-      월: month.substring(5), // "2024-11" -> "11"
-      매출: data.commission,
-      정산: data.settlement,
-      건수: data.count
-    }))
-
-  // 수익 구조 데이터
-  const revenueStructureData = [
-    { name: 'AG 수수료', value: stats.totalAGCommission, color: COLORS.primary },
-    { name: '캐피탈 수수료', value: stats.totalCapitalCommission, color: COLORS.secondary },
-    { name: '딜러 수수료', value: stats.totalDealerCommission, color: COLORS.warning },
-    { name: '페이백', value: stats.totalPayback, color: COLORS.danger },
-  ].filter(item => item.value > 0)
+  }, [contracts, selectedYear, selectedContractor])
 
   const formatCurrency = (amount: number) => {
     if (amount >= 100000000) {
-      return `${(amount / 100000000).toFixed(1)}억`
-    }
-    if (amount >= 10000000) {
-      return `${(amount / 10000000).toFixed(1)}천만`
+      const billions = Math.floor(amount / 100000000)
+      const remainder = Math.floor((amount % 100000000) / 10000)
+      if (remainder > 0) {
+        return `${billions}억 ${remainder.toLocaleString()}만`
+      }
+      return `${billions}억`
     }
     if (amount >= 10000) {
-      return `${(amount / 10000).toFixed(0)}만`
+      return `${Math.floor(amount / 10000).toLocaleString()}만`
     }
     return amount.toLocaleString()
   }
@@ -391,16 +476,11 @@ export default function SalesAnalytics({ contracts: initialContracts, users }: S
 
     setIsSaving(true)
     try {
+      // editFormData에서 값이 있으면 사용, 없으면 selectedContract 기존값 유지
       const payload = {
-        status: editFormData.status,
-        ag_commission: editFormData.ag_commission ? parseInt(editFormData.ag_commission) : 0,
-        capital_commission: editFormData.capital_commission ? parseInt(editFormData.capital_commission) : 0,
-        dealer_commission: editFormData.dealer_commission ? parseInt(editFormData.dealer_commission) : 0,
-        payback: editFormData.payback ? parseInt(editFormData.payback) : 0,
-        total_commission: calculateTotalCommission(),
-        settlement_amount: editFormData.settlement_amount ? parseInt(editFormData.settlement_amount) : 0,
-        contract_date: editFormData.contract_date || null,
-        execution_date: editFormData.execution_date || null,
+        status: editFormData.status || selectedContract.status,
+        settlement_amount: editFormData.settlement_amount ? parseInt(editFormData.settlement_amount) : (selectedContract.settlement_amount || 0),
+        execution_date: editFormData.execution_date || selectedContract.execution_date || null,
       }
 
       const response = await fetch(`/api/contracts/${selectedContract.id}`, {
@@ -472,26 +552,25 @@ export default function SalesAnalytics({ contracts: initialContracts, users }: S
   }
 
   return (
-    <div className="min-h-screen bg-gray-50/50">
-      {/* 필터 헤더 */}
-      <div className="sticky top-0 z-20 bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-2">
-            {/* 기간 필터 버튼 */}
-            <div className="flex bg-gray-100 rounded-lg p-1">
+    <div className="min-h-screen bg-white">
+      {/* 상단 헤더 - Linear 스타일 */}
+      <header className="sticky top-0 z-20 bg-white border-b border-gray-200">
+        <div className="px-8 lg:px-12 py-4">
+          <div className="flex items-center gap-6">
+            {/* 기간 필터 - 미니멀 */}
+            <div className="flex items-center gap-1 border border-gray-200 rounded-lg p-1">
               {[
-                { key: 'week', label: '7일' },
+                { key: 'all', label: '전체' },
                 { key: 'month', label: '월별' },
                 { key: 'year', label: '연도' },
-                { key: 'all', label: '전체' },
               ].map((period) => (
                 <button
                   key={period.key}
-                  onClick={() => setSelectedPeriod(period.key as any)}
-                  className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                  onClick={() => setSelectedPeriod(period.key as 'all' | 'month' | 'year')}
+                  className={`px-3 py-1.5 text-xs font-normal rounded-md transition-colors ${
                     selectedPeriod === period.key
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900'
+                      ? 'bg-gray-900 text-white'
+                      : 'text-gray-500 hover:text-gray-900'
                   }`}
                 >
                   {period.label}
@@ -500,368 +579,371 @@ export default function SalesAnalytics({ contracts: initialContracts, users }: S
             </div>
 
             {/* 연도/월 선택 */}
-            {(selectedPeriod === 'year' || selectedPeriod === 'month') && (
-              <select
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(Number(e.target.value))}
-                className="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(year => (
-                  <option key={year} value={year}>{year}년</option>
-                ))}
-              </select>
-            )}
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(Number(e.target.value))}
+              className="px-3 py-1.5 text-xs border border-gray-200 rounded-lg text-gray-600 focus:outline-none focus:ring-1 focus:ring-gray-300"
+            >
+              {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(year => (
+                <option key={year} value={year}>{year}년</option>
+              ))}
+            </select>
 
             {selectedPeriod === 'month' && (
               <select
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(Number(e.target.value))}
-                className="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-3 py-1.5 text-xs border border-gray-200 rounded-lg text-gray-600 focus:outline-none focus:ring-1 focus:ring-gray-300"
               >
                 {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
                   <option key={month} value={month}>{month}월</option>
                 ))}
               </select>
             )}
-          </div>
 
-          {/* 영업자 필터 */}
-          <select
-            value={selectedUser}
-            onChange={(e) => setSelectedUser(e.target.value)}
-            className="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="all">전체 영업자</option>
-            {users.map(user => (
-              <option key={user.id} value={user.id}>{user.name}</option>
-            ))}
-          </select>
+            {/* 담당자 필터 */}
+            <select
+              value={selectedContractor}
+              onChange={(e) => setSelectedContractor(e.target.value)}
+              className="px-3 py-1.5 text-xs border border-gray-200 rounded-lg text-gray-600 focus:outline-none focus:ring-1 focus:ring-gray-300"
+            >
+              <option value="all">전체 담당자</option>
+              {contractorList.map(contractor => (
+                <option key={contractor} value={contractor}>{contractor}</option>
+              ))}
+            </select>
+          </div>
         </div>
-      </div>
+      </header>
 
-      <div className="p-6 space-y-6">
-        {/* Hero KPI 카드 - 4개 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* 총 매출 */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-medium text-gray-500">총 매출</span>
-              <div className={`flex items-center gap-1 text-xs font-medium ${stats.commissionGrowth >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                {stats.commissionGrowth >= 0 ? (
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                  </svg>
-                ) : (
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                  </svg>
-                )}
-                {Math.abs(stats.commissionGrowth).toFixed(1)}%
-              </div>
-            </div>
-            <div className="text-3xl font-bold text-gray-900 mb-1">
-              {formatCurrency(stats.totalCommission)}
-            </div>
-            <div className="text-sm text-gray-400">
-              {formatFullCurrency(stats.totalCommission)}
-            </div>
+      {/* 메인 컨텐츠 */}
+      <main className="px-8 lg:px-12 py-10">
+        {/* 연간 월별 매출 차트 - 상단 배치 */}
+        <div className="border border-gray-200 rounded-xl p-8 mb-12">
+          <h3 className="text-sm font-normal text-gray-900 mb-6">{selectedYear}년 월별 매출</h3>
+          <div className="h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={yearlyMonthlyData} margin={{ top: 30, right: 10, left: 10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="0" stroke="#f3f4f6" vertical={false} />
+                <XAxis
+                  dataKey="name"
+                  tick={{ fontSize: 11, fill: '#9CA3AF' }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(value) => value.replace(/\d+년 /, '')}
+                />
+                <YAxis
+                  tick={{ fontSize: 11, fill: '#9CA3AF' }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(value) => `₩${formatCurrency(value)}`}
+                />
+                <Tooltip
+                  formatter={(value: number) => [`₩${formatCurrency(value)}`, '매출']}
+                  contentStyle={{
+                    backgroundColor: 'white',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    fontSize: '12px'
+                  }}
+                />
+                <Bar dataKey="value" fill="#3B82F6" radius={[4, 4, 0, 0]} barSize={40}>
+                  <LabelList
+                    dataKey="displayValue"
+                    position="top"
+                    fill="#6B7280"
+                    fontSize={10}
+                    formatter={(value) => (value && value !== '0') ? `₩${value}` : ''}
+                  />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
+        </div>
 
-          {/* 순이익 (정산금) */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-medium text-gray-500">순이익</span>
-              <div className={`flex items-center gap-1 text-xs font-medium ${stats.settlementGrowth >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                {stats.settlementGrowth >= 0 ? (
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                  </svg>
-                ) : (
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                  </svg>
-                )}
-                {Math.abs(stats.settlementGrowth).toFixed(1)}%
-              </div>
+        {/* KPI 카드 3개 - 미니멀 border 스타일 */}
+        <div className="grid grid-cols-3 gap-6 mb-12">
+          {/* 총 매출 */}
+          <div className="border border-gray-200 rounded-xl p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-xs text-gray-400 uppercase tracking-wide">총 매출</span>
             </div>
-            <div className="text-3xl font-bold text-emerald-600 mb-1">
-              {formatCurrency(stats.totalSettlement)}
-            </div>
-            <div className="text-sm text-gray-400">
-              마진율 {stats.marginRate.toFixed(1)}%
-            </div>
+            <p className="text-2xl font-semibold text-gray-900">{formatCurrency(stats.totalCommission)}</p>
+            <p className="text-xs text-gray-400 mt-2">{formatFullCurrency(stats.totalCommission)}</p>
           </div>
 
           {/* 계약 건수 */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-medium text-gray-500">계약 건수</span>
-              <div className={`flex items-center gap-1 text-xs font-medium ${stats.contractGrowth >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                {stats.contractGrowth >= 0 ? (
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                  </svg>
+          <div className="border border-gray-200 rounded-xl p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span className="text-xs text-gray-400 uppercase tracking-wide">계약 건수</span>
+            </div>
+            <p className="text-2xl font-semibold text-gray-900">{stats.totalContracts}<span className="text-base font-normal text-gray-400 ml-1">건</span></p>
+            <p className="text-xs text-gray-400 mt-2">완료 {stats.completedContracts}건</p>
+          </div>
+
+          {/* 증감률 */}
+          <div className="border border-gray-200 rounded-xl p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              <span className="text-xs text-gray-400 uppercase tracking-wide">전월 대비</span>
+            </div>
+            <p className={`text-2xl font-semibold ${stats.commissionGrowth >= 0 ? 'text-gray-900' : 'text-gray-900'}`}>
+              {stats.commissionGrowth >= 0 ? '+' : ''}{stats.commissionGrowth.toFixed(1)}%
+            </p>
+            <p className="text-xs text-gray-400 mt-2">매출 증감률</p>
+          </div>
+        </div>
+
+        {/* 계약상태 + 매체별 유입 + 연령대별 */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+          {/* 상태 요약 - 도넛형 */}
+          <div className="border border-gray-200 rounded-xl p-8">
+            <h3 className="text-sm font-normal text-gray-900 mb-6">계약 상태</h3>
+            <div className="flex items-center gap-8">
+              <div className="w-40 h-40">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={statusDonutData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={45}
+                      outerRadius={70}
+                      paddingAngle={2}
+                      dataKey="value"
+                    >
+                      {statusDonutData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={DONUT_COLORS[index % DONUT_COLORS.length]} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex-1 space-y-3">
+                {statusDonutData.map((item, index) => (
+                  <div key={item.name} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: DONUT_COLORS[index % DONUT_COLORS.length] }}></div>
+                      <span className="text-sm text-gray-500">{item.name}</span>
+                    </div>
+                    <span className="text-sm font-medium text-gray-900">{item.value}건</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* 매체별 유입 순위 - 도넛형 (계약률 포함) */}
+          <div className="border border-gray-200 rounded-xl p-8">
+            <h3 className="text-sm font-normal text-gray-900 mb-6">매체별 유입 순위</h3>
+            <div className="flex items-center gap-8">
+              <div className="w-40 h-40">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={mediaDonutData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={45}
+                      outerRadius={70}
+                      paddingAngle={2}
+                      dataKey="value"
+                    >
+                      {mediaDonutData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={MEDIA_COLORS[index % MEDIA_COLORS.length]} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex-1 space-y-2.5">
+                {mediaDonutData.length > 0 ? (
+                  mediaDonutData.map((item, index) => (
+                    <div key={item.name} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: MEDIA_COLORS[index % MEDIA_COLORS.length] }}></div>
+                        <span className="text-sm text-gray-500">{item.name}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm font-medium text-gray-900">{item.value}건</span>
+                        <span className="text-xs text-gray-400">({item.percentage}%)</span>
+                        <span className="text-xs px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600">계약률 {item.contractRate}%</span>
+                      </div>
+                    </div>
+                  ))
                 ) : (
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                  </svg>
+                  <p className="text-sm text-gray-400">매체 데이터 없음</p>
                 )}
-                {Math.abs(stats.contractGrowth).toFixed(1)}%
-              </div>
-            </div>
-            <div className="text-3xl font-bold text-gray-900 mb-1">
-              {stats.totalContracts}<span className="text-lg font-normal text-gray-400">건</span>
-            </div>
-            <div className="text-sm text-gray-400">
-              완료 {stats.completedContracts}건
-            </div>
-          </div>
-
-          {/* 평균 계약 단가 */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-medium text-gray-500">평균 계약 단가</span>
-            </div>
-            <div className="text-3xl font-bold text-gray-900 mb-1">
-              {formatCurrency(stats.avgCommission)}
-            </div>
-            <div className="text-sm text-gray-400">
-              평균 차량가 {formatCurrency(stats.avgVehiclePrice)}
-            </div>
-          </div>
-        </div>
-
-        {/* 차트 섹션 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* 월별 매출 추이 */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <h3 className="text-base font-semibold text-gray-900 mb-6">매출 추이</h3>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={monthlyTrendData}>
-                  <defs>
-                    <linearGradient id="colorCommission" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={COLORS.primary} stopOpacity={0.1}/>
-                      <stop offset="95%" stopColor={COLORS.primary} stopOpacity={0}/>
-                    </linearGradient>
-                    <linearGradient id="colorSettlement" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={COLORS.secondary} stopOpacity={0.1}/>
-                      <stop offset="95%" stopColor={COLORS.secondary} stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="월" tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} tickFormatter={(value) => formatCurrency(value)} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Area type="monotone" dataKey="매출" stroke={COLORS.primary} fill="url(#colorCommission)" strokeWidth={2} />
-                  <Area type="monotone" dataKey="정산" stroke={COLORS.secondary} fill="url(#colorSettlement)" strokeWidth={2} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="flex items-center justify-center gap-6 mt-4">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS.primary }}></div>
-                <span className="text-sm text-gray-600">매출</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS.secondary }}></div>
-                <span className="text-sm text-gray-600">정산</span>
               </div>
             </div>
           </div>
 
-          {/* 수익 구조 */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <h3 className="text-base font-semibold text-gray-900 mb-6">수익 구조</h3>
-            <div className="h-64 flex items-center justify-center">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={revenueStructureData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={90}
-                    paddingAngle={2}
-                    dataKey="value"
-                  >
-                    {revenueStructureData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value: number) => formatFullCurrency(value)} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="grid grid-cols-2 gap-3 mt-4">
-              {revenueStructureData.map((item) => (
-                <div key={item.name} className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
-                  <span className="text-sm text-gray-600">{item.name}</span>
-                  <span className="text-sm font-medium text-gray-900 ml-auto">{formatCurrency(item.value)}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* 캐피탈별 매출 */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <h3 className="text-base font-semibold text-gray-900 mb-6">캐피탈별 매출</h3>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={capitalChartData} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={true} vertical={false} />
-                  <XAxis type="number" tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} tickFormatter={(value) => formatCurrency(value)} />
-                  <YAxis dataKey="name" type="category" tick={{ fontSize: 12, fill: '#374151' }} axisLine={false} tickLine={false} width={80} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="매출" fill={COLORS.primary} radius={[0, 4, 4, 0]} barSize={20} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* 영업자별 실적 */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <h3 className="text-base font-semibold text-gray-900 mb-6">영업자별 실적</h3>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={salespersonChartData} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={true} vertical={false} />
-                  <XAxis type="number" tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} tickFormatter={(value) => formatCurrency(value)} />
-                  <YAxis dataKey="name" type="category" tick={{ fontSize: 12, fill: '#374151' }} axisLine={false} tickLine={false} width={60} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="매출" fill={COLORS.secondary} radius={[0, 4, 4, 0]} barSize={20} />
-                </BarChart>
-              </ResponsiveContainer>
+          {/* 연령대별 계약 - 도넛형 (계약률 포함) */}
+          <div className="border border-gray-200 rounded-xl p-8">
+            <h3 className="text-sm font-normal text-gray-900 mb-6">연령대별 계약</h3>
+            <div className="flex items-center gap-8">
+              <div className="w-40 h-40">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={ageGroupData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={45}
+                      outerRadius={70}
+                      paddingAngle={2}
+                      dataKey="value"
+                    >
+                      {ageGroupData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={AGE_COLORS[index % AGE_COLORS.length]} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex-1 space-y-2.5">
+                {ageGroupData.length > 0 ? (
+                  ageGroupData.map((item, index) => (
+                    <div key={item.name} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: AGE_COLORS[index % AGE_COLORS.length] }}></div>
+                        <span className="text-sm text-gray-500">{item.name}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm font-medium text-gray-900">{item.value}건</span>
+                        <span className="text-xs text-gray-400">({item.percentage}%)</span>
+                        <span className="text-xs px-1.5 py-0.5 rounded bg-cyan-50 text-cyan-600">계약률 {item.contractRate}%</span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-400">생년월일 데이터 없음</p>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* 보조 KPI 카드 */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {/* 매체별 */}
-          <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-            <h4 className="text-sm font-medium text-gray-500 mb-3">매체별 유입</h4>
-            <div className="space-y-2">
-              {mediaChartData.slice(0, 3).map((item) => (
-                <div key={item.name} className="flex items-center justify-between">
-                  <span className="text-sm text-gray-700">{item.name}</span>
-                  <span className="text-sm font-semibold text-gray-900">{item.value}건</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* 상품유형별 */}
-          <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-            <h4 className="text-sm font-medium text-gray-500 mb-3">상품유형</h4>
-            <div className="space-y-2">
-              {productTypeData.map((item) => (
-                <div key={item.name} className="flex items-center justify-between">
-                  <span className="text-sm text-gray-700">{item.name}</span>
-                  <span className="text-sm font-semibold text-gray-900">{item.value}건</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* AG 비용 */}
-          <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-            <h4 className="text-sm font-medium text-gray-500 mb-3">AG 비용</h4>
-            <div className="text-2xl font-bold text-gray-900 mb-1">
-              {formatCurrency(stats.totalAGCommission)}
-            </div>
-            <div className="text-sm text-gray-400">
-              비율 {stats.totalCommission > 0 ? ((stats.totalAGCommission / stats.totalCommission) * 100).toFixed(1) : 0}%
-            </div>
-          </div>
-
-          {/* 페이백 비용 */}
-          <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-            <h4 className="text-sm font-medium text-gray-500 mb-3">페이백 비용</h4>
-            <div className="text-2xl font-bold text-red-600 mb-1">
-              {formatCurrency(stats.totalPayback)}
-            </div>
-            <div className="text-sm text-gray-400">
-              비율 {stats.totalCommission > 0 ? ((stats.totalPayback / stats.totalCommission) * 100).toFixed(1) : 0}%
-            </div>
-          </div>
-        </div>
-
-        {/* 계약 상세 테이블 */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-semibold text-gray-900">계약 상세</h3>
-              <span className="text-sm text-gray-500">총 {filteredContracts.length}건</span>
-            </div>
+        {/* 계약 목록 테이블 */}
+        <div className="border border-gray-200 rounded-xl overflow-hidden">
+          <div className="px-8 py-5 border-b border-gray-200 flex items-center justify-between">
+            <h3 className="text-sm font-normal text-gray-900">계약 목록</h3>
+            <span className="text-xs text-gray-400">{filteredContracts.length}건</span>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full table-fixed">
+              <colgroup>
+                <col style={{ width: '6%' }} />
+                <col style={{ width: '6%' }} />
+                <col style={{ width: '9%' }} />
+                <col style={{ width: '6%' }} />
+                <col style={{ width: '6%' }} />
+                <col style={{ width: '7%' }} />
+                <col style={{ width: '5%' }} />
+                <col style={{ width: '12%' }} />
+                <col style={{ width: '8%' }} />
+                <col style={{ width: '8%' }} />
+                <col style={{ width: '8%' }} />
+                <col style={{ width: '7%' }} />
+                <col style={{ width: '7%' }} />
+              </colgroup>
               <thead>
-                <tr className="bg-gray-50/50">
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">고객명</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">차량</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">캐피탈</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">담당자</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">상태</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">매출</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">정산</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">계약일</th>
+                <tr className="border-b border-gray-100">
+                  <th className="px-3 py-4 text-left text-xs font-normal text-gray-400 tracking-wide">매체</th>
+                  <th className="px-3 py-4 text-left text-xs font-normal text-gray-400 tracking-wide">고객명</th>
+                  <th className="px-3 py-4 text-left text-xs font-normal text-gray-400 tracking-wide">번호</th>
+                  <th className="px-3 py-4 text-left text-xs font-normal text-gray-400 tracking-wide">상태</th>
+                  <th className="px-3 py-4 text-left text-xs font-normal text-gray-400 tracking-wide">담당자</th>
+                  <th className="px-3 py-4 text-left text-xs font-normal text-gray-400 tracking-wide">금융사</th>
+                  <th className="px-3 py-4 text-left text-xs font-normal text-gray-400 tracking-wide">판매구분</th>
+                  <th className="px-3 py-4 text-left text-xs font-normal text-gray-400 tracking-wide">차량명</th>
+                  <th className="px-3 py-4 text-left text-xs font-normal text-gray-400 tracking-wide">차량가</th>
+                  <th className="px-3 py-4 text-left text-xs font-normal text-gray-400 tracking-wide">총수수료</th>
+                  <th className="px-3 py-4 text-left text-xs font-normal text-gray-400 tracking-wide">정산금액</th>
+                  <th className="px-3 py-4 text-left text-xs font-normal text-gray-400 tracking-wide">계약일</th>
+                  <th className="px-3 py-4 text-left text-xs font-normal text-gray-400 tracking-wide">출고일</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {paginatedContracts.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="px-6 py-16 text-center">
-                      <div className="text-gray-400">
-                        <svg className="w-12 h-12 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        <p className="text-sm">해당 기간에 계약 데이터가 없습니다</p>
-                      </div>
+                    <td colSpan={13} className="px-8 py-16 text-center">
+                      <p className="text-sm text-gray-400">데이터가 없습니다</p>
                     </td>
                   </tr>
                 ) : (
                   paginatedContracts.map((contract) => {
-                    const displayName = contract.contractor || users.find(u => u.id === contract.user_id)?.name || '미지정'
+                    const displayName = contract.contractor || users.find(u => u.id === contract.user_id)?.name || '-'
                     return (
                       <tr
                         key={contract.id}
-                        className="hover:bg-gray-50/50 transition-colors cursor-pointer"
+                        className="hover:bg-gray-50/50 cursor-pointer transition-colors"
                         onClick={() => {
                           setSelectedContract(contract)
+                          setEditFormData({
+                            status: contract.status || '',
+                            ag_commission: contract.ag_commission ? String(contract.ag_commission) : '',
+                            capital_commission: contract.capital_commission ? String(contract.capital_commission) : '',
+                            dealer_commission: contract.dealer_commission ? String(contract.dealer_commission) : '',
+                            payback: contract.payback ? String(contract.payback) : '',
+                            total_commission: contract.total_commission ? String(contract.total_commission) : '',
+                            settlement_amount: contract.settlement_amount ? String(contract.settlement_amount) : '',
+                            contract_date: contract.contract_date || '',
+                            execution_date: contract.execution_date || '',
+                          })
+                          setIsEditMode(false)
                           setIsContractModalOpen(true)
                         }}
                       >
-                        <td className="px-6 py-4">
-                          <span className="text-sm font-medium text-gray-900">{contract.customer_name}</span>
+                        <td className="px-3 py-4">
+                          <span className="px-2 py-1 text-xs rounded-lg font-medium bg-gray-900 text-white truncate block">
+                            {contract.media || '카스피릿'}
+                          </span>
                         </td>
-                        <td className="px-6 py-4">
-                          <div className="text-sm text-gray-900">{contract.vehicle_name}</div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="text-sm text-gray-700">{contract.capital}</span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="text-sm text-gray-700">{displayName}</span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={`inline-flex px-2.5 py-1 text-xs font-medium rounded-full border ${getStatusColor(contract.status)}`}>
+                        <td className="px-3 py-4 text-sm font-semibold text-gray-900 truncate">{contract.customer_name}</td>
+                        <td className="px-3 py-4 text-sm text-gray-600 truncate">{contract.phone || '-'}</td>
+                        <td className="px-3 py-4">
+                          <span className={`inline-block px-2 py-0.5 text-xs font-normal rounded border ${getStatusColor(contract.status)}`}>
                             {getStatusLabel(contract.status)}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-right">
-                          <span className="text-sm font-semibold text-gray-900">{formatFullCurrency(contract.total_commission)}</span>
+                        <td className="px-3 py-4 text-sm text-gray-600 truncate">{displayName}</td>
+                        <td className="px-3 py-4 text-sm text-gray-600 truncate">{contract.finance_company || '-'}</td>
+                        <td className="px-3 py-4">
+                          {contract.sales_type ? (
+                            <span className={`px-2 py-1 text-xs rounded-lg font-medium ${
+                              contract.sales_type === '렌트' ? 'bg-green-100 text-green-800' :
+                              contract.sales_type === '리스' ? 'bg-blue-100 text-blue-800' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              {contract.sales_type}
+                            </span>
+                          ) : <span className="text-gray-400">-</span>}
                         </td>
-                        <td className="px-6 py-4 text-right">
-                          <span className="text-sm font-semibold text-emerald-600">{formatFullCurrency(contract.settlement_amount)}</span>
+                        <td className="px-3 py-4 text-sm text-gray-900 truncate">{contract.vehicle_name || '-'}</td>
+                        <td className="px-3 py-4 text-sm font-medium text-gray-900 truncate">
+                          {contract.vehicle_price ? `${contract.vehicle_price.toLocaleString()}` : '-'}
                         </td>
-                        <td className="px-6 py-4">
-                          <span className="text-sm text-gray-500">
-                            {contract.contract_date ? new Date(contract.contract_date).toLocaleDateString('ko-KR') : '-'}
-                          </span>
+                        <td className="px-3 py-4 text-sm font-medium text-blue-600 truncate">
+                          {contract.total_commission ? `${contract.total_commission.toLocaleString()}` : '-'}
+                        </td>
+                        <td className="px-3 py-4 text-sm font-medium text-green-600 truncate">
+                          {contract.settlement_amount ? `${contract.settlement_amount.toLocaleString()}` : '-'}
+                        </td>
+                        <td className="px-3 py-4 text-sm text-gray-600 truncate">
+                          {contract.contract_date || '-'}
+                        </td>
+                        <td className="px-3 py-4 text-sm text-gray-600 truncate">
+                          {contract.execution_date || '-'}
                         </td>
                       </tr>
                     )
@@ -873,15 +955,15 @@ export default function SalesAnalytics({ contracts: initialContracts, users }: S
 
           {/* 페이지네이션 */}
           {totalPages > 1 && (
-            <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-              <p className="text-sm text-gray-500">
-                {(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, filteredContracts.length)} / {filteredContracts.length}건
+            <div className="px-8 py-4 border-t border-gray-100 flex items-center justify-between">
+              <p className="text-xs text-gray-400">
+                {(currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, filteredContracts.length)} / {filteredContracts.length}
               </p>
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="px-3 py-1.5 text-xs text-gray-500 hover:text-gray-900 disabled:opacity-40 transition-colors"
                 >
                   이전
                 </button>
@@ -900,10 +982,10 @@ export default function SalesAnalytics({ contracts: initialContracts, users }: S
                     <button
                       key={pageNum}
                       onClick={() => setCurrentPage(pageNum)}
-                      className={`w-8 h-8 text-sm rounded-lg transition-colors ${
+                      className={`w-7 h-7 text-xs rounded transition-colors ${
                         currentPage === pageNum
                           ? 'bg-gray-900 text-white'
-                          : 'text-gray-600 hover:bg-gray-100'
+                          : 'text-gray-500 hover:text-gray-900'
                       }`}
                     >
                       {pageNum}
@@ -913,7 +995,7 @@ export default function SalesAnalytics({ contracts: initialContracts, users }: S
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="px-3 py-1.5 text-xs text-gray-500 hover:text-gray-900 disabled:opacity-40 transition-colors"
                 >
                   다음
                 </button>
@@ -921,25 +1003,23 @@ export default function SalesAnalytics({ contracts: initialContracts, users }: S
             </div>
           )}
         </div>
-      </div>
+      </main>
 
-      {/* Contract Detail Modal - 노션 스타일 (계약관리 페이지와 동일) */}
+      {/* Contract Detail Modal - 미니멀 스타일 */}
       {isContractModalOpen && selectedContract && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white border border-gray-200 rounded-2xl shadow-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white p-5 border-b border-gray-200 z-10 flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">계약 상세 정보</h2>
-              </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md">
+          <div className="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto border border-gray-200" style={{ boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
+            <div className="sticky top-0 bg-white p-6 border-b border-gray-200 z-10 flex items-center justify-between rounded-t-3xl">
+              <h2 className="text-xl font-bold text-gray-800">계약 상세</h2>
               <button
                 type="button"
                 onClick={() => {
                   setIsContractModalOpen(false)
                   setIsEditMode(false)
                 }}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/50 hover:bg-white/80 text-gray-400 hover:text-gray-600 transition-all duration-300"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -1328,6 +1408,32 @@ export default function SalesAnalytics({ contracts: initialContracts, users }: S
                 </div>
                 <span className="flex-1 text-sm font-bold text-blue-600">₩{formatNumber(String(selectedContract.total_commission || 0))}</span>
               </div>
+              <div className="flex items-center py-2.5 border-b border-gray-100 hover:bg-gray-50 -mx-6 px-6 bg-green-50">
+                <div className="flex items-center gap-2 w-40">
+                  <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-sm text-green-600 font-medium">정산금액</span>
+                </div>
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    value={isEditMode ? editFormData.settlement_amount : (selectedContract.settlement_amount ? String(selectedContract.settlement_amount) : '')}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^0-9]/g, '')
+                      setEditFormData({ ...editFormData, settlement_amount: value })
+                      setIsEditMode(true)
+                    }}
+                    placeholder="정산금액 입력"
+                    className="w-48 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm font-semibold text-green-600 focus:ring-2 focus:ring-green-400 focus:border-green-400 placeholder:text-gray-400 placeholder:font-normal"
+                  />
+                  {(isEditMode ? editFormData.settlement_amount : selectedContract.settlement_amount) && (
+                    <span className="ml-2 text-sm text-green-600">
+                      ₩{formatNumber(isEditMode ? editFormData.settlement_amount : String(selectedContract.settlement_amount || ''))}
+                    </span>
+                  )}
+                </div>
+              </div>
 
               {/* 고객서류 섹션 */}
               {selectedContract.customer_documents && (
@@ -1372,14 +1478,14 @@ export default function SalesAnalytics({ contracts: initialContracts, users }: S
                 </>
               )}
 
-              {/* 버튼 영역 */}
-              <div className="flex justify-end gap-3 pt-4">
+              {/* 버튼 영역 - 글래스 */}
+              <div className="flex justify-end gap-3 pt-6 mt-4 border-t border-white/20">
                 {isEditMode ? (
                   <>
                     <button
                       type="button"
                       onClick={cancelEditMode}
-                      className="px-6 py-3 bg-white border border-gray-300 rounded-lg text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors"
+                      className="px-6 py-2.5 bg-white/50 hover:bg-white/70 text-gray-700 rounded-xl text-sm font-semibold transition-all duration-300"
                     >
                       취소
                     </button>
@@ -1387,7 +1493,7 @@ export default function SalesAnalytics({ contracts: initialContracts, users }: S
                       type="button"
                       onClick={handleSaveContract}
                       disabled={isSaving}
-                      className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="px-6 py-2.5 bg-gradient-to-r from-orange-400 to-rose-400 hover:from-orange-500 hover:to-rose-500 text-white rounded-xl text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg"
                     >
                       {isSaving ? '저장 중...' : '저장'}
                     </button>
@@ -1396,7 +1502,7 @@ export default function SalesAnalytics({ contracts: initialContracts, users }: S
                   <button
                     type="button"
                     onClick={() => setIsContractModalOpen(false)}
-                    className="px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white rounded-lg text-sm font-semibold transition-colors"
+                    className="px-6 py-2.5 bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900 text-white rounded-xl text-sm font-semibold transition-all duration-300 shadow-lg"
                   >
                     닫기
                   </button>

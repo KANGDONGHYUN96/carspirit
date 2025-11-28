@@ -14,16 +14,29 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // 사용자 역할 확인
+    const { data: userData } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    const isAdmin = userData?.role === 'admin' || userData?.role === 'manager'
+
     const body = await request.json()
     const { id } = await params
 
-    const { data, error } = await supabase
+    let query = supabase
       .from('contracts')
       .update(body)
       .eq('id', id)
-      .eq('created_by', user.id)
-      .select()
-      .single()
+
+    // 관리자/매니저가 아닌 경우 본인 계약만 수정 가능
+    if (!isAdmin) {
+      query = query.eq('created_by', user.id)
+    }
+
+    const { data, error } = await query.select().single()
 
     if (error) {
       throw error

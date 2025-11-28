@@ -34,9 +34,11 @@ interface Contract {
 interface ContractsClientProps {
   contracts: Contract[]
   userName: string
+  userRole: string
 }
 
-export default function ContractsClient({ contracts: initialContracts, userName }: ContractsClientProps) {
+export default function ContractsClient({ contracts: initialContracts, userName, userRole }: ContractsClientProps) {
+  const isAdmin = userRole === 'admin' || userRole === 'manager'
   const [contracts, setContracts] = useState(initialContracts)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingContract, setEditingContract] = useState<Contract | null>(null)
@@ -444,6 +446,7 @@ export default function ContractsClient({ contracts: initialContracts, userName 
 
       const payload = {
         ...formData,
+        contractor: userName, // 담당자는 항상 현재 로그인한 사용자로 고정
         vehicle_price: formData.vehicle_price ? parseInt(formData.vehicle_price) : null,
         annual_mileage: formData.annual_mileage ? parseInt(formData.annual_mileage) : null,
         initial_cost_amount: formData.initial_cost_amount ? parseInt(formData.initial_cost_amount) : null,
@@ -602,18 +605,19 @@ export default function ContractsClient({ contracts: initialContracts, userName 
           <div>
             <table className="w-full table-fixed">
               <colgroup>
-                <col style={{ width: '7%' }} />
-                <col style={{ width: '7%' }} />
-                <col style={{ width: '10%' }} />
-                <col style={{ width: '7%' }} />
-                <col style={{ width: '7%' }} />
-                <col style={{ width: '8%' }} />
                 <col style={{ width: '6%' }} />
-                <col style={{ width: '14%' }} />
+                <col style={{ width: '6%' }} />
                 <col style={{ width: '9%' }} />
-                <col style={{ width: '9%' }} />
+                <col style={{ width: '6%' }} />
+                <col style={{ width: '6%' }} />
+                <col style={{ width: '7%' }} />
+                <col style={{ width: '5%' }} />
+                <col style={{ width: '12%' }} />
                 <col style={{ width: '8%' }} />
                 <col style={{ width: '8%' }} />
+                <col style={{ width: '8%' }} />
+                <col style={{ width: '7%' }} />
+                <col style={{ width: '7%' }} />
               </colgroup>
               <thead className="border-b border-gray-200">
                 <tr>
@@ -627,6 +631,7 @@ export default function ContractsClient({ contracts: initialContracts, userName 
                   <th className="px-3 py-4 text-left text-xs font-semibold text-gray-600 tracking-wide">차량명</th>
                   <th className="px-3 py-4 text-left text-xs font-semibold text-gray-600 tracking-wide">차량가</th>
                   <th className="px-3 py-4 text-left text-xs font-semibold text-gray-600 tracking-wide">총수수료</th>
+                  <th className="px-3 py-4 text-left text-xs font-semibold text-gray-600 tracking-wide">정산금액</th>
                   <th className="px-3 py-4 text-left text-xs font-semibold text-gray-600 tracking-wide">계약일</th>
                   <th className="px-3 py-4 text-left text-xs font-semibold text-gray-600 tracking-wide">출고일</th>
                 </tr>
@@ -665,6 +670,9 @@ export default function ContractsClient({ contracts: initialContracts, userName 
                     </td>
                     <td className="px-3 py-4 text-sm font-medium text-blue-600 truncate">
                       {contract.total_commission ? `${contract.total_commission.toLocaleString()}` : '-'}
+                    </td>
+                    <td className="px-3 py-4 text-sm font-medium text-green-600 truncate">
+                      {contract.settlement_amount ? `${contract.settlement_amount.toLocaleString()}` : '-'}
                     </td>
                     <td className="px-3 py-4 text-sm text-gray-600 truncate">
                       {contract.contract_date || '-'}
@@ -1084,6 +1092,17 @@ export default function ContractsClient({ contracts: initialContracts, userName 
                   </div>
                   <span className="flex-1 text-sm font-bold text-blue-600">₩{formatNumber(String(calculateTotalCommission()))}</span>
                 </div>
+                {editingContract?.settlement_amount ? (
+                  <div className="flex items-center py-2.5 border-b border-gray-100 hover:bg-gray-50 -mx-6 px-6 bg-green-50">
+                    <div className="flex items-center gap-2 w-40">
+                      <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-sm text-green-600 font-medium">정산금액</span>
+                    </div>
+                    <span className="flex-1 text-sm font-bold text-green-600">₩{formatNumber(String(editingContract.settlement_amount))}</span>
+                  </div>
+                ) : null}
 
                 {/* 고객서류 섹션 */}
                 {formData.customer_documents && (
@@ -1184,12 +1203,21 @@ export default function ContractsClient({ contracts: initialContracts, userName 
                   </div>
                   <div>
                     <label className="block text-xs text-gray-500 mb-1">담당자</label>
-                    <input
-                      type="text"
-                      value={formData.contractor}
-                      onChange={(e) => setFormData({ ...formData, contractor: e.target.value })}
-                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-400 focus:border-gray-400"
-                    />
+                    {isAdmin ? (
+                      <input
+                        type="text"
+                        value={formData.contractor}
+                        onChange={(e) => setFormData({ ...formData, contractor: e.target.value })}
+                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-400 focus:border-gray-400"
+                      />
+                    ) : (
+                      <input
+                        type="text"
+                        value={userName}
+                        readOnly
+                        className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded text-sm text-gray-600 cursor-not-allowed"
+                      />
+                    )}
                   </div>
                   <div>
                     <label className="block text-xs text-gray-500 mb-1">고객명 *</label>

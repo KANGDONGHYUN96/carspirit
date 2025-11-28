@@ -13,25 +13,18 @@ export default async function ContractsPage() {
 
   const supabase = await createClient()
 
-  // 관리자/매니저는 모든 계약 조회, 영업자는 본인 계약만 조회
-  const isManagerOrAdmin = user.role === 'manager' || user.role === 'admin'
-
-  let query = supabase
+  // 계약관리 페이지: 모든 사용자가 본인 계약만 조회 (관리자도 본인 계약만)
+  const { data: contracts } = await supabase
     .from('contracts')
     .select('*')
-
-  // 영업자는 본인이 생성한 계약만 조회
-  if (!isManagerOrAdmin) {
-    query = query.eq('user_id', user.id)
-  }
-
-  const { data: contracts } = await query.order('created_at', { ascending: false })
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
 
   return (
     <DashboardLayout>
       <div className="p-8 bg-gray-50 min-h-screen">
         <div className="max-w-[95%] mx-auto">
-          <ContractsClient contracts={contracts || []} userName={user.name} />
+          <ContractsClient contracts={contracts || []} userName={user.name} userRole={user.role} />
         </div>
       </div>
     </DashboardLayout>
