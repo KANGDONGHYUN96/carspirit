@@ -31,10 +31,21 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { user: authUser } } = await supabase.auth.getUser()
 
-    if (!user) {
+    if (!authUser) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // auth_user_id로 users 테이블에서 실제 user.id 조회
+    const { data: dbUser, error: userError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('auth_user_id', authUser.id)
+      .single()
+
+    if (userError || !dbUser) {
+      return NextResponse.json({ error: '사용자 정보를 찾을 수 없습니다' }, { status: 401 })
     }
 
     const body = await request.json()
@@ -43,8 +54,8 @@ export async function POST(request: NextRequest) {
       .from('contracts')
       .insert({
         ...body,
-        user_id: user.id,
-        created_by: user.id
+        user_id: dbUser.id,
+        created_by: dbUser.id
       })
       .select()
       .single()
