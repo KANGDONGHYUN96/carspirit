@@ -8,20 +8,24 @@ export async function PATCH(
 ) {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { user: authUser } } = await supabase.auth.getUser()
 
-    if (!user) {
+    if (!authUser) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // 사용자 역할 확인
-    const { data: userData } = await supabase
+    // auth_user_id로 users 테이블에서 사용자 정보 조회
+    const { data: dbUser } = await supabase
       .from('users')
-      .select('role')
-      .eq('id', user.id)
+      .select('id, role')
+      .eq('auth_user_id', authUser.id)
       .single()
 
-    const isAdmin = userData?.role === 'admin' || userData?.role === 'manager'
+    if (!dbUser) {
+      return NextResponse.json({ error: '사용자 정보를 찾을 수 없습니다' }, { status: 401 })
+    }
+
+    const isAdmin = dbUser.role === 'admin' || dbUser.role === 'manager'
 
     const body = await request.json()
     const { id } = await params
@@ -33,7 +37,7 @@ export async function PATCH(
 
     // 관리자/매니저가 아닌 경우 본인 계약만 수정 가능
     if (!isAdmin) {
-      query = query.eq('created_by', user.id)
+      query = query.eq('created_by', dbUser.id)
     }
 
     const { data, error } = await query.select().single()
@@ -56,10 +60,21 @@ export async function DELETE(
 ) {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { user: authUser } } = await supabase.auth.getUser()
 
-    if (!user) {
+    if (!authUser) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // auth_user_id로 users 테이블에서 사용자 ID 조회
+    const { data: dbUser } = await supabase
+      .from('users')
+      .select('id')
+      .eq('auth_user_id', authUser.id)
+      .single()
+
+    if (!dbUser) {
+      return NextResponse.json({ error: '사용자 정보를 찾을 수 없습니다' }, { status: 401 })
     }
 
     const { id } = await params
@@ -68,7 +83,7 @@ export async function DELETE(
       .from('contracts')
       .delete()
       .eq('id', id)
-      .eq('created_by', user.id)
+      .eq('created_by', dbUser.id)
 
     if (error) {
       throw error
