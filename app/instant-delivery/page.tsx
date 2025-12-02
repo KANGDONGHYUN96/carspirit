@@ -3,6 +3,10 @@ import { redirect } from 'next/navigation'
 import DashboardLayout from '@/components/layout/dashboard-layout'
 import InstantDeliveryTable from '@/components/instant-delivery/instant-delivery-table'
 
+// 캐시 비활성화 - 항상 최신 데이터 가져오기
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function InstantDeliveryPage() {
   const supabase = await createClient()
 
@@ -23,11 +27,40 @@ export default async function InstantDeliveryPage() {
     redirect('/auth/pending')
   }
 
-  // 즉시출고 차량 목록 가져오기
-  const { data: vehicles } = await supabase
-    .from('instant_delivery_vehicles')
-    .select('*')
-    .order('created_at', { ascending: false })
+  // 즉시출고 차량 목록 가져오기 (전체 데이터 - 페이지네이션으로 전부 가져오기)
+  let allVehicles: any[] = []
+  let from = 0
+  const pageSize = 1000
+
+  while (true) {
+    const { data, error } = await supabase
+      .from('instant_delivery_vehicles')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .range(from, from + pageSize - 1)
+
+    if (error) {
+      console.log('에러:', error)
+      break
+    }
+
+    if (!data || data.length === 0) {
+      break
+    }
+
+    allVehicles = [...allVehicles, ...data]
+    from += pageSize
+
+    if (data.length < pageSize) {
+      break
+    }
+  }
+
+  const vehicles = allVehicles
+
+  // 디버깅: 콘솔에 데이터 확인
+  console.log('=== 즉시출고 데이터 조회 ===')
+  console.log('데이터 개수:', vehicles?.length || 0)
 
   return (
     <DashboardLayout>

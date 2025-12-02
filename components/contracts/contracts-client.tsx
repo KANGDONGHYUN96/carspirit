@@ -476,9 +476,19 @@ export default function ContractsClient({ contracts: initialContracts, userName,
         throw new Error(errorData.error || '저장 실패')
       }
 
+      const result = await response.json()
+      const savedContract = result.data
+
+      if (editingContract) {
+        // 수정: 기존 계약 업데이트
+        setContracts(prev => prev.map(c => c.id === savedContract.id ? savedContract : c))
+      } else {
+        // 신규: 목록 맨 앞에 추가
+        setContracts(prev => [savedContract, ...prev])
+      }
+
       setAlert({ message: editingContract ? '계약이 수정되었습니다.' : '계약이 등록되었습니다.', type: 'success' })
       closeModal()
-      router.refresh()
     } catch (error: any) {
       setAlert({ message: error.message || '저장 실패', type: 'error' })
       console.error(error)

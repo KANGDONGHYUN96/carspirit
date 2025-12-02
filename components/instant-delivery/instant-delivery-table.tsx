@@ -26,7 +26,8 @@ type Column = '출처' | '차량명' | '옵션' | '외장' | '내장' | '차량�
 const COLUMNS: Column[] = ['출처', '차량명', '옵션', '외장', '내장', '차량가', '프로모션', '상품구분', '비고']
 
 export default function InstantDeliveryTable({ vehicles }: InstantDeliveryTableProps) {
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchInput, setSearchInput] = useState('')  // 입력 중인 검색어
+  const [searchQuery, setSearchQuery] = useState('')  // 실제 검색에 사용되는 검색어
   const [hasSearched, setHasSearched] = useState(false)
   const [filters, setFilters] = useState<Record<Column, string[]>>({
     '출처': [],
@@ -41,10 +42,10 @@ export default function InstantDeliveryTable({ vehicles }: InstantDeliveryTableP
   })
   const [openFilter, setOpenFilter] = useState<Column | null>(null)
 
-  // 각 컬럼의 고유값 추출
+  // 각 컬럼의 고유값 추출 (현재 필터링된 데이터 기준)
   const getUniqueValues = (column: Column): string[] => {
     const key = getColumnKey(column)
-    const values = vehicles
+    const values = filteredVehicles
       .map(v => {
         const value = v[key]
         if (column === '차량가' && typeof value === 'number') {
@@ -92,28 +93,16 @@ export default function InstantDeliveryTable({ vehicles }: InstantDeliveryTableP
   // 필터링된 차량 목록
   const filteredVehicles = useMemo(() => {
     return vehicles.filter(vehicle => {
-      // 검색어 필터 (외장/내장 제외)
+      // 검색어 필터 - 차량명과 출처에서만 검색
       if (searchQuery) {
         const query = searchQuery.toLowerCase().trim()
-        // 외장, 내장 색상은 검색에서 제외
-        const searchableFields = [
-          vehicle.source,
-          vehicle.vehicle_name,
-          vehicle.options,
-          // vehicle.exterior_color,  // 제외
-          // vehicle.interior_color,  // 제외
-          vehicle.promotion,
-          vehicle.product_type,
-          vehicle.note,
-        ].filter(Boolean).map(field => String(field).toLowerCase())
 
-        // 정확한 단어 매칭 또는 단어의 시작 부분 매칭
-        const found = searchableFields.some(field => {
-          // 단어 경계를 고려한 정규식 생성
-          const words = field.split(/[\s,\/\(\)]+/)
-          // 정확히 일치하거나, 단어의 시작 부분이 검색어와 일치하는 경우만
-          return words.some(word => word === query || word.startsWith(query))
-        })
+        // 차량명과 출처에서만 검색 (다른 필드는 제외)
+        const vehicleName = (vehicle.vehicle_name || '').toLowerCase()
+        const source = (vehicle.source || '').toLowerCase()
+
+        // 차량명 또는 출처에 검색어가 포함되어야 함
+        const found = vehicleName.includes(query) || source.includes(query)
 
         if (!found) {
           return false
@@ -167,12 +156,34 @@ export default function InstantDeliveryTable({ vehicles }: InstantDeliveryTableP
     return value || '-'
   }
 
-  // 검색 실행
+  // 검색 실행 (엔터키 또는 버튼 클릭 시)
   const handleSearch = () => {
-    if (searchQuery.trim()) {
+    if (searchInput.trim()) {
+      setSearchQuery(searchInput.trim())
       setHasSearched(true)
     }
   }
+
+  // 필터 초기화
+  const handleReset = () => {
+    setSearchInput('')
+    setSearchQuery('')
+    setFilters({
+      '출처': [],
+      '차량명': [],
+      '옵션': [],
+      '외장': [],
+      '내장': [],
+      '차량가': [],
+      '프로모션': [],
+      '상품구분': [],
+      '비고': [],
+    })
+    setHasSearched(false)
+  }
+
+  // 필터가 적용되어 있는지 확인
+  const hasActiveFilters = searchQuery || Object.values(filters).some(arr => arr.length > 0)
 
   // 엔터키로 검색
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -194,10 +205,10 @@ export default function InstantDeliveryTable({ vehicles }: InstantDeliveryTableP
           <div className="relative max-w-md">
             <input
               type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="차량명, 옵션 등 검색"
+              placeholder="차량명, 옵션 등 검색 (Enter로 검색)"
               className="w-full px-6 py-4 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
             />
             <button
@@ -214,17 +225,36 @@ export default function InstantDeliveryTable({ vehicles }: InstantDeliveryTableP
         <>
           {/* 검색 후 - 상단 고정 검색창 */}
           <div className="px-8 mb-6">
-            <div className="relative max-w-md">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="차량명, 옵션 등 검색"
-                className="w-full px-6 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <svg className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+            <div className="flex items-center gap-4">
+              <div className="relative max-w-md flex-1">
+                <input
+                  type="text"
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="차량명, 옵션 등 검색 (Enter로 검색)"
+                  className="w-full px-6 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  onClick={handleSearch}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </button>
+              </div>
+              {hasActiveFilters && (
+                <button
+                  onClick={handleReset}
+                  className="px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors text-sm font-medium whitespace-nowrap"
+                >
+                  초기화
+                </button>
+              )}
+              <span className="text-sm text-gray-500 whitespace-nowrap">
+                총 {filteredVehicles.length.toLocaleString()}대
+              </span>
             </div>
           </div>
 
