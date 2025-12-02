@@ -93,15 +93,11 @@ export default function VehicleGallerySection({ vehicles, userId, userName, user
     return vehicles.filter(v => v.brand === brand && v.model === model)
   }
 
-  // 뒤로가기 핸들러
-  const handleBack = () => {
-    if (selectedModel) {
-      setSelectedModel(null)
-    } else if (selectedBrand) {
-      setSelectedBrand(null)
-    } else if (selectedCategory) {
-      setSelectedCategory(null)
-    }
+  // 초기화 핸들러
+  const handleReset = () => {
+    setSelectedCategory(null)
+    setSelectedBrand(null)
+    setSelectedModel(null)
   }
 
   // 키보드 이벤트로 이미지 네비게이션
@@ -339,13 +335,13 @@ export default function VehicleGallerySection({ vehicles, userId, userName, user
         {(selectedCategory || selectedBrand || selectedModel) && (
           <div className="mb-6 flex items-center gap-2">
             <button
-              onClick={handleBack}
+              onClick={handleReset}
               className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
-              뒤로
+              초기화
             </button>
             <div className="flex items-center gap-2 text-sm text-gray-600">
               {selectedCategory && (
