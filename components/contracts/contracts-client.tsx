@@ -449,7 +449,7 @@ export default function ContractsClient({ contracts: initialContracts, userName,
 
       const payload = {
         ...formData,
-        contractor: userName, // 담당자는 항상 현재 로그인한 사용자로 고정
+        contractor: isAdmin ? formData.contractor : userName, // 관리자는 폼에서 입력한 담당자, 일반 사용자는 로그인한 사용자로 고정
         vehicle_price: formData.vehicle_price ? parseInt(formData.vehicle_price) : null,
         annual_mileage: formData.annual_mileage ? parseInt(formData.annual_mileage) : null,
         initial_cost_amount: formData.initial_cost_amount ? parseInt(formData.initial_cost_amount) : null,
@@ -1506,7 +1506,7 @@ export default function ContractsClient({ contracts: initialContracts, userName,
                   <div>
                     <label className="block text-xs text-gray-500 mb-2">보험연령</label>
                     <div className="flex gap-2">
-                      {['만21세', '만26세', '자체가입'].map((type) => (
+                      {['만21세', '만26세', '만35세', '자체가입'].map((type) => (
                         <button
                           key={type}
                           type="button"
