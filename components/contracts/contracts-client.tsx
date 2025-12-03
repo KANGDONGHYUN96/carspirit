@@ -660,7 +660,7 @@ export default function ContractsClient({ contracts: initialContracts, userName,
                   >
                     <td className="px-3 py-4">
                       <span className="px-2 py-1 text-xs rounded-lg font-medium bg-gray-900 text-white truncate block">
-                        {contract.media || '카스피릿'}
+                        {isAdmin ? (contract.media || '카스피릿') : '카스피릿'}
                       </span>
                     </td>
                     <td className="px-3 py-4 text-sm font-semibold text-gray-900 truncate">{contract.customer_name}</td>
@@ -778,7 +778,7 @@ export default function ContractsClient({ contracts: initialContracts, userName,
                     </svg>
                     <span className="text-sm text-gray-500">매체</span>
                   </div>
-                  <span className="flex-1"><span className="px-2 py-1 text-xs rounded-full font-medium bg-gray-900 text-white">{formData.media || '카스피릿'}</span></span>
+                  <span className="flex-1"><span className="px-2 py-1 text-xs rounded-full font-medium bg-gray-900 text-white">{isAdmin ? (formData.media || '카스피릿') : '카스피릿'}</span></span>
                 </div>
                 <div className="flex items-center py-2.5 border-b border-gray-100 hover:bg-gray-50 -mx-6 px-6">
                   <div className="flex items-center gap-2 w-40">

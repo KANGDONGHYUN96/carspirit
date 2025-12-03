@@ -1147,7 +1147,7 @@ export default function InquiryDetailModal({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-xs text-gray-500 mb-1">매체</p>
-                <p className="text-sm font-medium text-gray-900">{inquiry.source || '카스피릿'}</p>
+                <p className="text-sm font-medium text-gray-900">{userRole === 'admin' ? (inquiry.source || '카스피릿') : '카스피릿'}</p>
               </div>
               <div>
                 <p className="text-xs text-gray-500 mb-1">고객명</p>
