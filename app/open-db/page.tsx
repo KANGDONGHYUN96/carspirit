@@ -28,7 +28,7 @@ export default async function OpenDBPage() {
   const sevenDaysAgo = new Date()
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
 
-  // 1. unlock_at이 설정된 문의 중 기간이 지난 것
+  // 1. unlock_at이 설정된 문의 중 기간이 지난 것 (계약 상태 제외)
   await supabase
     .from('inquiries')
     .update({
@@ -38,8 +38,9 @@ export default async function OpenDBPage() {
     .not('user_id', 'is', null)
     .not('unlock_at', 'is', null)
     .lt('unlock_at', now.toISOString())
+    .neq('status', '계약')
 
-  // 2. unlock_at이 NULL인 문의 중 created_at이 7일 이상 지난 것 (기존 데이터 처리)
+  // 2. unlock_at이 NULL인 문의 중 created_at이 7일 이상 지난 것 (기존 데이터 처리, 계약 상태 제외)
   await supabase
     .from('inquiries')
     .update({
@@ -49,6 +50,7 @@ export default async function OpenDBPage() {
     .not('user_id', 'is', null)
     .is('unlock_at', null)
     .lt('created_at', sevenDaysAgo.toISOString())
+    .neq('status', '계약')
 
   // 오픈DB 문의 가져오기 (user_id가 NULL인 것만)
   const { data: openInquiries } = await supabase

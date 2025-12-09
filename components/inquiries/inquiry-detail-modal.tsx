@@ -1114,142 +1114,120 @@ export default function InquiryDetailModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+        className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl select-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 헤더 */}
-        <div className="flex items-start justify-between p-6 border-b border-gray-200">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">문의 상세</h2>
-            <p className="text-sm text-gray-500 mt-1">
-              등록일: {new Date(inquiry.created_at).toLocaleString('ko-KR')}
-            </p>
+        <div className="sticky top-0 bg-white/95 backdrop-blur-sm z-10 px-8 py-6 border-b border-gray-100">
+          <div className="flex items-start justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 tracking-tight">문의 상세</h2>
+              <p className="text-sm text-gray-400 mt-1 font-light">
+                {new Date(inquiry.created_at).toLocaleString('ko-KR')}
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-2 -m-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
         </div>
 
         {/* 본문 */}
-        <div className="p-6 space-y-6">
-          {/* 고객 정보 */}
-          <div className="bg-gray-50 rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">고객 정보</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-xs text-gray-500 mb-1">매체</p>
-                <p className="text-sm font-medium text-gray-900">{userRole === 'admin' ? (inquiry.source || '카스피릿') : '카스피릿'}</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500 mb-1">고객명</p>
-                <p className="text-sm font-medium text-gray-900">{inquiry.customer_name}</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500 mb-1">번호</p>
-                <p className="text-sm font-medium text-gray-900">{inquiry.customer_phone || '-'}</p>
-              </div>
+        <div className="px-8 py-6 space-y-6">
+          {/* 상단 액션 버튼 */}
+          <div className="flex items-center justify-between">
+            {/* 상태 선택 - 작은 버튼 일렬 */}
+            <div className="flex items-center gap-1.5">
+              {[
+                { name: '신규', color: 'bg-blue-500', hoverColor: 'hover:bg-blue-100' },
+                { name: '관리', color: 'bg-green-500', hoverColor: 'hover:bg-green-100' },
+                { name: '부재', color: 'bg-yellow-500', hoverColor: 'hover:bg-yellow-100' },
+                { name: '심사', color: 'bg-orange-500', hoverColor: 'hover:bg-orange-100' },
+                { name: '가망', color: 'bg-cyan-500', hoverColor: 'hover:bg-cyan-100' },
+                { name: '계약', color: 'bg-purple-500', hoverColor: 'hover:bg-purple-100' },
+              ].map((s) => (
+                <button
+                  key={s.name}
+                  onClick={() => setStatus(s.name)}
+                  className={`px-2.5 py-1 text-xs rounded-md font-medium transition-all ${
+                    status === s.name
+                      ? `${s.color} text-white`
+                      : `bg-gray-100 text-gray-600 ${s.hoverColor}`
+                  }`}
+                >
+                  {s.name}
+                </button>
+              ))}
             </div>
-          </div>
-
-          {/* 문의 내용 */}
-          <div>
-            <h3 className="text-sm font-semibold text-gray-700 mb-2">문의 내용</h3>
-            <div className="bg-gray-50 rounded-lg p-4">
-              <p className="text-gray-900 whitespace-pre-line">{inquiry.content}</p>
-            </div>
-          </div>
-
-          {/* 상태 변경 */}
-          <div>
-            <h3 className="text-sm font-semibold text-gray-700 mb-2">상태</h3>
-            <div className="grid grid-cols-3 gap-2">
+            {/* 계약/잠금 버튼 */}
+            <div className="flex items-center gap-2">
               <button
-                onClick={() => setStatus('신규')}
-                className={`py-2 px-4 rounded-lg font-medium transition-all ${
-                  status === '신규'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                신규
-              </button>
-              <button
-                onClick={() => setStatus('관리')}
-                className={`py-2 px-4 rounded-lg font-medium transition-all ${
-                  status === '관리'
-                    ? 'bg-green-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                관리
-              </button>
-              <button
-                onClick={() => setStatus('부재')}
-                className={`py-2 px-4 rounded-lg font-medium transition-all ${
-                  status === '부재'
-                    ? 'bg-yellow-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                부재
-              </button>
-              <button
-                onClick={() => setStatus('심사')}
-                className={`py-2 px-4 rounded-lg font-medium transition-all ${
-                  status === '심사'
-                    ? 'bg-orange-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                심사
-              </button>
-              <button
-                onClick={() => setStatus('가망')}
-                className={`py-2 px-4 rounded-lg font-medium transition-all ${
-                  status === '가망'
-                    ? 'bg-cyan-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                가망
-              </button>
-              <button
-                onClick={() => setStatus('계약')}
-                className={`py-2 px-4 rounded-lg font-medium transition-all ${
-                  status === '계약'
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                onClick={() => setShowContractForm(true)}
+                className="px-3 py-1.5 text-xs font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-all"
               >
                 계약
               </button>
+              <button
+                onClick={handleLock}
+                disabled={isLocking}
+                className="px-3 py-1.5 text-xs font-medium bg-gray-100 hover:bg-gray-200 disabled:bg-gray-100 disabled:text-gray-400 text-gray-700 rounded-md transition-all"
+              >
+                {isLocking ? '처리중' : '잠금'}
+              </button>
             </div>
           </div>
 
+          {/* 고객 정보 */}
+          <section>
+            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">고객 정보</h3>
+            <div className="space-y-2">
+              <div className="flex items-center gap-3 py-2 border-b border-gray-100">
+                <span className="text-sm text-gray-500 w-16">매체</span>
+                <span className="text-sm font-medium text-gray-900">{userRole === 'admin' ? (inquiry.source || '카스피릿') : '카스피릿'}</span>
+              </div>
+              <div className="flex items-center gap-3 py-2 border-b border-gray-100">
+                <span className="text-sm text-gray-500 w-16">고객명</span>
+                <span className="text-sm font-semibold text-gray-900">{inquiry.customer_name}</span>
+              </div>
+              <div className="flex items-center gap-3 py-2 border-b border-gray-100">
+                <span className="text-sm text-gray-500 w-16">연락처</span>
+                <span className="text-sm font-medium text-gray-900">{inquiry.customer_phone || '-'}</span>
+              </div>
+            </div>
+          </section>
+
+          {/* 문의 내용 */}
+          <section>
+            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">문의 내용</h3>
+            <div className="bg-gray-50 rounded-xl p-4">
+              <p className="text-sm text-gray-800 whitespace-pre-line leading-relaxed">{inquiry.content}</p>
+            </div>
+          </section>
+
           {/* 메모 목록 */}
-          <div>
-            <h3 className="text-sm font-semibold text-gray-700 mb-2">상담 메모</h3>
-            <div className="bg-gray-50 rounded-lg p-4 max-h-60 overflow-y-auto space-y-3">
+          <section>
+            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">상담 메모</h3>
+            <div className="bg-gray-50 rounded-xl p-5 max-h-60 overflow-y-auto space-y-3">
               {isLoadingMemos ? (
-                <p className="text-sm text-gray-500 text-center py-4">메모 로딩 중...</p>
+                <p className="text-sm text-gray-400 text-center py-6">메모 로딩 중...</p>
               ) : memos.length === 0 ? (
-                <p className="text-sm text-gray-500 text-center py-4">작성된 메모가 없습니다</p>
+                <p className="text-sm text-gray-400 text-center py-6">작성된 메모가 없습니다</p>
               ) : (
                 memos.map((memo) => (
-                  <div key={memo.id} className="bg-white rounded-lg p-3 border border-gray-200">
-                    <p className="text-sm text-gray-900 whitespace-pre-line mb-2">{memo.content}</p>
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                      <span className="font-medium text-blue-600">{memo.user_name}</span>
-                      <span>•</span>
+                  <div key={memo.id} className="bg-white rounded-lg px-4 py-2.5 border border-gray-100 shadow-sm flex items-center justify-between gap-3">
+                    <p className="text-sm text-gray-800 flex-1">{memo.content}</p>
+                    <div className="flex items-center gap-2 text-xs text-gray-400 whitespace-nowrap">
+                      <span className="font-medium text-blue-500">{memo.user_name}</span>
+                      <span className="text-gray-300">•</span>
                       <span>{formatDateTime(memo.created_at)}</span>
                     </div>
                   </div>
@@ -1258,52 +1236,41 @@ export default function InquiryDetailModal({
             </div>
 
             {/* 새 메모 작성 */}
-            <div className="mt-3">
+            <div className="mt-4">
               <textarea
                 value={newMemo}
                 onChange={(e) => setNewMemo(e.target.value)}
                 placeholder="새 메모를 입력하세요..."
                 rows={3}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-none text-sm placeholder:text-gray-400"
               />
               <button
                 onClick={handleSaveMemo}
-                className="mt-2 w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                className="mt-3 w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-4 rounded-xl transition-colors"
               >
                 메모 추가
               </button>
             </div>
-          </div>
+          </section>
         </div>
 
         {/* 푸터 */}
-        <div className="flex gap-3 p-6 border-t border-gray-200">
-          <button
-            onClick={handleSave}
-            disabled={isSaving}
-            className="flex-1 bg-gray-800 hover:bg-gray-900 disabled:bg-gray-400 text-white font-medium py-3 px-4 rounded transition-colors"
-          >
-            {isSaving ? '저장 중...' : '저장'}
-          </button>
-          <button
-            onClick={() => setShowContractForm(true)}
-            className="flex-1 bg-gray-700 hover:bg-gray-800 text-white font-medium py-3 px-4 rounded transition-colors"
-          >
-            계약
-          </button>
-          <button
-            onClick={handleLock}
-            disabled={isLocking}
-            className="flex-1 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white font-medium py-3 px-4 rounded transition-colors"
-          >
-            {isLocking ? '처리 중...' : userRole === 'admin' ? '7일 잠금 (무제한)' : '7일 잠금'}
-          </button>
-          <button
-            onClick={onClose}
-            className="flex-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-3 px-4 rounded transition-colors"
-          >
-            닫기
-          </button>
+        <div className="sticky bottom-0 bg-white/95 backdrop-blur-sm border-t border-gray-100 px-8 py-4">
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={handleSave}
+              disabled={isSaving}
+              className="px-4 py-2 text-sm font-medium bg-gray-900 hover:bg-gray-800 disabled:bg-gray-300 text-white rounded-lg transition-all"
+            >
+              {isSaving ? '저장 중...' : '저장'}
+            </button>
+            <button
+              onClick={onClose}
+              className="px-4 py-2 text-sm font-medium bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 rounded-lg transition-all"
+            >
+              닫기
+            </button>
+          </div>
         </div>
       </div>
 

@@ -177,123 +177,127 @@ export default function OpenDBDetailModal({
   return (
     <>
       <div
-        className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
         onClick={onClose}
       >
         <div
-          className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+          className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl select-none"
           onClick={(e) => e.stopPropagation()}
         >
-        {/* 헤더 */}
-        <div className="flex items-start justify-between p-6 border-b border-gray-200">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">문의 상세</h2>
-            <p className="text-sm text-gray-500 mt-1">
-              등록일: {new Date(inquiry.created_at).toLocaleString('ko-KR')}
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        {/* 본문 */}
-        <div className="p-6 space-y-6">
-          {/* 고객 정보 */}
-          <div className="bg-gray-50 rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">고객 정보</h3>
-            <div className="grid grid-cols-2 gap-4">
+          {/* 헤더 */}
+          <div className="sticky top-0 bg-white/95 backdrop-blur-sm z-10 px-8 py-6 border-b border-gray-100">
+            <div className="flex items-start justify-between">
               <div>
-                <p className="text-xs text-gray-500 mb-1">매체</p>
-                <p className="text-sm font-medium text-gray-900">{isAdmin ? (inquiry.source || '카스피릿') : '카스피릿'}</p>
+                <h2 className="text-2xl font-bold text-gray-900 tracking-tight">문의 상세</h2>
+                <p className="text-sm text-gray-400 mt-1 font-light">
+                  {new Date(inquiry.created_at).toLocaleString('ko-KR')}
+                </p>
               </div>
-              <div>
-                <p className="text-xs text-gray-500 mb-1">고객명</p>
-                <p className="text-sm font-medium text-gray-900">{inquiry.customer_name}</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500 mb-1">번호</p>
-                <p className="text-sm font-medium text-gray-900">{inquiry.customer_phone || '-'}</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500 mb-1">담당자</p>
-                <p className="text-sm font-medium text-gray-900">{inquiry.assigned_to_name || '-'}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* 문의 내용 */}
-          <div>
-            <h3 className="text-sm font-semibold text-gray-700 mb-2">문의 내용</h3>
-            <div className="bg-gray-50 rounded-lg p-4">
-              <p className="text-gray-900 whitespace-pre-line">{inquiry.content}</p>
-            </div>
-          </div>
-
-          {/* 메모 목록 */}
-          <div>
-            <h3 className="text-sm font-semibold text-gray-700 mb-2">상담 메모</h3>
-            <div className="bg-gray-50 rounded-lg p-4 max-h-60 overflow-y-auto space-y-3">
-              {isLoadingMemos ? (
-                <p className="text-sm text-gray-500 text-center py-4">메모 로딩 중...</p>
-              ) : memos.length === 0 ? (
-                <p className="text-sm text-gray-500 text-center py-4">작성된 메모가 없습니다</p>
-              ) : (
-                memos.map((memo) => (
-                  <div key={memo.id} className="bg-white rounded-lg p-3 border border-gray-200">
-                    <p className="text-sm text-gray-900 whitespace-pre-line mb-2">{memo.content}</p>
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                      <span className="font-medium text-blue-600">{memo.user_name}</span>
-                      <span>•</span>
-                      <span>{formatDateTime(memo.created_at)}</span>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {/* 새 메모 작성 */}
-            <div className="mt-3">
-              <textarea
-                value={newMemo}
-                onChange={(e) => setNewMemo(e.target.value)}
-                placeholder="새 메모를 입력하세요..."
-                rows={3}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-              />
               <button
-                onClick={handleSaveMemo}
-                className="mt-2 w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                onClick={onClose}
+                className="p-2 -m-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all"
               >
-                메모 추가
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* 본문 */}
+          <div className="px-8 py-6 space-y-6">
+            {/* 고객 정보 */}
+            <section>
+              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">고객 정보</h3>
+              <div className="space-y-2">
+                <div className="flex items-center gap-3 py-2 border-b border-gray-100">
+                  <span className="text-sm text-gray-500 w-16">매체</span>
+                  <span className="text-sm font-medium text-gray-900">{isAdmin ? (inquiry.source || '카스피릿') : '카스피릿'}</span>
+                </div>
+                <div className="flex items-center gap-3 py-2 border-b border-gray-100">
+                  <span className="text-sm text-gray-500 w-16">고객명</span>
+                  <span className="text-sm font-semibold text-gray-900">{inquiry.customer_name}</span>
+                </div>
+                <div className="flex items-center gap-3 py-2 border-b border-gray-100">
+                  <span className="text-sm text-gray-500 w-16">연락처</span>
+                  <span className="text-sm font-medium text-gray-900">{inquiry.customer_phone || '-'}</span>
+                </div>
+                <div className="flex items-center gap-3 py-2 border-b border-gray-100">
+                  <span className="text-sm text-gray-500 w-16">담당자</span>
+                  <span className="text-sm font-medium text-gray-900">{inquiry.assigned_to_name || '-'}</span>
+                </div>
+              </div>
+            </section>
+
+            {/* 문의 내용 */}
+            <section>
+              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">문의 내용</h3>
+              <div className="bg-gray-50 rounded-xl p-4">
+                <p className="text-sm text-gray-800 whitespace-pre-line leading-relaxed">{inquiry.content}</p>
+              </div>
+            </section>
+
+            {/* 메모 목록 */}
+            <section>
+              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">상담 메모</h3>
+              <div className="bg-gray-50 rounded-xl p-5 max-h-60 overflow-y-auto space-y-3">
+                {isLoadingMemos ? (
+                  <p className="text-sm text-gray-400 text-center py-6">메모 로딩 중...</p>
+                ) : memos.length === 0 ? (
+                  <p className="text-sm text-gray-400 text-center py-6">작성된 메모가 없습니다</p>
+                ) : (
+                  memos.map((memo) => (
+                    <div key={memo.id} className="bg-white rounded-lg px-4 py-2.5 border border-gray-100 shadow-sm flex items-center justify-between gap-3">
+                      <p className="text-sm text-gray-800 flex-1">{memo.content}</p>
+                      <div className="flex items-center gap-2 text-xs text-gray-400 whitespace-nowrap">
+                        <span className="font-medium text-blue-500">{memo.user_name}</span>
+                        <span className="text-gray-300">•</span>
+                        <span>{formatDateTime(memo.created_at)}</span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* 새 메모 작성 */}
+              <div className="mt-4">
+                <textarea
+                  value={newMemo}
+                  onChange={(e) => setNewMemo(e.target.value)}
+                  placeholder="새 메모를 입력하세요..."
+                  rows={3}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-none text-sm placeholder:text-gray-400"
+                />
+                <button
+                  onClick={handleSaveMemo}
+                  className="mt-3 w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-4 rounded-xl transition-colors"
+                >
+                  메모 추가
+                </button>
+              </div>
+            </section>
+          </div>
+
+          {/* 푸터 */}
+          <div className="sticky bottom-0 bg-white/95 backdrop-blur-sm border-t border-gray-100 px-8 py-4">
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={handleLock}
+                disabled={isLocking}
+                className="px-4 py-2 text-sm font-medium bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 disabled:text-gray-400 text-white rounded-lg transition-all"
+              >
+                {isLocking ? '처리중' : isAdmin ? '잠금' : `잠금 (${todayLockCount}/2)`}
+              </button>
+              <button
+                onClick={onClose}
+                className="px-4 py-2 text-sm font-medium bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 rounded-lg transition-all"
+              >
+                닫기
               </button>
             </div>
           </div>
         </div>
-
-        {/* 푸터 */}
-        <div className="flex gap-3 p-6 border-t border-gray-200">
-          <button
-            onClick={handleLock}
-            disabled={isLocking}
-            className="flex-1 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white font-medium py-3 px-4 rounded-lg transition-colors"
-          >
-            {isLocking ? '처리 중...' : isAdmin ? '🔒 잠금 (무제한)' : `🔒 잠금 (${todayLockCount}/2)`}
-          </button>
-          <button
-            onClick={onClose}
-            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-4 rounded-lg transition-colors"
-          >
-            닫기
-          </button>
-        </div>
       </div>
-    </div>
 
     {/* Custom Alert Modal */}
     <CustomAlert
