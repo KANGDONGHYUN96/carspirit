@@ -14,12 +14,7 @@ export default async function ProfilePage() {
   return (
     <DashboardLayout>
       <div className="p-6 bg-gray-50 min-h-screen">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">👤 내 계정</h1>
-            <p className="text-gray-600 mt-2">프로필 정보를 관리하세요</p>
-          </div>
-
+        <div className="max-w-6xl mx-auto">
           <ProfileClient user={user} />
         </div>
       </div>

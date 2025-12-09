@@ -11,6 +11,7 @@ export interface User {
   email: string
   name: string
   phone: string | null
+  fax: string | null
   role: UserRole
   approved: boolean
   allowed_ip: string | null
@@ -20,6 +21,15 @@ export interface User {
   profile_image_url: string | null
   business_card_url: string | null
   admin_memo: string | null
+  // 회사/업무 정보
+  company: string | null
+  position: string | null
+  join_date: string | null
+  recruiter_number: string | null
+  // 정산계좌 정보
+  bank_name: string | null
+  account_holder: string | null
+  account_number: string | null
 }
 
 export interface CapitalPromotion {

@@ -13,6 +13,374 @@ interface UsersTableProps {
 type FilterStatus = 'all' | 'pending' | 'approved'
 type FilterRole = 'all' | 'admin' | 'manager' | 'salesperson'
 
+// 은행 목록
+const BANKS = [
+  '국민은행', '신한은행', '우리은행', '하나은행', 'NH농협은행',
+  'IBK기업은행', 'SC제일은행', '씨티은행', '카카오뱅크', '토스뱅크',
+  '케이뱅크', '새마을금고', '신협', '우체국', '수협은행',
+  'BNK부산은행', 'BNK경남은행', 'DGB대구은행', '광주은행', '전북은행', '제주은행'
+]
+
+// 사용자 상세 모달 컴포넌트
+interface UserDetailModalProps {
+  user: User
+  editedPhone: string
+  editedFax: string
+  editedMemo: string
+  editedCompany: string
+  editedPosition: string
+  editedJoinDate: string
+  editedRecruiterNumber: string
+  editedBankName: string
+  editedAccountHolder: string
+  editedAccountNumber: string
+  setEditedPhone: (v: string) => void
+  setEditedFax: (v: string) => void
+  setEditedMemo: (v: string) => void
+  setEditedCompany: (v: string) => void
+  setEditedPosition: (v: string) => void
+  setEditedJoinDate: (v: string) => void
+  setEditedRecruiterNumber: (v: string) => void
+  setEditedBankName: (v: string) => void
+  setEditedAccountHolder: (v: string) => void
+  setEditedAccountNumber: (v: string) => void
+  isSaving: boolean
+  onClose: () => void
+  onSave: () => void
+  getRoleLabel: (role: string) => string
+}
+
+function UserDetailModal({
+  user,
+  editedPhone, editedFax, editedMemo, editedCompany, editedPosition,
+  editedJoinDate, editedRecruiterNumber, editedBankName, editedAccountHolder, editedAccountNumber,
+  setEditedPhone, setEditedFax, setEditedMemo, setEditedCompany, setEditedPosition,
+  setEditedJoinDate, setEditedRecruiterNumber, setEditedBankName, setEditedAccountHolder, setEditedAccountNumber,
+  isSaving, onClose, onSave, getRoleLabel
+}: UserDetailModalProps) {
+  const [activeTab, setActiveTab] = useState<'personal' | 'contract' | 'account'>('personal')
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-gray-50 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden">
+        {/* Modal Header */}
+        <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+          <h2 className="text-xl font-bold text-gray-900">사용자 상세 정보</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Modal Body - 2 Column Layout */}
+        <div className="flex overflow-hidden" style={{ height: 'calc(90vh - 140px)' }}>
+          {/* 좌측: Personal Information */}
+          <div className="w-[320px] flex-shrink-0 bg-white border-r border-gray-200 p-6 overflow-y-auto">
+            <div className="flex items-center gap-2 mb-6">
+              <span className="text-gray-400 text-sm">General</span>
+              <span className="text-gray-400">/</span>
+              <span className="text-gray-900 font-semibold text-sm">Personal Information</span>
+            </div>
+
+            {/* 프로필 사진 */}
+            <div className="flex flex-col items-center mb-6">
+              {user.profile_image_url ? (
+                <img
+                  src={user.profile_image_url}
+                  alt={user.name}
+                  className="w-24 h-24 rounded-full object-cover border-4 border-gray-100 shadow-lg mb-4"
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-full bg-blue-500 flex items-center justify-center text-white text-3xl font-semibold shadow-lg mb-4">
+                  {user.name.charAt(0)}
+                </div>
+              )}
+              <h3 className="text-xl font-bold text-gray-900">{user.name}</h3>
+              <p className="text-gray-500 text-sm">{getRoleLabel(user.role)}</p>
+              <div className="flex items-center gap-2 mt-3">
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                  user.role === 'admin' ? 'bg-purple-100 text-purple-700' :
+                  user.role === 'manager' ? 'bg-indigo-100 text-indigo-700' :
+                  'bg-cyan-100 text-cyan-700'
+                }`}>
+                  {getRoleLabel(user.role)}
+                </span>
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                  user.approved ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                }`}>
+                  {user.approved ? '승인됨' : '대기중'}
+                </span>
+              </div>
+            </div>
+
+            {/* 기본 정보 요약 */}
+            <div className="space-y-4 border-t border-gray-100 pt-6">
+              <div>
+                <label className="text-xs text-gray-400 uppercase tracking-wide">Email</label>
+                <p className="text-gray-900 mt-1 text-sm">{user.email}</p>
+              </div>
+              <div>
+                <label className="text-xs text-gray-400 uppercase tracking-wide">Phone</label>
+                <p className="text-gray-900 mt-1 text-sm">{editedPhone || '-'}</p>
+              </div>
+              <div>
+                <label className="text-xs text-gray-400 uppercase tracking-wide">Company</label>
+                <p className="text-gray-900 mt-1 text-sm">{editedCompany || '-'}</p>
+              </div>
+              <div>
+                <label className="text-xs text-gray-400 uppercase tracking-wide">가입일</label>
+                <p className="text-gray-900 mt-1 text-sm">
+                  {new Date(user.created_at).toLocaleDateString('ko-KR')}
+                </p>
+              </div>
+            </div>
+
+            {/* 명함 미리보기 */}
+            {user.business_card_url && (
+              <div className="mt-6 border-t border-gray-100 pt-6">
+                <label className="text-xs text-gray-400 uppercase tracking-wide block mb-2">명함</label>
+                <div className="bg-gray-50 rounded-lg p-2 border border-gray-200">
+                  <img
+                    src={user.business_card_url}
+                    alt="명함"
+                    className="w-full rounded shadow-sm"
+                  />
+                </div>
+                <a
+                  href={user.business_card_url}
+                  download={`명함_${user.name}.jpg`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  다운로드
+                </a>
+              </div>
+            )}
+          </div>
+
+          {/* 우측: 상세 정보 편집 */}
+          <div className="flex-1 overflow-y-auto p-6">
+            {/* 탭 네비게이션 */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
+              <div className="flex border-b border-gray-100">
+                <button
+                  onClick={() => setActiveTab('personal')}
+                  className={`px-6 py-4 text-sm font-medium transition-colors relative ${
+                    activeTab === 'personal' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  인적사항
+                  {activeTab === 'personal' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />}
+                </button>
+                <button
+                  onClick={() => setActiveTab('contract')}
+                  className={`px-6 py-4 text-sm font-medium transition-colors relative ${
+                    activeTab === 'contract' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  회사/업무 정보
+                  {activeTab === 'contract' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />}
+                </button>
+                <button
+                  onClick={() => setActiveTab('account')}
+                  className={`px-6 py-4 text-sm font-medium transition-colors relative ${
+                    activeTab === 'account' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  정산계좌
+                  {activeTab === 'account' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />}
+                </button>
+              </div>
+
+              <div className="p-6">
+                {/* 인적사항 탭 */}
+                {activeTab === 'personal' && (
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-5">
+                    <div>
+                      <label className="text-xs text-gray-400 uppercase tracking-wide block mb-2">이름</label>
+                      <div className="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200 text-gray-900">
+                        {user.name}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-400 uppercase tracking-wide block mb-2">연락처</label>
+                      <input
+                        type="tel"
+                        value={editedPhone}
+                        onChange={(e) => setEditedPhone(e.target.value)}
+                        placeholder="010-0000-0000"
+                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-400 uppercase tracking-wide block mb-2">이메일</label>
+                      <div className="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200 text-gray-900">
+                        {user.email}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-400 uppercase tracking-wide block mb-2">팩스</label>
+                      <input
+                        type="text"
+                        value={editedFax}
+                        onChange={(e) => setEditedFax(e.target.value)}
+                        placeholder="02-0000-0000"
+                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* 회사/업무 정보 탭 */}
+                {activeTab === 'contract' && (
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-5">
+                    <div>
+                      <label className="text-xs text-gray-400 uppercase tracking-wide block mb-2">소속</label>
+                      <input
+                        type="text"
+                        value={editedCompany}
+                        onChange={(e) => setEditedCompany(e.target.value)}
+                        placeholder="회사/조직명"
+                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-400 uppercase tracking-wide block mb-2">직급</label>
+                      <input
+                        type="text"
+                        value={editedPosition}
+                        onChange={(e) => setEditedPosition(e.target.value)}
+                        placeholder="직급/직책"
+                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-400 uppercase tracking-wide block mb-2">입사일</label>
+                      <input
+                        type="date"
+                        value={editedJoinDate}
+                        onChange={(e) => setEditedJoinDate(e.target.value)}
+                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-400 uppercase tracking-wide block mb-2">모집인 번호</label>
+                      <input
+                        type="text"
+                        value={editedRecruiterNumber}
+                        onChange={(e) => setEditedRecruiterNumber(e.target.value)}
+                        placeholder="모집인 등록번호"
+                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* 정산계좌 탭 */}
+                {activeTab === 'account' && (
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-5">
+                    <div>
+                      <label className="text-xs text-gray-400 uppercase tracking-wide block mb-2">은행명</label>
+                      <select
+                        value={editedBankName}
+                        onChange={(e) => setEditedBankName(e.target.value)}
+                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                      >
+                        <option value="">선택하세요</option>
+                        {BANKS.map(bank => (
+                          <option key={bank} value={bank}>{bank}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-400 uppercase tracking-wide block mb-2">예금주</label>
+                      <input
+                        type="text"
+                        value={editedAccountHolder}
+                        onChange={(e) => setEditedAccountHolder(e.target.value)}
+                        placeholder="예금주명"
+                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="text-xs text-gray-400 uppercase tracking-wide block mb-2">계좌번호</label>
+                      <input
+                        type="text"
+                        value={editedAccountNumber}
+                        onChange={(e) => setEditedAccountNumber(e.target.value)}
+                        placeholder="'-' 없이 입력"
+                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-mono"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 관리자 메모 */}
+            <div className="bg-amber-50 rounded-xl border border-amber-200 p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-900">관리자 메모</h4>
+                  <p className="text-xs text-amber-700">사용자에게 보이지 않음</p>
+                </div>
+              </div>
+              <textarea
+                value={editedMemo}
+                onChange={(e) => setEditedMemo(e.target.value)}
+                placeholder="관리자 전용 메모를 입력하세요..."
+                rows={3}
+                className="w-full px-4 py-3 bg-white border border-amber-200 rounded-lg text-gray-900 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all resize-none"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Modal Footer */}
+        <div className="bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-end gap-3">
+          <button
+            onClick={onClose}
+            disabled={isSaving}
+            className="px-6 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg font-medium transition-colors disabled:opacity-50"
+          >
+            취소
+          </button>
+          <button
+            onClick={onSave}
+            disabled={isSaving}
+            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
+          >
+            {isSaving ? (
+              <>
+                <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                저장 중...
+              </>
+            ) : (
+              '저장'
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function UsersTable({ users, currentUserId }: UsersTableProps) {
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all')
   const [filterRole, setFilterRole] = useState<FilterRole>('all')
@@ -23,13 +391,20 @@ export default function UsersTable({ users, currentUserId }: UsersTableProps) {
   const [currentPage, setCurrentPage] = useState(1)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [isUserModalOpen, setIsUserModalOpen] = useState(false)
-  const [editedPhone, setEditedPhone] = useState('')
-  const [editedMemo, setEditedMemo] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const itemsPerPage = 50
 
-  console.log('UsersTable received users:', users)
-  console.log('Users length:', users.length)
+  // 편집 상태
+  const [editedPhone, setEditedPhone] = useState('')
+  const [editedFax, setEditedFax] = useState('')
+  const [editedMemo, setEditedMemo] = useState('')
+  const [editedCompany, setEditedCompany] = useState('')
+  const [editedPosition, setEditedPosition] = useState('')
+  const [editedJoinDate, setEditedJoinDate] = useState('')
+  const [editedRecruiterNumber, setEditedRecruiterNumber] = useState('')
+  const [editedBankName, setEditedBankName] = useState('')
+  const [editedAccountHolder, setEditedAccountHolder] = useState('')
+  const [editedAccountNumber, setEditedAccountNumber] = useState('')
 
   // 필터링된 사용자 목록
   const filteredUsers = users.filter(user => {
@@ -152,7 +527,15 @@ export default function UsersTable({ users, currentUserId }: UsersTableProps) {
   const handleOpenUserModal = (user: User) => {
     setSelectedUser(user)
     setEditedPhone(user.phone || '')
+    setEditedFax(user.fax || '')
     setEditedMemo(user.admin_memo || '')
+    setEditedCompany(user.company || '')
+    setEditedPosition(user.position || '')
+    setEditedJoinDate(user.join_date || '')
+    setEditedRecruiterNumber(user.recruiter_number || '')
+    setEditedBankName(user.bank_name || '')
+    setEditedAccountHolder(user.account_holder || '')
+    setEditedAccountNumber(user.account_number || '')
     setIsUserModalOpen(true)
   }
 
@@ -168,7 +551,15 @@ export default function UsersTable({ users, currentUserId }: UsersTableProps) {
         body: JSON.stringify({
           userId: selectedUser.id,
           phone: editedPhone,
-          admin_memo: editedMemo
+          fax: editedFax,
+          admin_memo: editedMemo,
+          company: editedCompany,
+          position: editedPosition,
+          join_date: editedJoinDate || null,
+          recruiter_number: editedRecruiterNumber,
+          bank_name: editedBankName,
+          account_holder: editedAccountHolder,
+          account_number: editedAccountNumber
         })
       })
 
@@ -372,6 +763,7 @@ export default function UsersTable({ users, currentUserId }: UsersTableProps) {
                         <select
                           value={user.role}
                           onChange={(e) => handleRoleChange(user.id, e.target.value as 'admin' | 'manager' | 'salesperson')}
+                          onClick={(e) => e.stopPropagation()}
                           disabled={isProcessing}
                           className="text-xs font-semibold px-3 py-1 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
@@ -391,7 +783,7 @@ export default function UsersTable({ users, currentUserId }: UsersTableProps) {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Date(user.created_at).toLocaleDateString('ko-KR')}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                       {!isCurrentUser && !user.approved && (
                         <div className="flex gap-2">
                           <button
@@ -499,151 +891,33 @@ export default function UsersTable({ users, currentUserId }: UsersTableProps) {
 
       {/* User Detail Modal */}
       {isUserModalOpen && selectedUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            {/* Modal Header */}
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
-              <h2 className="text-xl font-bold text-gray-900">사용자 상세 정보</h2>
-              <button
-                onClick={() => setIsUserModalOpen(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <div className="p-6 space-y-6">
-              {/* Profile Section */}
-              <div className="flex items-center gap-4 pb-4 border-b border-gray-200">
-                <div className="w-20 h-20 rounded-full bg-blue-500 flex items-center justify-center text-white text-3xl font-semibold">
-                  {selectedUser.name.charAt(0)}
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-900">{selectedUser.name}</h3>
-                  <p className="text-sm text-gray-500">{selectedUser.email}</p>
-                  <span className={`mt-1 inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                    selectedUser.role === 'admin' ? 'bg-purple-100 text-purple-700' :
-                    selectedUser.role === 'manager' ? 'bg-indigo-100 text-indigo-700' :
-                    'bg-cyan-100 text-cyan-700'
-                  }`}>
-                    {getRoleLabel(selectedUser.role)}
-                  </span>
-                </div>
-              </div>
-
-              {/* Phone Number */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">전화번호</label>
-                <input
-                  type="tel"
-                  value={editedPhone}
-                  onChange={(e) => setEditedPhone(e.target.value)}
-                  placeholder="전화번호를 입력하세요"
-                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                />
-              </div>
-
-              {/* Business Card */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">명함</label>
-                {selectedUser.business_card_url ? (
-                  <div className="space-y-3">
-                    <div className="relative bg-gray-50 rounded-lg p-4 border-2 border-gray-200">
-                      <img
-                        src={selectedUser.business_card_url}
-                        alt="명함"
-                        className="w-full max-w-md mx-auto rounded-lg shadow-md"
-                      />
-                    </div>
-                    <a
-                      href={selectedUser.business_card_url}
-                      download={`명함_${selectedUser.name}.jpg`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors font-medium"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                      </svg>
-                      다운로드
-                    </a>
-                  </div>
-                ) : (
-                  <div className="bg-gray-50 rounded-lg p-8 border-2 border-dashed border-gray-300 text-center">
-                    <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                    <p className="mt-2 text-sm text-gray-600">명함이 등록되지 않았습니다</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Admin Memo */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  관리자 메모
-                  <span className="ml-2 text-xs text-gray-500">(사용자에게 보이지 않음)</span>
-                </label>
-                <textarea
-                  value={editedMemo}
-                  onChange={(e) => setEditedMemo(e.target.value)}
-                  placeholder="관리자 전용 메모를 입력하세요..."
-                  rows={4}
-                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
-                />
-              </div>
-
-              {/* Additional Info */}
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
-                <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-1">상태</label>
-                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                    selectedUser.approved ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                  }`}>
-                    {selectedUser.approved ? '승인됨' : '대기중'}
-                  </span>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-1">가입일</label>
-                  <p className="text-sm text-gray-900">
-                    {new Date(selectedUser.created_at).toLocaleDateString('ko-KR')}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Modal Footer */}
-            <div className="sticky bottom-0 bg-gray-50 px-6 py-4 flex items-center justify-end gap-3 border-t border-gray-200 rounded-b-2xl">
-              <button
-                onClick={() => setIsUserModalOpen(false)}
-                disabled={isSaving}
-                className="px-6 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                취소
-              </button>
-              <button
-                onClick={handleSaveUserInfo}
-                disabled={isSaving}
-                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                {isSaving ? (
-                  <>
-                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    저장 중...
-                  </>
-                ) : (
-                  '저장'
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
+        <UserDetailModal
+          user={selectedUser}
+          editedPhone={editedPhone}
+          editedFax={editedFax}
+          editedMemo={editedMemo}
+          editedCompany={editedCompany}
+          editedPosition={editedPosition}
+          editedJoinDate={editedJoinDate}
+          editedRecruiterNumber={editedRecruiterNumber}
+          editedBankName={editedBankName}
+          editedAccountHolder={editedAccountHolder}
+          editedAccountNumber={editedAccountNumber}
+          setEditedPhone={setEditedPhone}
+          setEditedFax={setEditedFax}
+          setEditedMemo={setEditedMemo}
+          setEditedCompany={setEditedCompany}
+          setEditedPosition={setEditedPosition}
+          setEditedJoinDate={setEditedJoinDate}
+          setEditedRecruiterNumber={setEditedRecruiterNumber}
+          setEditedBankName={setEditedBankName}
+          setEditedAccountHolder={setEditedAccountHolder}
+          setEditedAccountNumber={setEditedAccountNumber}
+          isSaving={isSaving}
+          onClose={() => setIsUserModalOpen(false)}
+          onSave={handleSaveUserInfo}
+          getRoleLabel={getRoleLabel}
+        />
       )}
     </div>
   )

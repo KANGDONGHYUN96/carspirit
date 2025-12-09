@@ -14,7 +14,19 @@ export async function PATCH(request: Request) {
       )
     }
 
-    const { userId, phone, admin_memo } = await request.json()
+    const {
+      userId,
+      phone,
+      fax,
+      admin_memo,
+      company,
+      position,
+      join_date,
+      recruiter_number,
+      bank_name,
+      account_holder,
+      account_number
+    } = await request.json()
 
     if (!userId) {
       return NextResponse.json(
@@ -30,7 +42,15 @@ export async function PATCH(request: Request) {
       .from('users')
       .update({
         phone: phone || null,
-        admin_memo: admin_memo || null
+        fax: fax || null,
+        admin_memo: admin_memo || null,
+        company: company || null,
+        position: position || null,
+        join_date: join_date || null,
+        recruiter_number: recruiter_number || null,
+        bank_name: bank_name || null,
+        account_holder: account_holder || null,
+        account_number: account_number || null
       })
       .eq('id', userId)
 
