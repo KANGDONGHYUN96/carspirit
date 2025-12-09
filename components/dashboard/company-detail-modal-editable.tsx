@@ -354,19 +354,12 @@ export default function CompanyDetailModalEditable({
 
         {/* 스크롤 가능한 본문 */}
         <div className="flex-1 overflow-y-auto px-6 py-6">
-          {/* 개요 */}
-          <EditableSection title="개요">
+          {/* 기본 정보 */}
+          <EditableSection title="기본 정보">
             <EditableField
               label="링크"
               value={company.website_link}
               onChange={(v) => updateField('website_link', v)}
-              isLink
-              multiline
-            />
-            <EditableField
-              label="카카오톡"
-              value={company.kakao_link}
-              onChange={(v) => updateField('kakao_link', v)}
               isLink
               multiline
             />
@@ -376,10 +369,6 @@ export default function CompanyDetailModalEditable({
               onChange={(v) => updateField('id_pw', v)}
               multiline
             />
-          </EditableSection>
-
-          {/* 연락처 */}
-          <EditableSection title="연락처">
             <EditableField
               label="전화번호"
               value={company.phone}
@@ -404,56 +393,10 @@ export default function CompanyDetailModalEditable({
               onChange={(v) => updateField('address', v)}
               multiline
             />
-          </EditableSection>
-
-          {/* 보험 및 운용 */}
-          <EditableSection title="보험 및 운용">
             <EditableField
-              label="대물한도"
-              value={company.liability_limit}
-              onChange={(v) => updateField('liability_limit', v)}
-              multiline
-            />
-            <EditableField
-              label="면책금"
-              value={company.deductible}
-              onChange={(v) => updateField('deductible', v)}
-              multiline
-            />
-            <EditableField
-              label="렌트 수입차 보험연령"
-              value={company.rent_import_insurance_age}
-              onChange={(v) => updateField('rent_import_insurance_age', v)}
-              multiline
-            />
-            <EditableField
-              label="연령제한"
-              value={company.age_limit}
-              onChange={(v) => updateField('age_limit', v)}
-              multiline
-            />
-            <EditableField
-              label="운전자 범위"
-              value={company.driver_range}
-              onChange={(v) => updateField('driver_range', v)}
-              multiline
-            />
-            <EditableField
-              label="운행거리 초과/유예거리"
-              value={company.mileage_excess}
-              onChange={(v) => updateField('mileage_excess', v)}
-              multiline
-            />
-            <EditableField
-              label="차량 전손시"
-              value={company.total_loss}
-              onChange={(v) => updateField('total_loss', v)}
-              multiline
-            />
-            <EditableField
-              label="음주취소 후 재취득 1년미만"
-              value={company.drunk_reacquired_under_1year}
-              onChange={(v) => updateField('drunk_reacquired_under_1year', v)}
+              label="탁송업체"
+              value={company.delivery_company}
+              onChange={(v) => updateField('delivery_company', v)}
               multiline
             />
           </EditableSection>
@@ -473,18 +416,6 @@ export default function CompanyDetailModalEditable({
               multiline
             />
             <EditableField
-              label="중도해지위약율"
-              value={company.early_termination_penalty}
-              onChange={(v) => updateField('early_termination_penalty', v)}
-              multiline
-            />
-            <EditableField
-              label="승계 수수료"
-              value={company.succession_fee}
-              onChange={(v) => updateField('succession_fee', v)}
-              multiline
-            />
-            <EditableField
               label="리스 질권설정"
               value={company.lease_pledge}
               onChange={(v) => updateField('lease_pledge', v)}
@@ -494,6 +425,12 @@ export default function CompanyDetailModalEditable({
 
           {/* 고객/대상 조건 */}
           <EditableSection title="고객/대상 조건">
+            <EditableField
+              label="연령제한"
+              value={company.age_limit}
+              onChange={(v) => updateField('age_limit', v)}
+              multiline
+            />
             <EditableField
               label="국산차/수입차 취급"
               value={company.domestic_import_available}
@@ -513,9 +450,9 @@ export default function CompanyDetailModalEditable({
               multiline
             />
             <EditableField
-              label="직계가족 운전가능 조건"
-              value={company.family_driver_condition}
-              onChange={(v) => updateField('family_driver_condition', v)}
+              label="건설업"
+              value={company.construction_industry}
+              onChange={(v) => updateField('construction_industry', v)}
               multiline
             />
             <EditableField
@@ -531,9 +468,73 @@ export default function CompanyDetailModalEditable({
               multiline
             />
             <EditableField
-              label="건설업"
-              value={company.construction_industry}
-              onChange={(v) => updateField('construction_industry', v)}
+              label="직계가족 운전가능 조건"
+              value={company.family_driver_condition}
+              onChange={(v) => updateField('family_driver_condition', v)}
+              multiline
+            />
+          </EditableSection>
+
+          {/* 보험 및 운용 */}
+          <EditableSection title="보험 및 운용">
+            <EditableField
+              label="대물한도"
+              value={company.liability_limit}
+              onChange={(v) => updateField('liability_limit', v)}
+              multiline
+            />
+            <EditableField
+              label="면책금"
+              value={company.deductible}
+              onChange={(v) => updateField('deductible', v)}
+              multiline
+            />
+            <EditableField
+              label="수입차 보험연령"
+              value={company.rent_import_insurance_age}
+              onChange={(v) => updateField('rent_import_insurance_age', v)}
+              multiline
+            />
+            <EditableField
+              label="운전자 범위"
+              value={company.driver_range}
+              onChange={(v) => updateField('driver_range', v)}
+              multiline
+            />
+            <EditableField
+              label="차량 전손시"
+              value={company.total_loss}
+              onChange={(v) => updateField('total_loss', v)}
+              multiline
+            />
+            <EditableField
+              label="음주취소 후 재취득 1년미만"
+              value={company.drunk_reacquired_under_1year}
+              onChange={(v) => updateField('drunk_reacquired_under_1year', v)}
+              multiline
+            />
+            <EditableField
+              label="운행거리 초과/유예거리"
+              value={company.mileage_excess}
+              onChange={(v) => updateField('mileage_excess', v)}
+              multiline
+            />
+            <EditableField
+              label="중도해지위약율"
+              value={company.early_termination_penalty}
+              onChange={(v) => updateField('early_termination_penalty', v)}
+              multiline
+            />
+            <EditableField
+              label="연체이자율"
+              value={company.overdue_interest_rate}
+              onChange={(v) => updateField('overdue_interest_rate', v)}
+              multiline
+            />
+            <EditableField
+              label="승계 수수료"
+              value={company.succession_fee}
+              onChange={(v) => updateField('succession_fee', v)}
               multiline
             />
           </EditableSection>
@@ -552,26 +553,10 @@ export default function CompanyDetailModalEditable({
               onChange={(v) => updateField('account_name_change', v)}
               multiline
             />
-            <EditableField
-              label="연체이자율"
-              value={company.overdue_interest_rate}
-              onChange={(v) => updateField('overdue_interest_rate', v)}
-              multiline
-            />
           </EditableSection>
 
-          {/* 탁송/등록 */}
-          <EditableSection title="탁송/등록">
-            <EditableField
-              label="탁송업체"
-              value={company.delivery_company}
-              onChange={(v) => updateField('delivery_company', v)}
-              multiline
-            />
-          </EditableSection>
-
-          {/* 기타 */}
-          <EditableSection title="기타">
+          {/* 기타 공지 */}
+          <EditableSection title="기타 공지">
             <EditableField
               label="기타 공지"
               value={company.other_notice}
@@ -657,17 +642,17 @@ export default function CompanyDetailModalEditable({
             )}
             <div className="flex gap-3 ml-auto">
               <button
-                onClick={onClose}
-                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                닫기
-              </button>
-              <button
                 onClick={handleSave}
                 disabled={isSaving}
                 className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
                 {isSaving ? '저장 중...' : '저장'}
+              </button>
+              <button
+                onClick={onClose}
+                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                닫기
               </button>
             </div>
           </div>

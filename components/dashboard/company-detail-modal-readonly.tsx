@@ -53,6 +53,8 @@ interface Company {
 interface CompanyDetailModalReadonlyProps {
   company: Company
   onClose: () => void
+  isAdmin?: boolean
+  onSwitchToEdit?: () => void
 }
 
 interface ReadonlyFieldProps {
@@ -113,6 +115,8 @@ function ReadonlySection({ title, children }: ReadonlySectionProps) {
 export default function CompanyDetailModalReadonly({
   company,
   onClose,
+  isAdmin = false,
+  onSwitchToEdit,
 }: CompanyDetailModalReadonlyProps) {
   const [files, setFiles] = useState<CompanyFile[]>([])
 
@@ -238,67 +242,58 @@ export default function CompanyDetailModalReadonly({
 
         {/* 스크롤 가능한 본문 */}
         <div className="flex-1 overflow-y-auto px-6 py-6">
-          {/* 개요 */}
-          <ReadonlySection title="개요">
+          {/* 기본 정보 */}
+          <ReadonlySection title="기본 정보">
             <ReadonlyField label="링크" value={company.website_link} isLink />
-            <ReadonlyField label="카카오톡" value={company.kakao_link} isLink />
             <ReadonlyField label="ID/PW" value={company.id_pw} />
-          </ReadonlySection>
-
-          {/* 연락처 */}
-          <ReadonlySection title="연락처">
             <ReadonlyField label="전화번호" value={company.phone} />
             <ReadonlyField label="이메일" value={company.email} />
             <ReadonlyField label="팩스" value={company.fax} />
             <ReadonlyField label="주소" value={company.address} />
-          </ReadonlySection>
-
-          {/* 보험 및 운용 */}
-          <ReadonlySection title="보험 및 운용">
-            <ReadonlyField label="대물한도" value={company.liability_limit} />
-            <ReadonlyField label="면책금" value={company.deductible} />
-            <ReadonlyField label="렌트 수입차 보험연령" value={company.rent_import_insurance_age} />
-            <ReadonlyField label="연령제한" value={company.age_limit} />
-            <ReadonlyField label="운전자 범위" value={company.driver_range} />
-            <ReadonlyField label="운행거리 초과/유예거리" value={company.mileage_excess} />
-            <ReadonlyField label="차량 전손시" value={company.total_loss} />
-            <ReadonlyField label="음주취소 후 재취득 1년미만" value={company.drunk_reacquired_under_1year} />
+            <ReadonlyField label="탁송업체" value={company.delivery_company} />
           </ReadonlySection>
 
           {/* 심사/펀딩 및 계약 */}
           <ReadonlySection title="심사/펀딩 및 계약">
             <ReadonlyField label="심사/펀딩" value={company.screening_funding} />
             <ReadonlyField label="계약 후 보험조건 변경" value={company.insurance_change_after_contract} />
-            <ReadonlyField label="중도해지위약율" value={company.early_termination_penalty} />
-            <ReadonlyField label="승계 수수료" value={company.succession_fee} />
             <ReadonlyField label="리스 질권설정" value={company.lease_pledge} />
           </ReadonlySection>
 
           {/* 고객/대상 조건 */}
           <ReadonlySection title="고객/대상 조건">
+            <ReadonlyField label="연령제한" value={company.age_limit} />
             <ReadonlyField label="국산차/수입차 취급" value={company.domestic_import_available} />
             <ReadonlyField label="신설법인" value={company.new_corporation} />
             <ReadonlyField label="외국인" value={company.foreigner} />
-            <ReadonlyField label="직계가족 운전가능 조건" value={company.family_driver_condition} />
+            <ReadonlyField label="건설업" value={company.construction_industry} />
             <ReadonlyField label="면허보증" value={company.license_guarantee} />
             <ReadonlyField label="취급제한" value={company.handling_restrictions} />
-            <ReadonlyField label="건설업" value={company.construction_industry} />
+            <ReadonlyField label="직계가족 운전가능 조건" value={company.family_driver_condition} />
+          </ReadonlySection>
+
+          {/* 보험 및 운용 */}
+          <ReadonlySection title="보험 및 운용">
+            <ReadonlyField label="대물한도" value={company.liability_limit} />
+            <ReadonlyField label="면책금" value={company.deductible} />
+            <ReadonlyField label="수입차 보험연령" value={company.rent_import_insurance_age} />
+            <ReadonlyField label="운전자 범위" value={company.driver_range} />
+            <ReadonlyField label="차량 전손시" value={company.total_loss} />
+            <ReadonlyField label="음주취소 후 재취득 1년미만" value={company.drunk_reacquired_under_1year} />
+            <ReadonlyField label="운행거리 초과/유예거리" value={company.mileage_excess} />
+            <ReadonlyField label="중도해지위약율" value={company.early_termination_penalty} />
+            <ReadonlyField label="연체이자율" value={company.overdue_interest_rate} />
+            <ReadonlyField label="승계 수수료" value={company.succession_fee} />
           </ReadonlySection>
 
           {/* 정산·계좌 */}
           <ReadonlySection title="정산·계좌">
             <ReadonlyField label="보증금/선수금 입금계좌" value={company.deposit_account} />
             <ReadonlyField label="통장 명의변경" value={company.account_name_change} />
-            <ReadonlyField label="연체이자율" value={company.overdue_interest_rate} />
           </ReadonlySection>
 
-          {/* 탁송/등록 */}
-          <ReadonlySection title="탁송/등록">
-            <ReadonlyField label="탁송업체" value={company.delivery_company} />
-          </ReadonlySection>
-
-          {/* 기타 */}
-          <ReadonlySection title="기타">
+          {/* 기타 공지 */}
+          <ReadonlySection title="기타 공지">
             <ReadonlyField label="기타 공지" value={company.other_notice} />
           </ReadonlySection>
 
@@ -337,12 +332,20 @@ export default function CompanyDetailModalReadonly({
           )}
         </div>
 
-        {/* 닫기 버튼 */}
+        {/* 하단 버튼 */}
         <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4">
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
+            {isAdmin && onSwitchToEdit && (
+              <button
+                onClick={onSwitchToEdit}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+              >
+                편집
+              </button>
+            )}
             <button
               onClick={onClose}
-              className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-sm font-medium transition-colors"
             >
               닫기
             </button>

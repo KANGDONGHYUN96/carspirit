@@ -52,11 +52,21 @@ interface CompanyGalleryProps {
 
 export default function CompanyGallery({ companies, isAdmin }: CompanyGalleryProps) {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null)
+  const [isEditMode, setIsEditMode] = useState(false)
   const router = useRouter()
 
   const handleUpdate = () => {
     // 데이터 새로고침
     router.refresh()
+  }
+
+  const handleClose = () => {
+    setSelectedCompany(null)
+    setIsEditMode(false)
+  }
+
+  const handleSwitchToEdit = () => {
+    setIsEditMode(true)
   }
 
   return (
@@ -83,16 +93,18 @@ export default function CompanyGallery({ companies, isAdmin }: CompanyGalleryPro
       </section>
 
       {selectedCompany && (
-        isAdmin ? (
+        isAdmin && isEditMode ? (
           <CompanyDetailModalEditable
             company={selectedCompany}
-            onClose={() => setSelectedCompany(null)}
+            onClose={handleClose}
             onUpdate={handleUpdate}
           />
         ) : (
           <CompanyDetailModalReadonly
             company={selectedCompany}
-            onClose={() => setSelectedCompany(null)}
+            onClose={handleClose}
+            isAdmin={isAdmin}
+            onSwitchToEdit={handleSwitchToEdit}
           />
         )
       )}
