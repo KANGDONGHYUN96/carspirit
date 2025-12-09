@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Inquiry } from '@/types/database.types'
+import { Inquiry, InquiryStatus } from '@/types/database.types'
 import { createClient } from '@/lib/supabase/client'
 import CustomAlert from '@/components/common/custom-alert'
 import CustomConfirm from '@/components/common/custom-confirm'
@@ -1157,7 +1157,7 @@ export default function InquiryDetailModal({
               ].map((s) => (
                 <button
                   key={s.name}
-                  onClick={() => setStatus(s.name)}
+                  onClick={() => setStatus(s.name as InquiryStatus)}
                   className={`px-2.5 py-1 text-xs rounded-md font-medium transition-all ${
                     status === s.name
                       ? `${s.color} text-white`
