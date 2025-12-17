@@ -67,7 +67,14 @@ interface EditableFieldProps {
 }
 
 function EditableField({ label, value, onChange, multiline = false, isLink = false }: EditableFieldProps) {
-  const isUrl = value && (value.startsWith('http://') || value.startsWith('https://'))
+  // 텍스트에서 URL들을 추출
+  const extractUrls = (text: string | null): string[] => {
+    if (!text) return []
+    const urlRegex = /https?:\/\/[^\s]+/g
+    return text.match(urlRegex) || []
+  }
+
+  const urls = isLink ? extractUrls(value) : []
 
   return (
     <div className="flex flex-col sm:flex-row mb-3">
@@ -93,18 +100,23 @@ function EditableField({ label, value, onChange, multiline = false, isLink = fal
             style={{ userSelect: 'text' }}
           />
         )}
-        {isLink && isUrl && (
-          <a
-            href={value}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-1 text-xs text-blue-600 hover:text-blue-800 underline cursor-pointer select-text inline-block"
-            onClick={(e) => e.stopPropagation()}
-            onCopy={(e) => e.stopPropagation()}
-            style={{ userSelect: 'text' }}
-          >
-            🔗 링크 열기
-          </a>
+        {isLink && urls.length > 0 && (
+          <div className="mt-1 flex flex-wrap gap-2">
+            {urls.map((url, index) => (
+              <a
+                key={index}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-blue-600 hover:text-blue-800 underline cursor-pointer select-text inline-block"
+                onClick={(e) => e.stopPropagation()}
+                onCopy={(e) => e.stopPropagation()}
+                style={{ userSelect: 'text' }}
+              >
+                🔗 링크 {urls.length > 1 ? index + 1 : '열기'}
+              </a>
+            ))}
+          </div>
         )}
       </div>
     </div>
@@ -285,13 +297,9 @@ export default function CompanyDetailModalEditable({
       {/* 배경 클릭 시 닫기 */}
       <div className="absolute inset-0" onClick={onClose} />
 
-      {/* 모달 컨텐츠 - 복사 방지 */}
+      {/* 모달 컨텐츠 */}
       <div
-        className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col select-none"
-        onCopy={(e) => e.preventDefault()}
-        onCut={(e) => e.preventDefault()}
-        onContextMenu={(e) => e.preventDefault()}
-        style={{ userSelect: 'none' }}
+        className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col"
       >
         {/* 헤더 */}
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
