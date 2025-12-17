@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import CompanyCardResult from './company-card-result'
-import CompanyDetailModalEditable from '../dashboard/company-detail-modal-editable'
+import CompanyDetailModalReadonly from '../dashboard/company-detail-modal-readonly'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -407,10 +407,10 @@ export default function ChatInterface({ userProfileImage, userName }: ChatInterf
 
       {/* 업체 상세 모달 */}
       {selectedCompany && (
-        <CompanyDetailModalEditable
+        <CompanyDetailModalReadonly
           company={selectedCompany}
           onClose={() => setSelectedCompany(null)}
-          onUpdate={() => {}}
+          isAdmin={false}
         />
       )}
     </motion.div>

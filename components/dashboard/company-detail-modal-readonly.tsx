@@ -66,7 +66,31 @@ interface ReadonlyFieldProps {
 function ReadonlyField({ label, value, isLink = false }: ReadonlyFieldProps) {
   if (!value) return null
 
-  const isUrl = value.startsWith('http://') || value.startsWith('https://')
+  // 텍스트에서 URL을 클릭 가능한 링크로 변환
+  const renderTextWithLinks = (text: string) => {
+    if (!isLink) return text
+
+    const urlRegex = /(https?:\/\/[^\s]+)/g
+    const parts = text.split(urlRegex)
+
+    return parts.map((part, index) => {
+      if (part.match(urlRegex)) {
+        return (
+          <a
+            key={index}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:text-blue-800 underline cursor-pointer"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {part}
+          </a>
+        )
+      }
+      return part
+    })
+  }
 
   return (
     <div className="flex flex-col sm:flex-row mb-3">
@@ -74,21 +98,7 @@ function ReadonlyField({ label, value, isLink = false }: ReadonlyFieldProps) {
         {label}:
       </label>
       <div className="flex-1 text-sm text-gray-900 whitespace-pre-wrap break-words">
-        {isLink && isUrl ? (
-          <a
-            href={value}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 hover:text-blue-800 underline cursor-pointer select-text"
-            onClick={(e) => e.stopPropagation()}
-            onCopy={(e) => e.stopPropagation()}
-            style={{ userSelect: 'text' }}
-          >
-            {value}
-          </a>
-        ) : (
-          value
-        )}
+        {renderTextWithLinks(value)}
       </div>
     </div>
   )
@@ -173,13 +183,10 @@ export default function CompanyDetailModalReadonly({
       {/* 배경 클릭 시 닫기 */}
       <div className="absolute inset-0" onClick={onClose} />
 
-      {/* 모달 컨텐츠 - 복사 방지 */}
+      {/* 모달 컨텐츠 - 텍스트 선택/복사 가능 */}
       <div
-        className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col select-none"
-        onCopy={(e) => e.preventDefault()}
-        onCut={(e) => e.preventDefault()}
-        onContextMenu={(e) => e.preventDefault()}
-        style={{ userSelect: 'none' }}
+        className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col select-text"
+        style={{ userSelect: 'text' }}
       >
         {/* 헤더 */}
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">

@@ -5,6 +5,7 @@ import CompanyGallery from '@/components/dashboard/company-gallery'
 import VehicleGallerySection from '@/components/dashboard/vehicle-gallery-section'
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentUser } from '@/lib/auth/get-user'
+import CopyProtectionWrapper from '@/components/common/copy-protection-wrapper'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -38,7 +39,7 @@ export default async function DashboardPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-6 space-y-6">
+      <CopyProtectionWrapper className="p-6 space-y-6">
         {/* 1️⃣ 캐피탈별 추가지원 섹션 */}
         <CapitalPromoSection promotions={promotions || []} />
 
@@ -55,7 +56,7 @@ export default async function DashboardPage() {
           userName={user?.name || ''}
           userRole={user?.role || 'salesperson'}
         />
-      </div>
+      </CopyProtectionWrapper>
     </DashboardLayout>
   )
 }
