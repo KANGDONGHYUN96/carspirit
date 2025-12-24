@@ -48,12 +48,12 @@ export async function POST(request: NextRequest) {
       .from('company-files')
       .getPublicUrl(filePath)
 
-    // users 테이블 업데이트
+    // users 테이블 업데이트 (auth_user_id로 조회)
     const updateField = type === 'card' ? 'business_card_url' : 'profile_image_url'
     const { error: dbError } = await supabase
       .from('users')
       .update({ [updateField]: publicUrl })
-      .eq('id', user.id)
+      .eq('auth_user_id', user.id)
 
     if (dbError) {
       console.error('DB 업데이트 실패:', dbError)
