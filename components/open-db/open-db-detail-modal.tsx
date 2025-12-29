@@ -86,8 +86,15 @@ export default function OpenDBDetailModal({
 
       if (error) throw error
 
+      // 메모 추가 시 inquiry의 updated_at 업데이트
+      await supabase
+        .from('inquiries')
+        .update({ updated_at: new Date().toISOString() })
+        .eq('id', inquiry.id)
+
       setNewMemo('')
       await loadMemos()
+      router.refresh()
       setAlert({ message: '메모가 저장되었습니다', type: 'success' })
     } catch (error) {
       console.error('메모 저장 에러:', error)
