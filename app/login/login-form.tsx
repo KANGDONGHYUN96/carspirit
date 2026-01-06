@@ -14,7 +14,7 @@ export default function LoginForm() {
 
       const supabase = createClient()
 
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
@@ -27,11 +27,18 @@ export default function LoginForm() {
 
       if (error) {
         setError(error.message)
+        setIsLoading(false)
+        return
+      }
+
+      // 모바일 환경에서 Google OAuth URL을 새 탭/외부 브라우저로 열기
+      if (data?.url) {
+        // 시스템 기본 브라우저로 열기 시도
+        window.location.href = data.url
       }
     } catch (err) {
       setError('로그인 중 오류가 발생했습니다.')
       console.error(err)
-    } finally {
       setIsLoading(false)
     }
   }
