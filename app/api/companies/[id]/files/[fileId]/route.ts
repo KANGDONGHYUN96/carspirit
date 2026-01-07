@@ -1,12 +1,14 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { requireAuth } from '@/lib/auth/get-user'
 
-// 파일 삭제
+// 파일 삭제 (로그인 필수)
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string; fileId: string }> }
 ) {
   try {
+    await requireAuth()
     const supabase = await createClient()
     const { id, fileId } = await params
 
@@ -21,7 +23,7 @@ export async function DELETE(
       return NextResponse.json({ error: '파일을 찾을 수 없습니다' }, { status: 404 })
     }
 
-    // 권한 확인
+    // 권한 확인 - company_id 매칭
     if (file.company_id !== id) {
       return NextResponse.json({ error: '권한이 없습니다' }, { status: 403 })
     }
@@ -56,6 +58,9 @@ export async function DELETE(
     return NextResponse.json({ success: true })
   } catch (error: any) {
     console.error('파일 삭제 실패:', error)
+    if (error.message === 'Unauthorized' || error.message === 'User not approved') {
+      return NextResponse.json({ error: '권한이 없습니다' }, { status: 401 })
+    }
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }

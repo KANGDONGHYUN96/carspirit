@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth/get-user'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -38,6 +39,9 @@ function detectSearchField(message: string): { field: string; description: strin
 
 export async function POST(request: NextRequest) {
   try {
+    // 로그인 + 승인된 사용자만 사용 가능
+    await requireAuth()
+
     const { message } = await request.json()
 
     if (!message) {
@@ -228,6 +232,9 @@ ${companyData}
 
   } catch (error: any) {
     console.error('Chat API error:', error)
+    if (error.message === 'Unauthorized' || error.message === 'User not approved') {
+      return NextResponse.json({ error: '로그인이 필요합니다' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: error.message || '챗봇 응답 중 오류가 발생했습니다.' },
       { status: 500 }

@@ -1,20 +1,25 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { requireAuth } from '@/lib/auth/get-user'
+import { canViewAllContracts } from '@/lib/auth/permissions'
 
 // 계약 목록 조회
 export async function GET(request: NextRequest) {
   try {
+    const currentUser = await requireAuth()
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { data: contracts, error } = await supabase
+    let query = supabase
       .from('contracts')
       .select('*')
       .order('created_at', { ascending: false })
+
+    // 관리자/매니저는 모든 계약 조회 가능, 일반 사용자는 본인 것만
+    if (!canViewAllContracts(currentUser)) {
+      query = query.eq('user_id', currentUser.id)
+    }
+
+    const { data: contracts, error } = await query
 
     if (error) {
       throw error
@@ -23,6 +28,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ contracts })
   } catch (error: any) {
     console.error('계약 조회 실패:', error)
+    if (error.message === 'Unauthorized' || error.message === 'User not approved') {
+      return NextResponse.json({ error: '권한이 없습니다' }, { status: 401 })
+    }
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }

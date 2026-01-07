@@ -1,12 +1,28 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { requireAuth } from '@/lib/auth/get-user'
 
-// 파일 목록 조회
+// 허용된 파일 타입
+const ALLOWED_FILE_TYPES = [
+  'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'text/plain', 'text/csv'
+]
+
+// 최대 파일 크기 (10MB)
+const MAX_FILE_SIZE = 10 * 1024 * 1024
+
+// 파일 목록 조회 (로그인 필수)
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    await requireAuth()
     const supabase = await createClient()
     const { id } = await params
 
@@ -23,16 +39,20 @@ export async function GET(
     return NextResponse.json({ files })
   } catch (error: any) {
     console.error('파일 목록 조회 실패:', error)
+    if (error.message === 'Unauthorized' || error.message === 'User not approved') {
+      return NextResponse.json({ error: '권한이 없습니다' }, { status: 401 })
+    }
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
 
-// 파일 업로드 - 한글 파일명 지원
+// 파일 업로드 (로그인 필수 + 파일 검증)
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    await requireAuth()
     const supabase = await createClient()
     const { id } = await params
     const formData = await request.formData()
@@ -40,6 +60,20 @@ export async function POST(
 
     if (files.length === 0) {
       return NextResponse.json({ error: '파일이 없습니다' }, { status: 400 })
+    }
+
+    // 파일 검증
+    for (const file of files) {
+      if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+        return NextResponse.json({
+          error: `허용되지 않는 파일 형식입니다: ${file.name}`
+        }, { status: 400 })
+      }
+      if (file.size > MAX_FILE_SIZE) {
+        return NextResponse.json({
+          error: `파일 크기가 너무 큽니다 (최대 10MB): ${file.name}`
+        }, { status: 400 })
+      }
     }
 
     // 업체 정보 가져오기
@@ -68,7 +102,7 @@ export async function POST(
       const filePath = `companies/${safeCompanyName}/${uniqueId}.${fileExt}`
 
       // Supabase Storage에 업로드
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('company-files')
         .upload(filePath, buffer, {
           contentType: file.type,
@@ -109,6 +143,9 @@ export async function POST(
     return NextResponse.json({ files: uploadedFiles })
   } catch (error: any) {
     console.error('파일 업로드 실패:', error)
+    if (error.message === 'Unauthorized' || error.message === 'User not approved') {
+      return NextResponse.json({ error: '권한이 없습니다' }, { status: 401 })
+    }
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }

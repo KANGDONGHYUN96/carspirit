@@ -156,20 +156,33 @@ async function sendKakaoAlimtalk(phone: string, assignedUserName: string, custom
   }
 }
 
-// CORS 헤더
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, X-API-Key',
+// 허용된 도메인 목록 (환경변수로 관리)
+const ALLOWED_ORIGINS = [
+  process.env.NEXT_PUBLIC_SITE_URL || 'https://carspirit.co.kr',
+  'https://www.carspirit.co.kr',
+  'https://carspirit.vercel.app',
+  ...(process.env.NODE_ENV === 'development' ? ['http://localhost:3000'] : [])
+].filter(Boolean)
+
+// CORS 헤더 생성 함수
+function getCorsHeaders(origin: string | null) {
+  const allowedOrigin = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0]
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, X-API-Key',
+  }
 }
 
 // OPTIONS 요청 처리 (CORS preflight)
-export async function OPTIONS() {
-  return new Response(null, { status: 200, headers: corsHeaders })
+export async function OPTIONS(request: Request) {
+  const origin = request.headers.get('Origin')
+  return new Response(null, { status: 200, headers: getCorsHeaders(origin) })
 }
 
 export async function POST(request: Request) {
-  const headers = corsHeaders
+  const origin = request.headers.get('Origin')
+  const headers = getCorsHeaders(origin)
 
   try {
     // API Key 검증 (마케팅 업체용)
@@ -178,7 +191,6 @@ export async function POST(request: Request) {
       process.env.MARKETING_API_KEY,           // 기본 키
       process.env.MARKETING_NAVER_API_KEY,     // 네이버용
       process.env.MARKETING_KAKAO_API_KEY,     // 카카오용
-      'test_api_key_12345',                    // 테스트용 (나중에 삭제)
     ].filter(Boolean)
 
     // API Key가 없거나 유효하지 않으면 거부

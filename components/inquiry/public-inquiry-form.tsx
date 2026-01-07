@@ -53,7 +53,7 @@ export default function PublicInquiryForm() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-API-Key': 'test_api_key_12345', // 테스트용 키
+          'X-API-Key': process.env.NEXT_PUBLIC_INQUIRY_API_KEY || '',
         },
         body: JSON.stringify({
           customer_name: formData.customer_name.trim(),
