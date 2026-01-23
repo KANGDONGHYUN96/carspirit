@@ -15,7 +15,7 @@ export async function middleware(request: NextRequest) {
   const { supabaseResponse, user } = await updateSession(request)
 
   // 공개 경로 (인증 불필요)
-  const publicPaths = ['/auth/callback', '/auth/pending', '/auth/auth-code-error']
+  const publicPaths = ['/auth/callback', '/auth/pending', '/auth/auth-code-error', '/api/inquiry/create']
   const isPublicPath = publicPaths.some(path => request.nextUrl.pathname.startsWith(path))
 
   if (isPublicPath) {
