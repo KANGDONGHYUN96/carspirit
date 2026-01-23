@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 
 // 다음 배정 영업자 선택 (최소 할당 우선 방식)
@@ -212,7 +212,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const supabase = await createClient()
+    const supabase = createAdminClient()
 
     // 1. 다음 배정 영업자 선택
     const rotationUser = await getNextRotationUser(supabase)
