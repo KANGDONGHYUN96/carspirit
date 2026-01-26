@@ -162,3 +162,26 @@ export interface VehicleGallery {
   created_at: string
   updated_at: string
 }
+
+// 승계문의 (admin 전용)
+export interface SuccessionInquiry {
+  id: string
+  customer_name: string
+  customer_phone: string
+  customer_email: string | null
+  content: string
+  status: InquiryStatus
+  memo: string | null
+  source: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface SuccessionInquiryMemo {
+  id: string
+  inquiry_id: string
+  user_id: string
+  user_name: string
+  content: string
+  created_at: string
+}

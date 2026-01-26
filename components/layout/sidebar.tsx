@@ -76,6 +76,16 @@ const navigation = [
 
 const adminNavigation = [
   {
+    name: '승계문의',
+    href: '/admin/succession-inquiries',
+    icon: (
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+      </svg>
+    ),
+    adminOnly: true,
+  },
+  {
     name: '프로모션 관리',
     href: '/admin/promotions',
     icon: (
@@ -116,6 +126,7 @@ const adminNavigation = [
 export default function Sidebar({ user }: SidebarProps) {
   const pathname = usePathname()
   const isManager = user.role === 'manager' || user.role === 'admin'
+  const isAdmin = user.role === 'admin'
 
   return (
     <div className="flex h-screen flex-col bg-white border-r border-gray-200 w-64">
@@ -159,23 +170,25 @@ export default function Sidebar({ user }: SidebarProps) {
               관리자
             </div>
             <div className="space-y-1">
-              {adminNavigation.map((item) => {
-                const isActive = pathname === item.href
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
-                      isActive
-                        ? 'bg-blue-50 text-blue-600 shadow-sm'
-                        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                    }`}
-                  >
-                    {item.icon}
-                    <span>{item.name}</span>
-                  </Link>
-                )
-              })}
+              {adminNavigation
+                .filter((item) => !item.adminOnly || isAdmin)
+                .map((item) => {
+                  const isActive = pathname === item.href
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
+                        isActive
+                          ? 'bg-blue-50 text-blue-600 shadow-sm'
+                          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                      }`}
+                    >
+                      {item.icon}
+                      <span>{item.name}</span>
+                    </Link>
+                  )
+                })}
             </div>
           </div>
         )}

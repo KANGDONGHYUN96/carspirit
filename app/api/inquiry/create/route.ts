@@ -180,6 +180,50 @@ export async function OPTIONS(request: Request) {
   return new Response(null, { status: 200, headers: getCorsHeaders(origin) })
 }
 
+// 승계문의 여부 확인 (Referer로 판단)
+function isSuccessionInquiry(request: Request): boolean {
+  const referer = request.headers.get('Referer') || ''
+  return referer.includes('/succession')
+}
+
+// 관리자들에게 알림톡 발송 (승계문의용)
+async function sendAlimtalkToAdmins(supabase: any, customerName: string, customerPhone: string, content: string) {
+  // admin role 사용자들의 전화번호 조회
+  const { data: admins, error } = await supabase
+    .from('users')
+    .select('name, phone')
+    .eq('role', 'admin')
+    .eq('approved', true)
+    .not('phone', 'is', null)
+
+  if (error) {
+    console.error('❌ 관리자 조회 에러:', error)
+    return
+  }
+
+  if (!admins || admins.length === 0) {
+    console.warn('⚠️ 알림톡을 받을 관리자가 없습니다.')
+    return
+  }
+
+  console.log(`📱 ${admins.length}명의 관리자에게 승계문의 알림톡 발송`)
+
+  // 각 관리자에게 알림톡 발송
+  for (const admin of admins) {
+    if (admin.phone) {
+      sendKakaoAlimtalk(
+        admin.phone,
+        admin.name,
+        customerName,
+        customerPhone,
+        `[승계문의] ${content}`
+      ).catch(err => {
+        console.error(`관리자 ${admin.name} 알림톡 발송 실패:`, err)
+      })
+    }
+  }
+}
+
 export async function POST(request: Request) {
   const origin = request.headers.get('Origin')
   const headers = getCorsHeaders(origin)
@@ -214,6 +258,43 @@ export async function POST(request: Request) {
 
     const supabase = createAdminClient()
 
+    // 승계문의인 경우 별도 테이블에 저장
+    if (isSuccessionInquiry(request)) {
+      console.log('🔄 승계문의로 처리')
+
+      const { data: inquiry, error: inquiryError } = await supabase
+        .from('succession_inquiries')
+        .insert({
+          customer_name: customer_name.trim(),
+          customer_phone: customer_phone.trim(),
+          content: content.trim(),
+          source: source || '승계',
+          status: '신규',
+        })
+        .select()
+        .single()
+
+      if (inquiryError) {
+        console.error('승계문의 생성 에러:', inquiryError)
+        throw new Error('승계문의 접수 실패')
+      }
+
+      // 관리자들에게 알림톡 발송
+      sendAlimtalkToAdmins(supabase, customer_name, customer_phone, content).catch(err => {
+        console.error('관리자 알림톡 발송 중 에러 (문의 접수는 성공):', err)
+      })
+
+      return NextResponse.json(
+        {
+          success: true,
+          inquiry_id: inquiry.id,
+          type: 'succession',
+        },
+        { headers }
+      )
+    }
+
+    // 일반 문의 처리
     // 1. 다음 배정 영업자 선택
     const rotationUser = await getNextRotationUser(supabase)
     const assignedUserId = rotationUser.user.id
