@@ -248,6 +248,16 @@ export async function POST(request: Request) {
     const body = await request.json()
     const { customer_name, customer_phone, content, source = '카스피릿' } = body
 
+    // 🔍 디버깅: 요청 정보 로깅
+    const referer = request.headers.get('Referer') || ''
+    console.log('📥 문의 API 요청:', {
+      referer,
+      source,
+      inquiry_type: body.inquiry_type,
+      isSuccession: referer.includes('/succession'),
+      customer_name,
+    })
+
     // 필수 값 검증
     if (!customer_name || !customer_phone || !content) {
       return NextResponse.json(
