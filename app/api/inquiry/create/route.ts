@@ -255,7 +255,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { customer_name, customer_phone, content, source = '카스피릿' } = body
+    const { customer_name, customer_phone, content, source = '카스피릿', marketing_agreed = false } = body
 
     // 🔍 디버깅: 요청 정보 로깅
     const referer = request.headers.get('Referer') || ''
@@ -336,6 +336,7 @@ export async function POST(request: Request) {
         assigned_to_name: assignedUserName,
         status: '신규',
         unlock_at: unlockAt.toISOString(),
+        marketing_agreed: Boolean(marketing_agreed),
       })
       .select()
       .single()
