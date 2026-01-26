@@ -303,7 +303,7 @@ export default function OpenDBTable({ inquiries, userId, userName, userRole, tod
                     onClick={() => setSelectedInquiry(inquiry)}
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{isAdmin ? (inquiry.source || '카스피릿') : '카스피릿'}</div>
+                      <div className="text-sm text-gray-900">카스피릿</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-700">{inquiry.assigned_to_name || '-'}</div>

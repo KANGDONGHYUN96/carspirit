@@ -219,7 +219,7 @@ export default function OpenDBDetailModal({
               <div className="space-y-2">
                 <div className="flex items-center gap-3 py-2 border-b border-gray-100">
                   <span className="text-sm text-gray-500 w-16">매체</span>
-                  <span className="text-sm font-medium text-gray-900">{isAdmin ? (inquiry.source || '카스피릿') : '카스피릿'}</span>
+                  <span className="text-sm font-medium text-gray-900">카스피릿</span>
                 </div>
                 <div className="flex items-center gap-3 py-2 border-b border-gray-100">
                   <span className="text-sm text-gray-500 w-16">고객명</span>
