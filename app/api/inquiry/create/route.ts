@@ -180,8 +180,17 @@ export async function OPTIONS(request: Request) {
   return new Response(null, { status: 200, headers: getCorsHeaders(origin) })
 }
 
-// 승계문의 여부 확인 (Referer로 판단)
-function isSuccessionInquiry(request: Request): boolean {
+// 승계문의 여부 확인 (content, source, Referer로 판단)
+function isSuccessionInquiry(request: Request, content: string, source: string): boolean {
+  // 1. content에 "[승계 상담]" 또는 "승계"가 포함되면 승계문의
+  if (content && (content.includes('[승계 상담]') || content.includes('승계'))) {
+    return true
+  }
+  // 2. source가 "승계"를 포함하면 승계문의
+  if (source && source.includes('승계')) {
+    return true
+  }
+  // 3. Referer에 /succession이 포함되면 승계문의 (백업)
   const referer = request.headers.get('Referer') || ''
   return referer.includes('/succession')
 }
@@ -269,7 +278,7 @@ export async function POST(request: Request) {
     const supabase = createAdminClient()
 
     // 승계문의인 경우 별도 테이블에 저장
-    if (isSuccessionInquiry(request)) {
+    if (isSuccessionInquiry(request, content, source)) {
       console.log('🔄 승계문의로 처리')
 
       const { data: inquiry, error: inquiryError } = await supabase
