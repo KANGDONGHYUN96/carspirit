@@ -13,10 +13,15 @@ const pathNameMap: { [key: string]: string } = {
   '/chat-history': '채팅 기록',
   '/contracts': '계약관리',
   '/profile': '내 계정',
+  '/strategic-vehicles': '전략차종',
+  '/admin': '관리자',
   '/admin/promotions': '프로모션 관리',
   '/admin/strategic-models': '전략차종 관리',
   '/admin/users': '사용자 관리',
   '/admin/analytics': '매출분석',
+  '/admin/inquiry-statistics': '문의통계',
+  '/admin/succession-inquiries': '승계문의',
+  '/admin/sales': '매출관리',
 }
 
 export default function Header() {
