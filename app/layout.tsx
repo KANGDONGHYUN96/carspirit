@@ -11,6 +11,14 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "카스피릿",
   description: "렌트/리스 영업 통합 관리 시스템",
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: {
+      index: false,
+      follow: false,
+    },
+  },
 };
 
 export default function RootLayout({
