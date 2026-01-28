@@ -1,8 +1,10 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, RadialBarChart, RadialBar } from 'recharts'
 import Image from 'next/image'
+import { createClient } from '@/lib/supabase/client'
+import InquiryDetailModal from '@/components/inquiries/inquiry-detail-modal'
 
 interface Inquiry {
   id: string
@@ -19,17 +21,22 @@ interface Inquiry {
   created_at: string
   updated_at: string
   unlock_at: string | null
+  marketing_agreed: boolean | null
 }
 
 interface User {
   id: string
   name: string
   role: string
+  approved: boolean
 }
 
 interface InquiryAnalyticsProps {
   inquiries: Inquiry[]
   users: User[]
+  currentUserId: string
+  currentUserName: string
+  currentUserRole: string
 }
 
 // 플랫폼 매핑 정보
@@ -137,11 +144,111 @@ function RankBadge({ rank }: { rank: number }) {
   )
 }
 
-export default function InquiryAnalytics({ inquiries: initialInquiries, users }: InquiryAnalyticsProps) {
-  const [inquiries] = useState(initialInquiries)
+export default function InquiryAnalytics({ inquiries: initialInquiries, users, currentUserId, currentUserName, currentUserRole }: InquiryAnalyticsProps) {
+  const [inquiries, setInquiries] = useState(initialInquiries)
   const [selectedPeriod, setSelectedPeriod] = useState<'all' | 'year' | 'month' | 'week'>('month')
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
+
+  // 테이블 관련 state
+  const [currentPage, setCurrentPage] = useState(1)
+  const [memoCounts, setMemoCounts] = useState<Record<string, number>>({})
+  const [searchQuery, setSearchQuery] = useState('')
+  const [sourceFilter, setSourceFilter] = useState<string>('all')
+  const [marketingFilter, setMarketingFilter] = useState<'all' | 'yes' | 'no'>('all')
+  const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null)
+  const itemsPerPage = 20
+  const supabase = createClient()
+
+  // 매체 목록 (필터용) - 순서 지정
+  const SOURCE_ORDER = ['카스피릿', '페이스북', '인스타그램', '유튜브', '카카오', '숨고', '네이버블로그']
+
+  const sourceOptions = useMemo(() => {
+    const sources = new Set<string>()
+    inquiries.forEach(inq => {
+      const platform = getPlatformConfig(inq.source)
+      sources.add(platform.name)
+    })
+    // 지정된 순서대로 정렬, 없는 것은 맨 뒤로
+    return Array.from(sources).sort((a, b) => {
+      const indexA = SOURCE_ORDER.indexOf(a)
+      const indexB = SOURCE_ORDER.indexOf(b)
+      if (indexA === -1 && indexB === -1) return a.localeCompare(b)
+      if (indexA === -1) return 1
+      if (indexB === -1) return -1
+      return indexA - indexB
+    })
+  }, [inquiries])
+
+  // 승인된 사용자만 필터링 (담당자 변경용)
+  const approvedUsers = useMemo(() => users.filter(u => u.approved), [users])
+
+  // 메모 개수 가져오기
+  useEffect(() => {
+    async function fetchMemoCounts() {
+      const inquiryIds = inquiries.map(i => i.id)
+      if (inquiryIds.length === 0) return
+
+      const { data } = await supabase
+        .from('inquiry_memos')
+        .select('inquiry_id')
+        .in('inquiry_id', inquiryIds)
+
+      if (data) {
+        const counts: Record<string, number> = {}
+        data.forEach(memo => {
+          counts[memo.inquiry_id] = (counts[memo.inquiry_id] || 0) + 1
+        })
+        setMemoCounts(counts)
+      }
+    }
+
+    fetchMemoCounts()
+  }, [inquiries])
+
+  // 담당자 변경 함수
+  const handleAssigneeChange = async (inquiryId: string, newUserId: string) => {
+    const selectedUser = approvedUsers.find(u => u.id === newUserId)
+    if (!selectedUser) return
+
+    const { error } = await supabase
+      .from('inquiries')
+      .update({
+        user_id: newUserId,
+        assigned_to: newUserId,
+        assigned_to_name: selectedUser.name,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', inquiryId)
+
+    if (!error) {
+      setInquiries(prev => prev.map(inq =>
+        inq.id === inquiryId
+          ? { ...inq, user_id: newUserId, assigned_to: newUserId, assigned_to_name: selectedUser.name }
+          : inq
+      ))
+    }
+  }
+
+  // 상태 뱃지
+  const getStatusBadge = (status: string) => {
+    const styles: Record<string, string> = {
+      '신규': 'bg-blue-100 text-blue-700',
+      '관리': 'bg-green-100 text-green-700',
+      '부재': 'bg-yellow-100 text-yellow-700',
+      '심사': 'bg-orange-100 text-orange-700',
+      '가망': 'bg-cyan-100 text-cyan-700',
+      '계약': 'bg-purple-100 text-purple-700',
+      '출고': 'bg-emerald-100 text-emerald-700',
+      '정산대기': 'bg-amber-100 text-amber-700',
+      '완료': 'bg-sky-100 text-sky-700',
+    }
+    return (
+      <span className={`px-2 py-1 text-xs font-medium rounded-full ${styles[status] || 'bg-gray-100 text-gray-700'}`}>
+        {status}
+      </span>
+    )
+  }
 
   // 기간별 필터링
   const filteredInquiries = useMemo(() => {
@@ -365,6 +472,47 @@ export default function InquiryAnalytics({ inquiries: initialInquiries, users }:
       .sort((a, b) => b.문의수 - a.문의수)
       .slice(0, 10)
   }, [stats.bySalesperson])
+
+  // 테이블용 필터링 (검색 + 매체 + 마케팅 필터 적용)
+  const tableInquiries = useMemo(() => {
+    return filteredInquiries.filter(inquiry => {
+      // 검색 필터
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase()
+        const matchesSearch = (
+          inquiry.customer_name.toLowerCase().includes(query) ||
+          inquiry.customer_phone?.toLowerCase().includes(query) ||
+          inquiry.content.toLowerCase().includes(query) ||
+          inquiry.assigned_to_name?.toLowerCase().includes(query)
+        )
+        if (!matchesSearch) return false
+      }
+
+      // 매체 필터
+      if (sourceFilter !== 'all') {
+        const platform = getPlatformConfig(inquiry.source)
+        if (platform.name !== sourceFilter) return false
+      }
+
+      // 마케팅 동의 필터
+      if (marketingFilter !== 'all') {
+        if (marketingFilter === 'yes' && !inquiry.marketing_agreed) return false
+        if (marketingFilter === 'no' && inquiry.marketing_agreed) return false
+      }
+
+      return true
+    })
+  }, [filteredInquiries, searchQuery, sourceFilter, marketingFilter])
+
+  // 페이지네이션
+  const totalPages = Math.ceil(tableInquiries.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const currentTableInquiries = tableInquiries.slice(startIndex, startIndex + itemsPerPage)
+
+  // 검색이나 필터 변경시 첫 페이지로
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, selectedPeriod, selectedYear, selectedMonth, sourceFilter, marketingFilter])
 
   // 연도 목록
   const years = useMemo(() => {
@@ -754,6 +902,324 @@ export default function InquiryAnalytics({ inquiries: initialInquiries, users }:
           </div>
         </div>
       </div>
+
+      {/* 문의 상세 테이블 */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
+        <div className="p-6 border-b border-gray-100 space-y-4">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <span className="w-2 h-6 bg-gradient-to-b from-gray-700 to-gray-900 rounded-full" />
+              문의 상세 목록
+              <span className="text-sm font-normal text-gray-500 ml-2">
+                ({tableInquiries.length}건)
+              </span>
+            </h3>
+            <input
+              type="text"
+              placeholder="고객명, 연락처, 내용, 담당자 검색..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-72 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all text-sm"
+            />
+          </div>
+
+          {/* 필터 영역 */}
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            {/* 매체 필터 - 로고만 */}
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setSourceFilter('all')}
+                className={`w-9 h-9 flex items-center justify-center rounded-lg transition-all ${
+                  sourceFilter === 'all'
+                    ? 'bg-blue-500 text-white ring-2 ring-blue-300'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+                title="전체"
+              >
+                <span className="text-xs font-bold">All</span>
+              </button>
+              {sourceOptions.map(source => {
+                const config = Object.values(PLATFORM_CONFIG).find(p => p.name === source) || DEFAULT_PLATFORM
+                const isCarspirit = source === '카스피릿'
+                return (
+                  <button
+                    key={source}
+                    onClick={() => setSourceFilter(source)}
+                    className={`w-9 h-9 flex items-center justify-center rounded-lg transition-all ${
+                      sourceFilter === source
+                        ? 'ring-2 ring-offset-1'
+                        : 'bg-gray-100 hover:bg-gray-200'
+                    } ${isCarspirit && sourceFilter === source ? 'bg-gray-800' : ''}`}
+                    style={sourceFilter === source ? { ringColor: config.color } : {}}
+                    title={source}
+                  >
+                    <div className={`w-6 h-6 relative flex items-center justify-center ${isCarspirit ? 'bg-gray-800 rounded p-0.5' : ''}`}>
+                      <Image
+                        src={config.logo}
+                        alt={source}
+                        width={isCarspirit ? 16 : 22}
+                        height={isCarspirit ? 16 : 22}
+                        className="object-contain"
+                      />
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* 마케팅 동의 필터 - 오른쪽 배치 */}
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setMarketingFilter('all')}
+                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
+                  marketingFilter === 'all'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                전체
+              </button>
+              <button
+                onClick={() => setMarketingFilter('yes')}
+                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
+                  marketingFilter === 'yes'
+                    ? 'bg-green-500 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                동의 O
+              </button>
+              <button
+                onClick={() => setMarketingFilter('no')}
+                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
+                  marketingFilter === 'no'
+                    ? 'bg-red-500 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                동의 X
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {tableInquiries.length === 0 ? (
+          <div className="p-12 text-center">
+            <p className="text-gray-500">검색 결과가 없습니다</p>
+          </div>
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">매체</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">담당자</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">문의일자</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">상태</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">고객명</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">번호</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">문의내용</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">수정일자</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">메모</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">마케팅</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">액션</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {currentTableInquiries.map((inquiry) => {
+                    const platform = getPlatformConfig(inquiry.source)
+                    const isCarspirit = platform.name === '카스피릿'
+
+                    return (
+                      <tr key={inquiry.id} className="hover:bg-gray-50 transition-colors">
+                        {/* 매체 */}
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-6 h-6 relative flex items-center justify-center ${isCarspirit ? 'bg-gray-800 rounded p-0.5' : ''}`}>
+                              <Image
+                                src={platform.logo}
+                                alt={platform.name}
+                                width={isCarspirit ? 16 : 20}
+                                height={isCarspirit ? 16 : 20}
+                                className="object-contain"
+                              />
+                            </div>
+                            <span className="text-sm text-gray-700">{platform.name}</span>
+                          </div>
+                        </td>
+
+                        {/* 담당자 (변경 가능) */}
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <select
+                            value={inquiry.assigned_to || inquiry.user_id || ''}
+                            onChange={(e) => handleAssigneeChange(inquiry.id, e.target.value)}
+                            className="text-sm bg-transparent border border-gray-200 rounded-lg px-2 py-1 focus:border-blue-500 focus:outline-none cursor-pointer hover:bg-gray-50"
+                          >
+                            <option value="">미지정</option>
+                            {approvedUsers.map(user => (
+                              <option key={user.id} value={user.id}>{user.name}</option>
+                            ))}
+                          </select>
+                        </td>
+
+                        {/* 문의일자 */}
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <span className="text-sm text-gray-600">
+                            {new Date(inquiry.created_at).toLocaleDateString('ko-KR', {
+                              year: '2-digit',
+                              month: '2-digit',
+                              day: '2-digit'
+                            })}
+                          </span>
+                        </td>
+
+                        {/* 상태 */}
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          {getStatusBadge(inquiry.status)}
+                        </td>
+
+                        {/* 고객명 */}
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <span className="text-sm font-medium text-gray-900">{inquiry.customer_name}</span>
+                        </td>
+
+                        {/* 번호 */}
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <span className="text-sm text-gray-600">{inquiry.customer_phone || '-'}</span>
+                        </td>
+
+                        {/* 문의내용 */}
+                        <td className="px-4 py-3">
+                          <span className="text-sm text-gray-700 line-clamp-1 max-w-[200px]" title={inquiry.content}>
+                            {inquiry.content}
+                          </span>
+                        </td>
+
+                        {/* 수정일자 */}
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <span className="text-sm text-gray-500">
+                            {new Date(inquiry.updated_at).toLocaleDateString('ko-KR', {
+                              year: '2-digit',
+                              month: '2-digit',
+                              day: '2-digit'
+                            })}
+                          </span>
+                        </td>
+
+                        {/* 메모 */}
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          {memoCounts[inquiry.id] ? (
+                            <span className="inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                              {memoCounts[inquiry.id]}개
+                            </span>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </td>
+
+                        {/* 마케팅 동의 */}
+                        <td className="px-4 py-3 whitespace-nowrap text-center">
+                          {inquiry.marketing_agreed ? (
+                            <span className="text-green-600 font-bold">O</span>
+                          ) : (
+                            <span className="text-red-500 font-bold">X</span>
+                          )}
+                        </td>
+
+                        {/* 액션 */}
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <button
+                            onClick={() => setSelectedInquiry(inquiry)}
+                            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                          >
+                            상세
+                          </button>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* 페이지네이션 */}
+            {totalPages > 1 && (
+              <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                      currentPage === 1
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    이전
+                  </button>
+
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNum: number
+                      if (totalPages <= 5) {
+                        pageNum = i + 1
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i
+                      } else {
+                        pageNum = currentPage - 2 + i
+                      }
+
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => setCurrentPage(pageNum)}
+                          className={`min-w-[32px] h-8 rounded-lg text-sm font-medium transition-all ${
+                            currentPage === pageNum
+                              ? 'bg-blue-500 text-white'
+                              : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      )
+                    })}
+                  </div>
+
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                      currentPage === totalPages
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    다음
+                  </button>
+                </div>
+
+                <div className="text-sm text-gray-600">
+                  {startIndex + 1}-{Math.min(startIndex + itemsPerPage, tableInquiries.length)} / {tableInquiries.length}건
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* 문의 상세 모달 */}
+      {selectedInquiry && (
+        <InquiryDetailModal
+          inquiry={selectedInquiry as any}
+          onClose={() => setSelectedInquiry(null)}
+          userId={currentUserId}
+          userName={currentUserName}
+          userRole={currentUserRole}
+        />
+      )}
     </div>
   )
 }

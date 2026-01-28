@@ -20,10 +20,10 @@ export default async function InquiryStatisticsPage() {
     .select('*')
     .order('created_at', { ascending: false })
 
-  // 사용자 목록 가져오기 (영업자별 통계를 위해)
+  // 사용자 목록 가져오기 (영업자별 통계 + 담당자 변경용)
   const { data: users } = await supabase
     .from('users')
-    .select('id, name, role')
+    .select('id, name, role, approved')
     .eq('approved', true)
 
   return (
@@ -41,6 +41,9 @@ export default async function InquiryStatisticsPage() {
         <InquiryAnalytics
           inquiries={inquiries || []}
           users={users || []}
+          currentUserId={user.id}
+          currentUserName={user.name}
+          currentUserRole={user.role}
         />
       </div>
     </DashboardLayout>

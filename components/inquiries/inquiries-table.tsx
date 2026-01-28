@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Inquiry } from '@/types/database.types'
 import { createClient } from '@/lib/supabase/client'
 import InquiryDetailModal from './inquiry-detail-modal'
@@ -16,6 +17,7 @@ interface InquiriesTableProps {
 type FilterStatus = 'all' | '신규' | '관리' | '부재' | '심사' | '가망' | '계약'
 
 export default function InquiriesTable({ inquiries, userId, userName, userRole }: InquiriesTableProps) {
+  const searchParams = useSearchParams()
   const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null)
   const [showAddModal, setShowAddModal] = useState(false)
   const [filter, setFilter] = useState<FilterStatus>('all')
@@ -24,6 +26,17 @@ export default function InquiriesTable({ inquiries, userId, userName, userRole }
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 50
   const supabase = createClient()
+
+  // URL 파라미터로 전달된 문의 ID가 있으면 모달 열기
+  useEffect(() => {
+    const inquiryId = searchParams.get('id')
+    if (inquiryId) {
+      const inquiry = inquiries.find(i => i.id === inquiryId)
+      if (inquiry) {
+        setSelectedInquiry(inquiry)
+      }
+    }
+  }, [searchParams, inquiries])
 
   // 메모 개수 가져오기
   useEffect(() => {
