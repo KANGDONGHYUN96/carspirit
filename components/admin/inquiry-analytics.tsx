@@ -950,7 +950,7 @@ export default function InquiryAnalytics({ inquiries: initialInquiries, users, c
                         ? 'ring-2 ring-offset-1'
                         : 'bg-gray-100 hover:bg-gray-200'
                     } ${isCarspirit && sourceFilter === source ? 'bg-gray-800' : ''}`}
-                    style={sourceFilter === source ? { ringColor: config.color } : {}}
+                    style={sourceFilter === source ? { ['--tw-ring-color' as string]: config.color } : {}}
                     title={source}
                   >
                     <div className={`w-6 h-6 relative flex items-center justify-center ${isCarspirit ? 'bg-gray-800 rounded p-0.5' : ''}`}>
