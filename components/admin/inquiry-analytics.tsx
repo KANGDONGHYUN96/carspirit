@@ -146,7 +146,7 @@ function RankBadge({ rank }: { rank: number }) {
 
 export default function InquiryAnalytics({ inquiries: initialInquiries, users, currentUserId, currentUserName, currentUserRole }: InquiryAnalyticsProps) {
   const [inquiries, setInquiries] = useState(initialInquiries)
-  const [selectedPeriod, setSelectedPeriod] = useState<'all' | 'year' | 'month' | 'week'>('month')
+  const [selectedPeriod, setSelectedPeriod] = useState<'all' | 'year' | 'month' | 'week'>('all')
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
 
