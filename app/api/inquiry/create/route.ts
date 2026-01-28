@@ -316,10 +316,12 @@ export async function POST(request: Request) {
         throw new Error('승계문의 접수 실패')
       }
 
-      // 관리자들에게 알림톡 발송
-      sendAlimtalkToAdmins(supabase, customer_name, customer_phone, content).catch(err => {
+      // 관리자들에게 알림톡 발송 (await로 완료 대기)
+      try {
+        await sendAlimtalkToAdmins(supabase, customer_name, customer_phone, content)
+      } catch (err) {
         console.error('관리자 알림톡 발송 중 에러 (문의 접수는 성공):', err)
-      })
+      }
 
       return NextResponse.json(
         {
@@ -367,17 +369,19 @@ export async function POST(request: Request) {
     // 3. 로테이션 상태 업데이트
     await updateRotationState(supabase, assignedUserId)
 
-    // 4. 카카오톡 알림톡 발송 (비동기로 실행, 실패해도 문의 접수는 성공)
+    // 4. 카카오톡 알림톡 발송 (await로 완료 대기)
     if (assignedUserPhone) {
-      sendKakaoAlimtalk(
-        assignedUserPhone,
-        assignedUserName,
-        customer_name,
-        customer_phone,
-        content
-      ).catch(err => {
+      try {
+        await sendKakaoAlimtalk(
+          assignedUserPhone,
+          assignedUserName,
+          customer_name,
+          customer_phone,
+          content
+        )
+      } catch (err) {
         console.error('알림톡 발송 중 에러 발생 (문의 접수는 성공):', err)
-      })
+      }
     } else {
       console.warn('⚠️ 담당자 전화번호가 없어서 알림톡을 발송하지 못했습니다.')
     }
