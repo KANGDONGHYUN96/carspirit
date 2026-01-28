@@ -95,65 +95,81 @@ async function updateRotationState(supabase: any, userId: string) {
     .limit(1)
 }
 
-// 카카오톡 알림톡 발송 (알리고 API)
+// PHP 프록시 설정 (카페24 고정 IP: 112.175.247.179)
+const ALIGO_PROXY_URL = 'https://carspirit.kr/aligo-proxy.php'
+const ALIGO_PROXY_KEY = 'carspirit_aligo_proxy_2024_secret'
+
+// 재시도 설정
+const MAX_RETRIES = 3
+const RETRY_DELAY = 2000 // 2초
+
+// 딜레이 함수
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+
+// 카카오톡 알림톡 발송 (PHP 프록시 경유)
 async function sendKakaoAlimtalk(phone: string, assignedUserName: string, customerName: string, customerPhone: string, content: string) {
-  // 알리고 API 설정이 있을 때만 발송
-  const aligoKey = process.env.ALIGO_API_KEY
-  const aligoUserId = process.env.ALIGO_USER_ID
-  const aligoSenderKey = process.env.ALIGO_SENDER_KEY
-  const aligoSenderPhone = process.env.ALIGO_SENDER_PHONE
-  const aligoTemplateCode = process.env.ALIGO_TEMPLATE_CODE || 'TK_9999' // 기본 템플릿 코드
+  // 전화번호 포맷팅 (하이픈 제거)
+  const formattedPhone = phone.replace(/-/g, '')
+  const formattedCustomerPhone = customerPhone.replace(/-/g, '')
 
-  if (!aligoKey || !aligoUserId || !aligoSenderKey || !aligoSenderPhone) {
-    console.warn('⚠️ 알림톡 설정이 없습니다. 환경 변수를 확인하세요.')
-    return { success: false, message: '알림톡 설정 없음' }
-  }
+  console.log('📱 알림톡 발송 시도 (PHP 프록시):', {
+    receiver: formattedPhone,
+    customer: customerName,
+    customerPhone: formattedCustomerPhone,
+  })
 
-  try {
-    // 전화번호 포맷팅 (하이픈 제거)
-    const formattedPhone = phone.replace(/-/g, '')
-    const formattedCustomerPhone = customerPhone.replace(/-/g, '')
+  // 재시도 로직
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 30000) // 30초 타임아웃
 
-    console.log('📱 알림톡 발송 시도:', {
-      receiver: formattedPhone,
-      customer: customerName,
-      customerPhone: formattedCustomerPhone,
-    })
+      const response = await fetch(ALIGO_PROXY_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Proxy-Key': ALIGO_PROXY_KEY,
+        },
+        body: JSON.stringify({
+          receiver: formattedPhone,
+          assigned_user_name: assignedUserName,
+          customer_name: customerName,
+          customer_phone: formattedCustomerPhone,
+          content: content,
+        }),
+        signal: controller.signal,
+      })
 
-    const formData = new URLSearchParams()
-    formData.append('apikey', aligoKey)
-    formData.append('userid', aligoUserId)
-    formData.append('senderkey', aligoSenderKey)
-    formData.append('tpl_code', aligoTemplateCode)
-    formData.append('sender', aligoSenderPhone)
-    formData.append('receiver_1', formattedPhone)
-    formData.append('subject_1', '[카스피릿] 신규문의')
-    // 템플릿 변수를 실제 값으로 치환해서 전송
-    const truncatedContent = content.length > 100 ? content.substring(0, 100) + '...' : content
-    formData.append('message_1', `[카스피릿] 신규문의\n\n안녕하세요 ${assignedUserName}님!\n새로운 고객 문의가 배정되었습니다.\n\n고객명: ${customerName}\n연락처: ${formattedCustomerPhone}\n문의내용: ${truncatedContent}\n\n지금 바로 확인하세요!`)
+      clearTimeout(timeoutId)
 
-    const response = await fetch('https://kakaoapi.aligo.in/akv10/alimtalk/send/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: formData.toString(),
-    })
+      const result = await response.json()
+      console.log(`📤 알림톡 프록시 응답 (시도 ${attempt}/${MAX_RETRIES}):`, result)
 
-    const result = await response.json()
-    console.log('📤 알림톡 API 응답:', result)
+      if (result.success) {
+        console.log('✅ 알림톡 발송 성공!')
+        return { success: true, result }
+      } else {
+        console.error(`❌ 알림톡 발송 실패 (시도 ${attempt}/${MAX_RETRIES}):`, result)
 
-    if (result.code === '0' || result.result_code === '1') {
-      console.log('✅ 알림톡 발송 성공!')
-      return { success: true, result }
-    } else {
-      console.error('❌ 알림톡 발송 실패:', result)
-      return { success: false, result }
+        // 마지막 시도가 아니면 재시도
+        if (attempt < MAX_RETRIES) {
+          console.log(`⏳ ${RETRY_DELAY / 1000}초 후 재시도...`)
+          await delay(RETRY_DELAY)
+        }
+      }
+    } catch (error) {
+      console.error(`❌ 알림톡 발송 에러 (시도 ${attempt}/${MAX_RETRIES}):`, error)
+
+      // 마지막 시도가 아니면 재시도
+      if (attempt < MAX_RETRIES) {
+        console.log(`⏳ ${RETRY_DELAY / 1000}초 후 재시도...`)
+        await delay(RETRY_DELAY)
+      }
     }
-  } catch (error) {
-    console.error('❌ 알림톡 발송 에러:', error)
-    return { success: false, error }
   }
+
+  console.error('❌ 알림톡 발송 최종 실패 (모든 재시도 소진)')
+  return { success: false, error: '모든 재시도 실패' }
 }
 
 // 허용된 도메인 목록 (환경변수로 관리)
@@ -161,6 +177,8 @@ const ALLOWED_ORIGINS = [
   process.env.NEXT_PUBLIC_SITE_URL || 'https://carspirit.co.kr',
   'https://www.carspirit.co.kr',
   'https://carspirit.vercel.app',
+  'https://carspiritadmin.com',
+  'https://www.carspiritadmin.com',
   ...(process.env.NODE_ENV === 'development' ? ['http://localhost:3000'] : [])
 ].filter(Boolean)
 
