@@ -53,6 +53,8 @@ const PLATFORM_CONFIG: Record<string, { name: string; logo: string; color: strin
   '오픈채팅': { name: '오픈채팅', logo: '/icon/kakao.png', color: '#FEE500' },
   'youtube': { name: '유튜브', logo: '/icon/youtube.png', color: '#FF0000' },
   '유튜브': { name: '유튜브', logo: '/icon/youtube.png', color: '#FF0000' },
+  'powerlink': { name: '네이버검색', logo: '/icon/naver.png', color: '#03C75A' },
+  '네이버검색': { name: '네이버검색', logo: '/icon/naver.png', color: '#03C75A' },
 }
 
 // 기본 플랫폼 설정 (카스피릿 - 직접문의)
@@ -161,7 +163,7 @@ export default function InquiryAnalytics({ inquiries: initialInquiries, users, c
   const supabase = createClient()
 
   // 매체 목록 (필터용) - 순서 지정
-  const SOURCE_ORDER = ['카스피릿', '페이스북', '인스타그램', '유튜브', '카카오', '숨고', '네이버블로그']
+  const SOURCE_ORDER = ['카스피릿', '네이버검색', '페이스북', '인스타그램', '유튜브', '카카오', '숨고', '네이버블로그']
 
   const sourceOptions = useMemo(() => {
     const sources = new Set<string>()
