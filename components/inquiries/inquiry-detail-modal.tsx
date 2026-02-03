@@ -31,7 +31,6 @@ export default function InquiryDetailModal({
 }: InquiryDetailModalProps) {
   const [status, setStatus] = useState(inquiry.status)
   const [isSaving, setIsSaving] = useState(false)
-  const [isLocking, setIsLocking] = useState(false)
   const [memos, setMemos] = useState<Memo[]>([])
   const [newMemo, setNewMemo] = useState('')
   const [isLoadingMemos, setIsLoadingMemos] = useState(true)
@@ -168,84 +167,6 @@ export default function InquiryDetailModal({
     } finally {
       setIsSaving(false)
     }
-  }
-
-  // 잠금 해제 (7일 연장)
-  const handleLock = async () => {
-    const isAdmin = userRole === 'admin'
-
-    if (!isAdmin) {
-      // 일반 사용자: 오늘 잠금 횟수 확인
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
-
-      const { data: todayLocks, error: countError } = await supabase
-        .from('inquiries')
-        .select('id, locked_at')
-        .eq('locked_by', userId)
-        .gte('locked_at', today.toISOString())
-        .not('locked_at', 'is', null)
-
-      if (countError) {
-        console.error('잠금 횟수 확인 에러:', countError)
-        setAlert({ message: '잠금 횟수 확인 실패', type: 'error' })
-        return
-      }
-
-      const todayLockCount = todayLocks?.length || 0
-      if (todayLockCount >= 2) {
-        setAlert({ message: '하루에 최대 2개까지만 잠금할 수 있습니다.', type: 'warning' })
-        return
-      }
-    }
-
-    setConfirm({
-      message: '이 문의를 7일 연장하시겠습니까?',
-      onConfirm: async () => {
-        setConfirm(null)
-        setIsLocking(true)
-        try {
-          const now = new Date()
-
-          // 기존 unlock_at이 있으면 그 시간에 +7일, 없으면 현재 시간 + 7일
-          let unlockAt: Date
-          if (inquiry.unlock_at) {
-            const currentUnlockAt = new Date(inquiry.unlock_at)
-            unlockAt = new Date(currentUnlockAt.getTime() + 7 * 24 * 60 * 60 * 1000) // 기존 unlock_at + 7일
-          } else {
-            unlockAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000) // 현재 시간 + 7일
-          }
-
-          // 이미 잠금된 문의인지 확인
-          const isAlreadyLocked = inquiry.locked_by === userId && inquiry.locked_at
-
-          const updateData: any = {
-            unlock_at: unlockAt.toISOString(),
-          }
-
-          // 처음 잠그는 경우에만 locked_at과 locked_by 업데이트
-          if (!isAlreadyLocked) {
-            updateData.locked_at = now.toISOString()
-            updateData.locked_by = userId
-          }
-
-          const { error } = await supabase
-            .from('inquiries')
-            .update(updateData)
-            .eq('id', inquiry.id)
-
-          if (error) throw error
-
-          setAlert({ message: '7일 연장되었습니다', type: 'success' })
-          router.refresh()
-          onClose()
-        } catch (error) {
-          console.error('Lock error:', error)
-          setAlert({ message: '잠금 실패: ' + (error as Error).message, type: 'error' })
-          setIsLocking(false)
-        }
-      }
-    })
   }
 
   // 총 수수료 자동 계산: AG + 금융사 + 대리점 + 기타 - 고객지원금
@@ -1168,20 +1089,13 @@ export default function InquiryDetailModal({
                 </button>
               ))}
             </div>
-            {/* 계약/잠금 버튼 */}
+            {/* 계약 버튼 */}
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowContractForm(true)}
                 className="px-3 py-1.5 text-xs font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-all"
               >
                 계약
-              </button>
-              <button
-                onClick={handleLock}
-                disabled={isLocking}
-                className="px-3 py-1.5 text-xs font-medium bg-gray-100 hover:bg-gray-200 disabled:bg-gray-100 disabled:text-gray-400 text-gray-700 rounded-md transition-all"
-              >
-                {isLocking ? '처리중' : '잠금'}
               </button>
             </div>
           </div>

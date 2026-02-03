@@ -61,42 +61,6 @@ export default function InquiriesTable({ inquiries, userId, userName, userRole }
     fetchMemoCounts()
   }, [inquiries])
 
-  // 공개 시간 표시 (7일전, 1시간전 등)
-  const getUnlockTimeDisplay = (inquiry: Inquiry) => {
-    const now = new Date()
-    let unlockAt: Date
-
-    // 잠금된 문의인 경우 unlock_at 사용
-    if (inquiry.locked_at && inquiry.unlock_at) {
-      unlockAt = new Date(inquiry.unlock_at)
-    } else {
-      // 신규 문의인 경우 created_at 기준으로 7일 후 계산
-      const createdAt = new Date(inquiry.created_at)
-      unlockAt = new Date(createdAt.getTime() + 7 * 24 * 60 * 60 * 1000)
-    }
-
-    // 이미 공개됨
-    if (now >= unlockAt) {
-      return '오픈'
-    }
-
-    // 남은 시간 계산
-    const diffMs = unlockAt.getTime() - now.getTime()
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-    const diffMinutes = Math.floor(diffMs / (1000 * 60))
-
-    if (diffDays > 0) {
-      return `${diffDays}일 후 공개`
-    } else if (diffHours > 0) {
-      return `${diffHours}시간 후 공개`
-    } else if (diffMinutes > 0) {
-      return `${diffMinutes}분 후 공개`
-    } else {
-      return '곧 공개'
-    }
-  }
-
   // 필터링
   const filteredInquiries = inquiries.filter((inquiry) => {
     const matchesFilter = filter === 'all' || inquiry.status === filter
@@ -337,7 +301,6 @@ export default function InquiriesTable({ inquiries, userId, userName, userRole }
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">번호</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">문의내용</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">수정일자</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">공개상태</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">메모</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">액션</th>
                 </tr>
@@ -387,11 +350,6 @@ export default function InquiriesTable({ inquiries, userId, userName, userRole }
                           hour: '2-digit',
                           minute: '2-digit'
                         })}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-600">
-                        {getUnlockTimeDisplay(inquiry)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

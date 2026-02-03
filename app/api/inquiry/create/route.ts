@@ -1,98 +1,22 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 
-// 다음 배정 영업자 선택 (최소 할당 우선 방식)
-async function getNextRotationUser(supabase: any) {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-
-  // 1. 활성화된 영업자 목록 가져오기 (오늘 배정 개수 기준 오름차순)
-  const { data: rotationUsers, error: rotationError } = await supabase
-    .from('user_rotation')
-    .select('*')
-    .eq('is_active', true)
-    .order('today_assigned_count', { ascending: true })
-    .order('priority', { ascending: false })
-    .limit(1)
-
-  if (rotationError) {
-    console.error('user_rotation 조회 에러:', rotationError)
-    throw new Error('영업자 배정 실패: ' + rotationError.message)
-  }
-
-  if (!rotationUsers || rotationUsers.length === 0) {
-    throw new Error('활성화된 영업자가 없습니다')
-  }
-
-  const rotationUser = rotationUsers[0]
-  console.log('✅ 선택된 로테이션 사용자:', rotationUser)
-
-  // 2. users 테이블에서 영업자 정보 가져오기
-  const { data: user, error: userError } = await supabase
+// 고정 배정 영업자 조회 (장동규 - 킹카노인정)
+async function getFixedAssignUser(supabase: any) {
+  const { data: user, error } = await supabase
     .from('users')
     .select('*')
-    .eq('id', rotationUser.user_id)
+    .eq('name', '킹카노인정')
+    .eq('approved', true)
     .single()
 
-  console.log('📋 user 쿼리 결과:', { user, userError })
-
-  if (userError) {
-    console.error('❌ users 조회 에러:', {
-      message: userError.message,
-      details: userError.details,
-      hint: userError.hint,
-      code: userError.code,
-      user_id: rotationUser.user_id,
-    })
-    throw new Error('영업자 정보 조회 실패: ' + userError.message)
+  if (error || !user) {
+    console.error('❌ 고정 배정 영업자 조회 실패:', error)
+    throw new Error('고정 배정 영업자(킹카노인정)를 찾을 수 없습니다')
   }
 
-  if (!user) {
-    console.error('❌ user가 null:', rotationUser.user_id)
-    throw new Error('영업자 정보를 찾을 수 없습니다')
-  }
-
-  return {
-    ...rotationUser,
-    user
-  }
-}
-
-// 로테이션 상태 업데이트
-async function updateRotationState(supabase: any, userId: string) {
-  // user_rotation 카운트 증가
-  const { error: updateError } = await supabase.rpc('increment_rotation_count', {
-    p_user_id: userId,
-  })
-
-  if (updateError) {
-    // RPC 함수가 없으면 직접 UPDATE
-    const { data: current } = await supabase
-      .from('user_rotation')
-      .select('total_assigned_count, today_assigned_count')
-      .eq('user_id', userId)
-      .single()
-
-    if (current) {
-      await supabase
-        .from('user_rotation')
-        .update({
-          total_assigned_count: current.total_assigned_count + 1,
-          today_assigned_count: current.today_assigned_count + 1,
-          last_assigned_at: new Date().toISOString(),
-        })
-        .eq('user_id', userId)
-    }
-  }
-
-  // rotation_state 업데이트
-  await supabase
-    .from('rotation_state')
-    .update({
-      last_user_id: userId,
-      updated_at: new Date().toISOString(),
-    })
-    .limit(1)
+  console.log('✅ 고정 배정 영업자:', user.name)
+  return user
 }
 
 // PHP 프록시 설정 (카페24 고정 IP: 112.175.247.179)
@@ -334,16 +258,13 @@ export async function POST(request: Request) {
     }
 
     // 일반 문의 처리
-    // 1. 다음 배정 영업자 선택
-    const rotationUser = await getNextRotationUser(supabase)
-    const assignedUserId = rotationUser.user.id
-    const assignedUserName = rotationUser.user.name
-    const assignedUserPhone = rotationUser.user.phone // 영업자 전화번호
+    // 1. 고정 배정 영업자 조회 (장동규 - 킹카노인정)
+    const assignedUser = await getFixedAssignUser(supabase)
+    const assignedUserId = assignedUser.id
+    const assignedUserName = assignedUser.name
+    const assignedUserPhone = assignedUser.phone // 영업자 전화번호
 
-    // 2. 문의 생성 (7일 후 자동 오픈)
-    const unlockAt = new Date()
-    unlockAt.setDate(unlockAt.getDate() + 7)
-
+    // 2. 문의 생성 (담당자에게 영구 귀속)
     const { data: inquiry, error: inquiryError } = await supabase
       .from('inquiries')
       .insert({
@@ -355,7 +276,6 @@ export async function POST(request: Request) {
         assigned_to: assignedUserId,
         assigned_to_name: assignedUserName,
         status: '신규',
-        unlock_at: unlockAt.toISOString(),
         marketing_agreed: Boolean(marketing_agreed),
       })
       .select()
@@ -366,10 +286,7 @@ export async function POST(request: Request) {
       throw new Error('문의 접수 실패')
     }
 
-    // 3. 로테이션 상태 업데이트
-    await updateRotationState(supabase, assignedUserId)
-
-    // 4. 카카오톡 알림톡 발송 (await로 완료 대기)
+    // 3. 카카오톡 알림톡 발송 (await로 완료 대기)
     if (assignedUserPhone) {
       try {
         await sendKakaoAlimtalk(
