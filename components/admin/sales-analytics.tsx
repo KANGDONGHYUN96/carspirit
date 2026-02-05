@@ -27,6 +27,7 @@ interface Contract {
   annual_mileage: string | null
   initial_cost_type: string | null
   initial_cost_amount: string | null
+  monthly_payment: string | null
   insurance_age: string | null
   car_tax_included: string | null
   customer_support: string | null
@@ -1238,6 +1239,15 @@ export default function SalesAnalytics({ contracts: initialContracts, users }: S
                   <span className="text-sm text-gray-500">초기비용</span>
                 </div>
                 <span className="flex-1 text-sm text-gray-900">{selectedContract.initial_cost_type || '-'} {selectedContract.initial_cost_amount ? `(₩${formatNumber(selectedContract.initial_cost_amount)})` : ''}</span>
+              </div>
+              <div className="flex items-center py-2.5 border-b border-gray-100 hover:bg-gray-50 -mx-6 px-6">
+                <div className="flex items-center gap-2 w-40">
+                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-sm text-gray-500">월납입료</span>
+                </div>
+                <span className="flex-1 text-sm text-gray-900">{selectedContract.monthly_payment ? `₩${formatNumber(selectedContract.monthly_payment)}` : '-'}</span>
               </div>
               <div className="flex items-center py-2.5 border-b border-gray-100 hover:bg-gray-50 -mx-6 px-6">
                 <div className="flex items-center gap-2 w-40">
