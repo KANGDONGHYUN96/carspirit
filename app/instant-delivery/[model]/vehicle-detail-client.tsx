@@ -317,6 +317,18 @@ export default function VehicleDetailClient({ modelName }: VehicleDetailClientPr
     s = s.replace(/\s+[A-Z][A-Z0-9]{1,3}$/, '')
     // "인테리어" 접미사 제거
     s = s.replace(/\s*인테리어\s*$/, '')
+    // 메리츠캐피탈 등: "외장색/내장색" 합쳐진 데이터 분리 (투톤 제외)
+    if (s.includes('/') && !s.includes('투톤')) {
+      const slashParts = s.split('/')
+      if (slashParts.length === 2) {
+        const afterSlash = slashParts[1].trim().replace(/\s/g, '')
+        const KNOWN_INTERIOR = ['토프', '코튼베이지', '네이비그레이', '올리브브라운',
+          '라이트카키', '피칸브라운', '인디고', '네이비', '브라운', '베이지', '다크그레이']
+        if (KNOWN_INTERIOR.some(ic => afterSlash === ic)) {
+          s = slashParts[0].trim()
+        }
+      }
+    }
     // 연결자 통일: "/" 와 "+" 를 공백으로 (투톤 색상 표기 통일)
     s = s.replace(/[\/+]/g, ' ')
     // 공백 정규화

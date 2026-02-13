@@ -156,9 +156,14 @@ function parseLineup(lineup: string): ParsedLineup {
 
   if (!lineup) return result
 
-  // 년형 추출
-  const yearMatch = lineup.match(/(\d{4})년형/)
-  if (yearMatch) result.year = yearMatch[0]
+  // 년형 추출: "2025년형" 또는 "25MY"/"26MY" 형식 모두 지원
+  const yearFullMatch = lineup.match(/(\d{4})년형/)
+  if (yearFullMatch) {
+    result.year = yearFullMatch[0]
+  } else {
+    const yearMyMatch = lineup.match(/(\d{2})MY/)
+    if (yearMyMatch) result.year = `20${yearMyMatch[1]}년형`
+  }
 
   // 연료 추출
   if (lineup.includes('하이브리드')) result.fuel = '하이브리드'
