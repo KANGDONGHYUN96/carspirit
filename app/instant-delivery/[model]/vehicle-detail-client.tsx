@@ -745,22 +745,10 @@ export default function VehicleDetailClient({ modelName }: VehicleDetailClientPr
   // 활성 필터 개수
   const activeFilterCount = Object.values(filters).reduce((sum, arr) => sum + arr.length, 0)
 
-  // 카테고리 라벨 (로딩/에러에서도 사용)
-  const loadingCategoryLabel = categoryParam === 'dealer' ? '대리점' : '특판'
-
   // 로딩 상태
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <nav className="flex items-center gap-1.5 text-sm text-gray-500 mb-6">
-          <a href="/dashboard" className="hover:text-gray-900 transition-colors">홈</a>
-          <span className="text-gray-300">&gt;</span>
-          <a href="/instant-delivery" className="hover:text-gray-900 transition-colors">즉시출고</a>
-          <span className="text-gray-300">&gt;</span>
-          <span>{loadingCategoryLabel}</span>
-          <span className="text-gray-300">&gt;</span>
-          <span className="text-gray-900 font-medium">{modelName}</span>
-        </nav>
         <div className="flex items-center justify-center py-20">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -775,15 +763,6 @@ export default function VehicleDetailClient({ modelName }: VehicleDetailClientPr
   if (error) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <nav className="flex items-center gap-1.5 text-sm text-gray-500 mb-6">
-          <a href="/dashboard" className="hover:text-gray-900 transition-colors">홈</a>
-          <span className="text-gray-300">&gt;</span>
-          <a href="/instant-delivery" className="hover:text-gray-900 transition-colors">즉시출고</a>
-          <span className="text-gray-300">&gt;</span>
-          <span>{loadingCategoryLabel}</span>
-          <span className="text-gray-300">&gt;</span>
-          <span className="text-gray-900 font-medium">{modelName}</span>
-        </nav>
         <div className="flex items-center justify-center py-20">
           <div className="text-center text-red-600">
             <p className="text-xl font-semibold mb-2">오류 발생</p>
@@ -794,27 +773,8 @@ export default function VehicleDetailClient({ modelName }: VehicleDetailClientPr
     )
   }
 
-  // 카테고리 라벨
-  const categoryLabel = categoryParam === 'dealer' ? '대리점' : '특판'
-
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      {/* 브레드크럼 */}
-      <nav className="flex items-center gap-1.5 text-sm text-gray-500 mb-6">
-        <a href="/dashboard" className="hover:text-gray-900 transition-colors">홈</a>
-        <span className="text-gray-300">&gt;</span>
-        <a href="/instant-delivery" className="hover:text-gray-900 transition-colors">즉시출고</a>
-        <span className="text-gray-300">&gt;</span>
-        <a
-          href={`/instant-delivery?category=${categoryParam || 'special'}`}
-          className="hover:text-gray-900 transition-colors"
-        >
-          {categoryLabel}
-        </a>
-        <span className="text-gray-300">&gt;</span>
-        <span className="text-gray-900 font-medium">{modelName}</span>
-      </nav>
-
       {/* 헤더 */}
       <div className="mb-8">
         <div className="flex items-center gap-4">

@@ -9,7 +9,7 @@ const UNIQUE_LOGOS = [
   { source: 'BNK캐피탈', logo: '/company-logos/bnk.png', width: 100, height: 45, offsetY: 0 },
   { source: 'IM캐피탈', logo: '/company-logos/im.png', width: 100, height: 45, offsetY: 0 },
   { source: 'MG캐피탈', logo: '/company-logos/mg.png', width: 100, height: 45, offsetY: 0 },
-  { source: '메리츠캐피탈', logo: '/company-logos/meritz.png', width: 100, height: 45, offsetY: 0 },
+  { source: '메리츠캐피탈', logo: '/company-logos/meritz1.png', width: 100, height: 45, offsetY: 0 },
   { source: 'JB우리캐피탈', logo: '/company-logos/jb.png', width: 100, height: 45, offsetY: 0 },
   { source: '롯데렌터카', logo: '/company-logos/lotte-rent.png', width: 100, height: 45, offsetY: 0 },
   { source: '롯데캐피탈', logo: '/company-logos/lotte-capital.png', width: 100, height: 45, offsetY: 0 },

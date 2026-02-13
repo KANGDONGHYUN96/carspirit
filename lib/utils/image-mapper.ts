@@ -290,7 +290,7 @@ const SOURCE_LOGOS: Record<string, string> = {
   'BNK캐피탈': '/company-logos/bnk.png',
   'IM캐피탈': '/company-logos/im.png',
   'MG캐피탈': '/company-logos/mg.png',
-  '메리츠캐피탈': '/company-logos/meritz.png',
+  '메리츠캐피탈': '/company-logos/meritz1.png',
   'JB우리캐피탈': '/company-logos/jb.png',
   '롯데렌터카': '/company-logos/lotte-rent.png',
   '롯데캐피탈': '/company-logos/lotte-capital.png',

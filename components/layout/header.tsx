@@ -1,7 +1,7 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
 const pathNameMap: { [key: string]: string } = {
@@ -27,6 +27,7 @@ const pathNameMap: { [key: string]: string } = {
 export default function Header() {
   const router = useRouter()
   const pathname = usePathname()
+  const searchParams = useSearchParams()
 
   const handleSignOut = async () => {
     const supabase = createClient()
@@ -39,10 +40,25 @@ export default function Header() {
     const paths = pathname.split('/').filter(Boolean)
     const breadcrumbs = [{ name: '홈', href: '/dashboard' }]
 
+    // 즉시출고 상세페이지: /instant-delivery/[model]
+    if (paths[0] === 'instant-delivery' && paths.length >= 2) {
+      const category = searchParams.get('category')
+      const categoryLabel = category === 'dealer' ? '대리점' : '특판'
+      const modelName = decodeURIComponent(paths[1])
+
+      breadcrumbs.push({ name: '즉시출고', href: '/instant-delivery' })
+      breadcrumbs.push({
+        name: categoryLabel,
+        href: `/instant-delivery?category=${category || 'special'}`
+      })
+      breadcrumbs.push({ name: modelName, href: pathname })
+      return breadcrumbs
+    }
+
     let currentPath = ''
     paths.forEach((path, index) => {
       currentPath += `/${path}`
-      const name = pathNameMap[currentPath] || path
+      const name = pathNameMap[currentPath] || decodeURIComponent(path)
       breadcrumbs.push({ name, href: currentPath })
     })
 
