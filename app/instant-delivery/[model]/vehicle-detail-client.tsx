@@ -445,10 +445,10 @@ export default function VehicleDetailClient({ modelName }: VehicleDetailClientPr
     return s
   }
 
-  // 라인업 정규화 헬퍼 (modelName 사용)
-  const getNormalizedLineup = (lineup: string | null): string => {
+  // 라인업 정규화 헬퍼 (modelName + rawVehicleName으로 인승 추출)
+  const getNormalizedLineup = (lineup: string | null, rawVehicleName?: string | null): string => {
     if (!lineup) return ''
-    return normalizeLineup(lineup, modelName)
+    return normalizeLineup(lineup, modelName, rawVehicleName || undefined)
   }
 
   // 고유 값 추출 (필터 옵션용)
@@ -466,7 +466,7 @@ export default function VehicleDetailClient({ modelName }: VehicleDetailClientPr
     // 라인업 정규화 후 고유 값 추출
     const lineupSet = new Set<string>()
     vehicles.forEach(v => {
-      const normalized = getNormalizedLineup(v.lineup)
+      const normalized = getNormalizedLineup(v.lineup, v.raw_vehicle_name)
       if (normalized) lineupSet.add(normalized)
     })
     // 라인업 정렬: 년형 오름차순 (2025→2026), 그 후 배기량/기타 오름차순
@@ -663,7 +663,7 @@ export default function VehicleDetailClient({ modelName }: VehicleDetailClientPr
       }
       if (filters.productType.length > 0 && !filters.productType.includes(v.product_type || '')) return false
       if (filters.saleCondition.length > 0 && !filters.saleCondition.includes(v.sale_condition || '')) return false
-      if (filters.lineup.length > 0 && !filters.lineup.includes(getNormalizedLineup(v.lineup))) return false
+      if (filters.lineup.length > 0 && !filters.lineup.includes(getNormalizedLineup(v.lineup, v.raw_vehicle_name))) return false
       if (filters.trim.length > 0) {
         const vTrim = v.trim ? v.trim.replace(/\s*\(\d+인승\)\s*$/, '').trim() : ''
         if (!filters.trim.includes(vTrim)) return false
@@ -703,7 +703,7 @@ export default function VehicleDetailClient({ modelName }: VehicleDetailClientPr
         v.sale_condition,
         v.discount,
         v.vehicle_name,
-        getNormalizedLineup(v.lineup),
+        getNormalizedLineup(v.lineup, v.raw_vehicle_name),
         v.trim,
         v.options,
         v.exterior_color,
@@ -1123,7 +1123,7 @@ export default function VehicleDetailClient({ modelName }: VehicleDetailClientPr
                         ) : null}
                         <span className="font-semibold text-gray-900">
                           {vehicle.vehicle_name}
-                          {vehicle.lineup && <span className="text-gray-500 font-normal ml-1">| {getNormalizedLineup(vehicle.lineup)}</span>}
+                          {vehicle.lineup && <span className="text-gray-500 font-normal ml-1">| {getNormalizedLineup(vehicle.lineup, vehicle.raw_vehicle_name)}</span>}
                         </span>
                         {count > 1 && (
                           <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-bold bg-orange-100 text-orange-700">

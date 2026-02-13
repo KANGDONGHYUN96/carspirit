@@ -195,26 +195,44 @@ function parseLineup(lineup: string): ParsedLineup {
 
 /**
  * 라인업을 정규화합니다.
- * 누락된 배기량/터보 정보를 차량 스펙에서 가져와 보정합니다.
+ * 형식: 연식 + 연료 배기량(T) + 구동방식 + 인승
+ * - 연료: vehicleName에서 추론 (HEV→하이브리드, EV→전기, 기본→가솔린)
+ * - 인승: rawVehicleName에서 추출 (DB lineup에 없으므로)
+ * - 구동방식: 여러 옵션이 있는 모델만 표시
+ * - 인승: 여러 옵션이 있는 모델만 표시
  */
-export function normalizeLineup(lineup: string, vehicleName: string): string {
+export function normalizeLineup(lineup: string, vehicleName: string, rawVehicleName?: string): string {
   if (!lineup) return ''
 
   const parsed = parseLineup(lineup)
   const spec = VEHICLE_ENGINE_SPECS[vehicleName]
 
+  // raw_vehicle_name에서 인승 추출 (DB lineup에 인승이 없는 경우)
+  if (!parsed.seats && rawVehicleName) {
+    const seatsMatch = rawVehicleName.match(/(\d+)인승/)
+    if (seatsMatch) parsed.seats = seatsMatch[0]
+  }
+
+  // vehicleName에서 연료 타입 추론 (DB lineup에 연료가 없는 경우)
+  if (!parsed.fuel) {
+    if (vehicleName.includes('HEV')) parsed.fuel = '하이브리드'
+    else if (/\bEV\b/.test(vehicleName) && !vehicleName.includes('HEV')) parsed.fuel = '전기'
+    else if (vehicleName.includes('일렉트릭')) parsed.fuel = '전기'
+    else if (vehicleName.includes('아이오닉')) parsed.fuel = '전기'
+    else if (vehicleName.includes('LPG')) parsed.fuel = 'LPG'
+    else if (vehicleName.includes('디젤')) parsed.fuel = '디젤'
+    else parsed.fuel = '가솔린'
+  }
+
   // 인승 구분이 있는 모델만 좌석수 표시
   const showSeats = parsed.seats && MULTI_SEAT_KEYWORDS.some(kw => vehicleName.includes(kw))
 
-  // 전기차는 배기량 없음 (HEV는 제외 - 'EV'가 'HEV'에 매칭되지 않도록 주의)
+  // 전기차는 배기량 없음 (HEV는 제외)
   const isEV = parsed.fuel === '전기'
-    || /\bEV\b/.test(vehicleName)
-    || vehicleName.includes('일렉트릭')
-    || vehicleName.includes('아이오닉')
   if (isEV && !vehicleName.includes('HEV')) {
     const parts = []
     if (parsed.year) parts.push(parsed.year)
-    if (parsed.fuel) parts.push(parsed.fuel)
+    parts.push('전기')
     // 테슬라는 구동방식 표시 안 함 (RWD/Long Range가 트림)
     const isTesla = /Model\s[3YSXE]/i.test(vehicleName)
     if (parsed.drive && !isTesla) parts.push(parsed.drive)
@@ -245,21 +263,27 @@ export function normalizeLineup(lineup: string, vehicleName: string): string {
   // 배기량이 없으면 차량 스펙에서 가져오기
   if (!parsed.displacement && spec?.displacement) {
     parsed.displacement = spec.displacement
-    // 스펙에서 배기량을 가져온 경우, 터보도 스펙 기준으로 적용
     if (spec.turbo) parsed.turbo = true
   } else if (spec?.turbo && parsed.displacement === spec.displacement) {
-    // 배기량이 스펙과 동일한 경우만 터보 적용
-    // (다른 배기량은 터보 여부가 다를 수 있음: 카니발 1.6T vs 3.5 NA)
     parsed.turbo = true
   }
 
-  // 정규화된 라인업 문자열 생성
+  // 정규화된 라인업 문자열 생성: 연식 + 연료 배기량(T) + 구동방식 + 인승
   const parts = []
   if (parsed.year) parts.push(parsed.year)
-  if (parsed.fuel) parts.push(parsed.fuel)
+
+  // 연료 + 배기량을 한 단위로 결합
   if (parsed.displacement) {
-    parts.push(parsed.turbo ? `${parsed.displacement}T` : parsed.displacement)
+    const dispStr = parsed.turbo ? `${parsed.displacement}T` : parsed.displacement
+    if (parsed.fuel) {
+      parts.push(`${parsed.fuel} ${dispStr}`)
+    } else {
+      parts.push(dispStr)
+    }
+  } else if (parsed.fuel) {
+    parts.push(parsed.fuel)
   }
+
   if (parsed.drive) parts.push(parsed.drive)
   if (showSeats) parts.push(parsed.seats!)
 
