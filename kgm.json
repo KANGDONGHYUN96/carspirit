@@ -1,0 +1,402 @@
+{
+  "brand": "KGM",
+  "vehicles": {
+    "무쏘": {
+      "official_name": "무쏘",
+      "year": "2026",
+      "aliases": ["musso", "MUSSO"],
+      "fuel_types": {
+        "디젤 2.2": {
+          "engine": "2.2 디젤",
+          "fuel": "디젤"
+        },
+        "디젤 2.2 4WD": {
+          "engine": "2.2 디젤",
+          "fuel": "디젤",
+          "drivetrain": "4WD"
+        }
+      },
+      "trims": {
+        "칸": {"korean": "칸", "aliases": ["칸", "KHAN"]},
+        "칸 플러스": {"korean": "칸 플러스", "aliases": ["칸플러스", "KHAN PLUS"]},
+        "칸 프리미엄": {"korean": "칸 프리미엄", "aliases": ["칸프리미엄", "KHAN PREMIUM"]}
+      },
+      "options": [
+        "12.3인치 계기판 디스플레이",
+        "12.3인치 인포테인먼트 디스플레이",
+        "Krell 프리미엄 사운드 시스템",
+        "전동식 운전석(8Way)+전동식 동승석(6Way)",
+        "통풍+히팅 시트",
+        "스마트 파워 테일게이트",
+        "어라운드 뷰 모니터링 시스템(AVM)",
+        "헤드업 디스플레이(HUD)",
+        "서라운드 뷰 모니터(SVM)",
+        "전자식 차동 제한장치(e-LSD)"
+      ],
+      "exterior_colors": {
+        "스페이스 블랙": "Space Black",
+        "그랜드 화이트": "Grand White",
+        "실키 실버": "Silky Silver",
+        "마운틴 그레이": "Mountain Grey",
+        "아마존 그린": "Amazon Green"
+      },
+      "interior_colors": [
+        "인디언 레드 투톤 가죽시트",
+        "블랙 가죽시트",
+        "모카 브라운 가죽시트"
+      ]
+    },
+    "무쏘 EV": {
+      "official_name": "무쏘 EV",
+      "year": "2026",
+      "aliases": ["musso ev", "MUSSO EV", "무쏘EV"],
+      "fuel_types": {
+        "전기": {
+          "engine": "전기모터 160kW",
+          "fuel": "전기",
+          "battery": "82kWh"
+        },
+        "전기 4WD": {
+          "engine": "전기모터 160kW x 2 (듀얼모터)",
+          "fuel": "전기",
+          "battery": "82kWh",
+          "drivetrain": "4WD"
+        }
+      },
+      "trims": {
+        "칸": {"korean": "칸", "aliases": ["칸", "KHAN"]},
+        "칸 플러스": {"korean": "칸 플러스", "aliases": ["칸플러스", "KHAN PLUS"]},
+        "칸 프리미엄": {"korean": "칸 프리미엄", "aliases": ["칸프리미엄", "KHAN PREMIUM"]},
+        "칸 플러스 4WD": {"korean": "칸 플러스 4WD", "aliases": ["칸플러스4WD"]},
+        "칸 프리미엄 4WD": {"korean": "칸 프리미엄 4WD", "aliases": ["칸프리미엄4WD"]}
+      },
+      "options": [
+        "12.3인치 계기판 디스플레이",
+        "12.3인치 인포테인먼트 디스플레이",
+        "Krell 프리미엄 사운드 시스템",
+        "전동식 운전석(8Way)+전동식 동승석(6Way)",
+        "통풍+히팅 시트",
+        "스마트 파워 테일게이트",
+        "어라운드 뷰 모니터링 시스템(AVM)",
+        "헤드업 디스플레이(HUD)",
+        "V2L(Vehicle to Load)",
+        "원격 스마트 주차 보조(RSPA)"
+      ],
+      "exterior_colors": {
+        "스페이스 블랙": "Space Black",
+        "그랜드 화이트": "Grand White",
+        "실키 실버": "Silky Silver",
+        "마운틴 그레이": "Mountain Grey",
+        "인디고 블루": "Indigo Blue"
+      },
+      "interior_colors": [
+        "블랙 가죽시트",
+        "네이비 블루 가죽시트",
+        "모카 브라운 가죽시트"
+      ]
+    },
+    "액티언": {
+      "official_name": "액티언",
+      "year": "2026",
+      "aliases": ["actyon", "ACTYON"],
+      "fuel_types": {
+        "가솔린 1.5 터보": {
+          "engine": "1.5 터보",
+          "fuel": "가솔린"
+        },
+        "가솔린 1.5 터보 4WD": {
+          "engine": "1.5 터보",
+          "fuel": "가솔린",
+          "drivetrain": "4WD"
+        }
+      },
+      "trims": {
+        "WD": {"korean": "WD", "aliases": ["WD"]},
+        "LX": {"korean": "LX", "aliases": ["LX"]},
+        "MX": {"korean": "MX", "aliases": ["MX"]},
+        "TX": {"korean": "TX", "aliases": ["TX"]},
+        "LX 4WD": {"korean": "LX 4WD", "aliases": ["LX4WD"]},
+        "MX 4WD": {"korean": "MX 4WD", "aliases": ["MX4WD"]},
+        "TX 4WD": {"korean": "TX 4WD", "aliases": ["TX4WD"]}
+      },
+      "options": [
+        "10.25인치 계기판 디스플레이",
+        "10.25인치 인포테인먼트 디스플레이",
+        "전동식 운전석(8Way)",
+        "통풍+히팅 시트",
+        "파노라마 선루프",
+        "스마트 파워 테일게이트",
+        "어라운드 뷰 모니터링 시스템(AVM)",
+        "블라인드 스팟 모니터(BSM)",
+        "후측방 충돌 회피 지원(RCCA)"
+      ],
+      "exterior_colors": {
+        "스페이스 블랙": "Space Black",
+        "그랜드 화이트": "Grand White",
+        "실키 실버": "Silky Silver",
+        "마운틴 그레이": "Mountain Grey",
+        "플레임 레드": "Flame Red",
+        "인디고 블루": "Indigo Blue"
+      },
+      "interior_colors": [
+        "블랙 직물시트",
+        "블랙 인조가죽시트",
+        "브라운 투톤 인조가죽시트"
+      ]
+    },
+    "액티언 HEV": {
+      "official_name": "액티언 HEV",
+      "year": "2026",
+      "aliases": ["actyon hev", "ACTYON HEV", "액티언하이브리드"],
+      "fuel_types": {
+        "하이브리드": {
+          "engine": "1.5 터보 하이브리드",
+          "fuel": "하이브리드",
+          "motor": "전기모터 포함"
+        }
+      },
+      "trims": {
+        "LX": {"korean": "LX", "aliases": ["LX"]},
+        "MX": {"korean": "MX", "aliases": ["MX"]},
+        "TX": {"korean": "TX", "aliases": ["TX"]}
+      },
+      "options": [
+        "10.25인치 계기판 디스플레이",
+        "10.25인치 인포테인먼트 디스플레이",
+        "전동식 운전석(8Way)",
+        "통풍+히팅 시트",
+        "파노라마 선루프",
+        "스마트 파워 테일게이트",
+        "어라운드 뷰 모니터링 시스템(AVM)",
+        "블라인드 스팟 모니터(BSM)"
+      ],
+      "exterior_colors": {
+        "스페이스 블랙": "Space Black",
+        "그랜드 화이트": "Grand White",
+        "실키 실버": "Silky Silver",
+        "마운틴 그레이": "Mountain Grey",
+        "인디고 블루": "Indigo Blue"
+      },
+      "interior_colors": [
+        "블랙 인조가죽시트",
+        "브라운 투톤 인조가죽시트"
+      ]
+    },
+    "토레스": {
+      "official_name": "토레스",
+      "year": "2026",
+      "aliases": ["torres", "TORRES"],
+      "fuel_types": {
+        "가솔린 1.5 터보": {
+          "engine": "1.5 터보",
+          "fuel": "가솔린"
+        }
+      },
+      "trims": {
+        "T5": {"korean": "T5", "aliases": ["T5"]},
+        "T6": {"korean": "T6", "aliases": ["T6"]},
+        "T7": {"korean": "T7", "aliases": ["T7"]}
+      },
+      "options": [
+        "12.3인치 계기판 디스플레이",
+        "12.3인치 인포테인먼트 디스플레이",
+        "전동식 운전석(8Way)+전동식 동승석(6Way)",
+        "통풍+히팅 시트",
+        "파노라마 선루프",
+        "스마트 파워 테일게이트",
+        "어라운드 뷰 모니터링 시스템(AVM)",
+        "헤드업 디스플레이(HUD)",
+        "Krell 프리미엄 사운드 시스템",
+        "빌트인캠 2.0"
+      ],
+      "exterior_colors": {
+        "스페이스 블랙": "Space Black",
+        "그랜드 화이트": "Grand White",
+        "실키 실버": "Silky Silver",
+        "마운틴 그레이": "Mountain Grey",
+        "포레스트 그린": "Forest Green",
+        "새틴 베이지": "Satin Beige",
+        "인디고 블루": "Indigo Blue"
+      },
+      "interior_colors": [
+        "블랙 인조가죽시트",
+        "모카 브라운 인조가죽시트",
+        "블랙 나파가죽시트",
+        "모카 브라운 나파가죽시트"
+      ]
+    },
+    "토레스 HEV": {
+      "official_name": "토레스 HEV",
+      "year": "2026",
+      "aliases": ["torres hev", "TORRES HEV", "토레스하이브리드"],
+      "fuel_types": {
+        "하이브리드": {
+          "engine": "1.5 터보 하이브리드",
+          "fuel": "하이브리드",
+          "motor": "전기모터 포함"
+        }
+      },
+      "trims": {
+        "T5": {"korean": "T5", "aliases": ["T5"]},
+        "T6": {"korean": "T6", "aliases": ["T6"]},
+        "T7": {"korean": "T7", "aliases": ["T7"]}
+      },
+      "options": [
+        "12.3인치 계기판 디스플레이",
+        "12.3인치 인포테인먼트 디스플레이",
+        "전동식 운전석(8Way)+전동식 동승석(6Way)",
+        "통풍+히팅 시트",
+        "파노라마 선루프",
+        "스마트 파워 테일게이트",
+        "어라운드 뷰 모니터링 시스템(AVM)",
+        "헤드업 디스플레이(HUD)",
+        "Krell 프리미엄 사운드 시스템"
+      ],
+      "exterior_colors": {
+        "스페이스 블랙": "Space Black",
+        "그랜드 화이트": "Grand White",
+        "실키 실버": "Silky Silver",
+        "마운틴 그레이": "Mountain Grey",
+        "포레스트 그린": "Forest Green",
+        "인디고 블루": "Indigo Blue"
+      },
+      "interior_colors": [
+        "블랙 인조가죽시트",
+        "모카 브라운 인조가죽시트",
+        "블랙 나파가죽시트"
+      ]
+    },
+    "토레스 EVX": {
+      "official_name": "토레스 EVX",
+      "year": "2026",
+      "aliases": ["torres evx", "TORRES EVX", "토레스전기차"],
+      "fuel_types": {
+        "전기": {
+          "engine": "전기모터 140kW",
+          "fuel": "전기",
+          "battery": "73.4kWh"
+        }
+      },
+      "trims": {
+        "T5": {"korean": "T5", "aliases": ["T5"]},
+        "T6": {"korean": "T6", "aliases": ["T6"]},
+        "T7": {"korean": "T7", "aliases": ["T7"]}
+      },
+      "options": [
+        "12.3인치 계기판 디스플레이",
+        "12.3인치 인포테인먼트 디스플레이",
+        "전동식 운전석(8Way)+전동식 동승석(6Way)",
+        "통풍+히팅 시트",
+        "파노라마 선루프",
+        "스마트 파워 테일게이트",
+        "어라운드 뷰 모니터링 시스템(AVM)",
+        "헤드업 디스플레이(HUD)",
+        "Krell 프리미엄 사운드 시스템",
+        "V2L(Vehicle to Load)",
+        "원격 스마트 주차 보조(RSPA)"
+      ],
+      "exterior_colors": {
+        "스페이스 블랙": "Space Black",
+        "그랜드 화이트": "Grand White",
+        "실키 실버": "Silky Silver",
+        "마운틴 그레이": "Mountain Grey",
+        "포레스트 그린": "Forest Green",
+        "인디고 블루": "Indigo Blue"
+      },
+      "interior_colors": [
+        "블랙 인조가죽시트",
+        "모카 브라운 인조가죽시트",
+        "블랙 나파가죽시트"
+      ]
+    },
+    "렉스턴 뉴 아레나": {
+      "official_name": "렉스턴 뉴 아레나",
+      "year": "2026",
+      "aliases": ["rexton", "REXTON", "렉스턴", "뉴아레나", "아레나"],
+      "fuel_types": {
+        "디젤 2.2": {
+          "engine": "2.2 디젤",
+          "fuel": "디젤"
+        },
+        "디젤 2.2 4WD": {
+          "engine": "2.2 디젤",
+          "fuel": "디젤",
+          "drivetrain": "4WD"
+        }
+      },
+      "trims": {
+        "익스프레스": {"korean": "익스프레스", "aliases": ["익스프레스", "EXPRESS"]},
+        "클래스": {"korean": "클래스", "aliases": ["클래스", "CLASS"]},
+        "시그니처": {"korean": "시그니처", "aliases": ["시그니처", "SIGNATURE"]},
+        "익스프레스 4WD": {"korean": "익스프레스 4WD", "aliases": ["익스프레스4WD"]},
+        "클래스 4WD": {"korean": "클래스 4WD", "aliases": ["클래스4WD"]},
+        "시그니처 4WD": {"korean": "시그니처 4WD", "aliases": ["시그니처4WD"]}
+      },
+      "options": [
+        "12.3인치 계기판 디스플레이",
+        "12.3인치 인포테인먼트 디스플레이",
+        "Krell 프리미엄 사운드 시스템",
+        "전동식 운전석(12Way)+전동식 동승석(8Way)",
+        "통풍+히팅+마사지 시트",
+        "파노라마 선루프",
+        "스마트 파워 테일게이트",
+        "어라운드 뷰 모니터링 시스템(AVM)",
+        "헤드업 디스플레이(HUD)",
+        "전자식 에어 서스펜션(EAS)",
+        "어댑티브 크루즈 컨트롤(ACC)"
+      ],
+      "exterior_colors": {
+        "스페이스 블랙": "Space Black",
+        "그랜드 화이트": "Grand White",
+        "실키 실버": "Silky Silver",
+        "마운틴 그레이": "Mountain Grey",
+        "플래티넘 그레이": "Platinum Grey",
+        "인디고 블루": "Indigo Blue"
+      },
+      "interior_colors": [
+        "블랙 나파가죽시트",
+        "버건디 나파가죽시트",
+        "모카 브라운 나파가죽시트"
+      ]
+    },
+    "티볼리": {
+      "official_name": "티볼리",
+      "year": "2026",
+      "aliases": ["tivoli", "TIVOLI"],
+      "fuel_types": {
+        "가솔린 1.5 터보": {
+          "engine": "1.5 터보",
+          "fuel": "가솔린"
+        }
+      },
+      "trims": {
+        "VX": {"korean": "VX", "aliases": ["VX"]},
+        "LX": {"korean": "LX", "aliases": ["LX"]},
+        "MX": {"korean": "MX", "aliases": ["MX"]},
+        "TX": {"korean": "TX", "aliases": ["TX"]}
+      },
+      "options": [
+        "8인치 계기판 디스플레이",
+        "9인치 인포테인먼트 디스플레이",
+        "전동식 운전석(6Way)",
+        "통풍+히팅 시트",
+        "선루프",
+        "스마트 파워 테일게이트",
+        "어라운드 뷰 모니터링 시스템(AVM)",
+        "블라인드 스팟 모니터(BSM)"
+      ],
+      "exterior_colors": {
+        "스페이스 블랙": "Space Black",
+        "그랜드 화이트": "Grand White",
+        "실키 실버": "Silky Silver",
+        "플레임 레드": "Flame Red",
+        "테크노 그레이": "Techno Grey",
+        "인디고 블루": "Indigo Blue"
+      },
+      "interior_colors": [
+        "블랙 직물시트",
+        "블랙 인조가죽시트"
+      ]
+    }
+  }
+}

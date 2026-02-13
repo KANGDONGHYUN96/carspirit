@@ -1,0 +1,297 @@
+{
+  "_description": "금융사 데이터 정규화를 위한 마스터 테이블 (정규화 룰 전용)",
+  "_updated": "2026-01-19",
+  "_note": "차량 데이터는 브랜드별 JSON 파일 참조 (hyundai.json, kia.json, genesis.json, renault.json, kgm.json)",
+
+  "brands": {
+    "현대": {
+      "official_name": "현대",
+      "aliases": ["현대", "HYUNDAI", "hyundai", "현대자동차", "현대차"],
+      "data_file": "hyundai.json"
+    },
+    "기아": {
+      "official_name": "기아",
+      "aliases": ["기아", "KIA", "kia", "기아자동차", "기아차"],
+      "data_file": "kia.json"
+    },
+    "제네시스": {
+      "official_name": "제네시스",
+      "aliases": ["제네시스", "GENESIS", "genesis"],
+      "data_file": "genesis.json"
+    },
+    "르노코리아": {
+      "official_name": "르노코리아",
+      "aliases": ["르노코리아", "르노", "RENAULT", "renault", "르노코리아자동차", "르노삼성", "르노삼성자동차"],
+      "data_file": "renault.json"
+    },
+    "KGM": {
+      "official_name": "KGM",
+      "aliases": ["KGM", "kgm", "KG모빌리티", "KG 모빌리티", "쌍용", "쌍용자동차", "SSANGYONG"],
+      "data_file": "kgm.json"
+    }
+  },
+
+  "option_normalizations": {
+    "_description": "금융사 데이터의 다양한 옵션명 표기를 제조사 공식 명칭으로 정규화",
+
+    "현대 스마트센스": {
+      "official": "현대 스마트센스",
+      "variants": ["현대스마트센스", "스마트센스", "HYUNDAI SMARTSENSE", "SmartSense"]
+    },
+    "현대 스마트센스Ⅰ": {
+      "official": "현대 스마트센스Ⅰ",
+      "variants": ["현대 스마트센스1", "현대 스마트센스 1", "스마트센스1", "스마트센스Ⅰ", "스마트센스 I"]
+    },
+    "현대 스마트센스Ⅱ플러스": {
+      "official": "현대 스마트센스Ⅱ플러스",
+      "variants": ["현대 스마트센스2플러스", "현대 스마트센스 II 플러스", "스마트센스2플러스", "스마트센스Ⅱ플러스"]
+    },
+    "드라이브 와이즈": {
+      "official": "드라이브 와이즈",
+      "variants": ["드라이브와이즈", "DRIVE WISE", "DriveWise"]
+    },
+    "드라이브 와이즈Ⅰ": {
+      "official": "드라이브 와이즈Ⅰ",
+      "variants": ["드라이브 와이즈1", "드라이브 와이즈 1", "드라이브와이즈1", "드라이브 와이즈 I"]
+    },
+    "드라이브 와이즈Ⅱ": {
+      "official": "드라이브 와이즈Ⅱ",
+      "variants": ["드라이브 와이즈2", "드라이브 와이즈 2", "드라이브와이즈2", "드라이브 와이즈 II"]
+    },
+    "선루프": {
+      "official": "선루프",
+      "variants": [
+        "썬루프", "SUNROOF",
+        "파노라마 선루프", "파노라마선루프", "파노라마 썬루프", "파노라마썬루프", "파노라마", "PANORAMA SUNROOF",
+        "듀얼 와이드 선루프", "듀얼와이드선루프", "듀얼 선루프", "듀얼선루프",
+        "와이드 선루프", "와이드선루프"
+      ]
+    },
+    "헤드업 디스플레이": {
+      "official": "헤드업 디스플레이",
+      "variants": ["헤드업디스플레이", "HUD", "HEAD UP DISPLAY"]
+    },
+    "파킹 어시스트": {
+      "official": "파킹 어시스트",
+      "variants": ["파킹어시스트", "PARKING ASSIST"]
+    },
+    "파킹 어시스트 플러스": {
+      "official": "파킹 어시스트 플러스",
+      "variants": ["파킹어시스트플러스", "파킹 어시스트+", "PARKING ASSIST PLUS"]
+    },
+    "파킹어시스트Ⅰ": {
+      "official": "파킹어시스트Ⅰ",
+      "variants": ["파킹 어시스트1", "파킹 어시스트 1", "파킹어시스트1", "파킹어시스트 I"]
+    },
+    "파킹어시스트Ⅱ": {
+      "official": "파킹어시스트Ⅱ",
+      "variants": ["파킹 어시스트2", "파킹 어시스트 2", "파킹어시스트2", "파킹어시스트 II"]
+    },
+    "파킹어시스트Ⅲ": {
+      "official": "파킹어시스트Ⅲ",
+      "variants": ["파킹 어시스트3", "파킹 어시스트 3", "파킹어시스트3", "파킹어시스트 III"]
+    },
+    "파킹어시스트Ⅳ": {
+      "official": "파킹어시스트Ⅳ",
+      "variants": ["파킹 어시스트4", "파킹 어시스트 4", "파킹어시스트4", "파킹어시스트 IV"]
+    },
+    "원격 스마트 주차 보조": {
+      "official": "원격 스마트 주차 보조",
+      "variants": ["원격스마트주차보조", "원격 주차 보조", "REMOTE SMART PARKING ASSIST", "RSPA"]
+    },
+    "빌트인 캠": {
+      "official": "빌트인 캠",
+      "variants": [
+        "빌트인캠", "BUILT-IN CAM", "블랙박스",
+        "빌트인 캠 2", "빌트인캠2", "빌트인 캠2", "BUILT-IN CAM 2", "빌트인캠 2.0",
+        "빌트인 캠 2 Plus", "빌트인 캠 2 플러스", "빌트인캠2플러스", "빌트인 캠2플러스",
+        "빌트인캠2 & 증강현실내비게이션"
+      ]
+    },
+    "컴포트": {
+      "official": "컴포트",
+      "variants": ["컴포트팩", "COMFORT", "컴포트 패키지"]
+    },
+    "컴포트Ⅰ": {
+      "official": "컴포트Ⅰ",
+      "variants": ["컴포트1", "컴포트 1", "COMFORT 1", "COMFORT I"]
+    },
+    "컴포트Ⅱ": {
+      "official": "컴포트Ⅱ",
+      "variants": ["컴포트2", "컴포트 2", "COMFORT 2", "COMFORT II"]
+    },
+    "컴포트Ⅲ": {
+      "official": "컴포트Ⅲ",
+      "variants": ["컴포트3", "컴포트 3", "COMFORT 3", "COMFORT III"]
+    },
+    "컨비니언스": {
+      "official": "컨비니언스",
+      "variants": ["컨비니언스팩", "CONVENIENCE", "컨비니언스 패키지"]
+    },
+    "프리미엄": {
+      "official": "프리미엄",
+      "variants": ["프리미엄팩", "PREMIUM", "프리미엄 패키지"]
+    },
+    "플래티넘": {
+      "official": "플래티넘",
+      "variants": ["플래티넘팩", "PLATINUM", "플래티넘 패키지"]
+    },
+    "스타일": {
+      "official": "스타일",
+      "variants": ["스타일팩", "STYLE", "스타일 패키지"]
+    },
+    "HTRAC": {
+      "official": "HTRAC",
+      "variants": ["에이치트랙", "H-TRAC", "4WD HTRAC"]
+    },
+    "AWD": {
+      "official": "AWD",
+      "variants": ["사륜구동", "4WD", "ALL WHEEL DRIVE"]
+    },
+    "BOSE 프리미엄 사운드": {
+      "official": "BOSE 프리미엄 사운드",
+      "variants": ["보스 프리미엄 사운드", "BOSE 사운드", "보스사운드", "BOSE"]
+    },
+    "하만카돈 프리미엄 사운드": {
+      "official": "하만카돈 프리미엄 사운드",
+      "variants": ["하만카돈 사운드", "하만카돈", "Harman Kardon", "HARMAN KARDON"]
+    },
+    "KRELL 프리미엄 사운드": {
+      "official": "KRELL 프리미엄 사운드",
+      "variants": ["크렐 프리미엄 사운드", "크렐 사운드", "크렐", "KRELL", "KRELL프리미엄사운", "크렐프리미엄사운"]
+    },
+    "메리디안 프리미엄 사운드": {
+      "official": "메리디안 프리미엄 사운드",
+      "variants": ["메리디안 사운드", "메리디안", "MERIDIAN"]
+    },
+    "렉시콘 프리미엄 사운드": {
+      "official": "렉시콘 프리미엄 사운드",
+      "variants": ["렉시콘 사운드", "렉시콘", "Lexicon", "LEXICON"]
+    },
+    "V2L": {
+      "official": "V2L",
+      "variants": ["Vehicle to Load", "V to L", "비투엘"]
+    },
+    "파퓰러 패키지": {
+      "official": "파퓰러 패키지",
+      "variants": ["파퓰러패키지", "파퓰러 팩", "POPULAR PACKAGE"]
+    },
+    "파퓰러 패키지Ⅰ": {
+      "official": "파퓰러 패키지Ⅰ",
+      "variants": ["파퓰러 패키지1", "파퓰러패키지1", "파퓰러1", "POPULAR PACKAGE 1"]
+    },
+    "파퓰러 패키지Ⅱ": {
+      "official": "파퓰러 패키지Ⅱ",
+      "variants": ["파퓰러 패키지2", "파퓰러패키지2", "파퓰러2", "POPULAR PACKAGE 2"]
+    },
+    "HUD + 빌트인 캠 2": {
+      "official": "HUD + 빌트인 캠 2",
+      "variants": ["HUD+빌트인캠2", "HUD+빌트인 캠 2", "HUD + 빌트인 캠2", "HUD+빌트인캠", "HUD+빌트인", "헤드업빌트인캠"]
+    },
+    "12.3인치 클러스터": {
+      "official": "12.3인치 클러스터",
+      "variants": ["12.3클러스터", "12.3인치클러스터"]
+    }
+  },
+
+  "trim_normalizations": {
+    "_description": "트림명 정규화",
+
+    "프레스티지": {
+      "official": "프레스티지",
+      "variants": ["PRESTIGE", "prestige"]
+    },
+    "익스클루시브": {
+      "official": "익스클루시브",
+      "variants": ["EXCLUSIVE", "exclusive"]
+    },
+    "시그니처": {
+      "official": "시그니처",
+      "variants": ["SIGNATURE", "signature"]
+    },
+    "노블레스": {
+      "official": "노블레스",
+      "variants": ["NOBLESSE", "noblesse"]
+    },
+    "캘리그래피": {
+      "official": "캘리그래피",
+      "variants": ["CALLIGRAPHY", "calligraphy", "캘리그라피", "캘리"]
+    },
+    "인스퍼레이션": {
+      "official": "인스퍼레이션",
+      "variants": ["INSPIRATION", "inspiration", "인스피레이션"]
+    },
+    "모던": {
+      "official": "모던",
+      "variants": ["MODERN", "modern"]
+    },
+    "스마트": {
+      "official": "스마트",
+      "variants": ["SMART", "smart"]
+    },
+    "GT-Line": {
+      "official": "GT-Line",
+      "variants": ["GT라인", "GT LINE", "지티라인", "GTLine"]
+    },
+    "N Line": {
+      "official": "N Line",
+      "variants": ["N라인", "N LINE", "엔라인", "NLine"]
+    },
+    "X-Line": {
+      "official": "X-Line",
+      "variants": ["X라인", "X LINE", "엑스라인", "XLine"]
+    }
+  },
+
+  "exterior_color_normalizations": {
+    "_description": "외장색 정규화 (색상코드 → 공식명칭)",
+
+    "ABP": "오로라 블랙 펄",
+    "A2B": "어비스 블랙 펄",
+    "SWP": "스노우 화이트 펄",
+    "WC9": "크리미 화이트 펄",
+    "W6H": "세레니티 화이트 펄",
+    "SAW": "아틀라스 화이트",
+    "AGT": "인터스텔라 그레이",
+    "T2G": "녹턴 그레이 메탈릭",
+    "C5G": "사이버 그레이 메탈릭",
+    "PE2": "에코트로닉 그레이 펄",
+    "R2P": "얼티메이트 레드 메탈릭"
+  },
+
+  "interior_color_normalizations": {
+    "_description": "내장색 정규화 - 오타 교정 + 공백 통일",
+    "네이비 그레이": {
+      "official": "네이비 그레이",
+      "variants": ["네이비그레디", "네이비 그레디"]
+    },
+    "딥그린&테라코타브라운": {
+      "official": "딥그린&테라코타브라운",
+      "variants": ["딥크린테라코타브라운", "딥크린 테라코타 브라운"]
+    },
+    "캐시미어 베이지": {
+      "official": "캐시미어 베이지",
+      "variants": ["캐쉬미어 베이지", "캐쉬미어베이지"]
+    },
+    "블랙 모노톤": {
+      "official": "블랙 모노톤",
+      "variants": ["블랙 모노", "블랙모노"]
+    },
+    "옵시디언 블랙 모노톤": {
+      "official": "옵시디언 블랙 모노톤",
+      "variants": ["옵시디언블랙모노", "옵시디언 블랙 모노"]
+    },
+    "딥그린&미디엄그레이": {
+      "official": "딥그린&미디엄그레이",
+      "variants": ["딥그린&미디엄그레"]
+    },
+    "세이지 그린": {
+      "official": "세이지 그린",
+      "variants": ["세이지그린"]
+    },
+    "울트라마린블루/글레이셔화이트/뉴스페이퍼": {
+      "official": "울트라마린블루/글레이셔화이트/뉴스페이퍼",
+      "variants": ["울트라마린블루/블레이셔화이트/뉴스페이퍼"]
+    }
+  }
+}

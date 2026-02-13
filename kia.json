@@ -1,0 +1,1267 @@
+{
+  "_description": "기아 공식 데이터 기반 정규화 마스터 테이블",
+  "_updated": "2026-01-15",
+  "_sources": {
+    "kia": "기아 공식 홈페이지 catalog-price PDF"
+  },
+
+  "brands": {
+    "기아": {
+      "official_name": "기아",
+      "aliases": ["기아", "KIA", "kia", "기아자동차", "기아차"]
+    }
+  },
+
+  "vehicles": {
+    "기아": {
+      "모닝": {
+        "official_name": "모닝",
+        "year": "2025",
+        "aliases": ["모닝", "MORNING", "MORNING URBAN", "모닝 어반"],
+        "trims": {
+          "트렌디": {"aliases": ["트렌디", "TRENDY"]},
+          "프레스티지": {"aliases": ["프레스티지", "PRESTIGE"]},
+          "시그니처": {"aliases": ["시그니처", "SIGNATURE"]},
+          "GT-Line": {"aliases": ["GT라인", "GT LINE", "지티라인"]}
+        },
+        "options": [
+          "버튼시동 PACK",
+          "스타일",
+          "16인치 전면가공 휠",
+          "컴포트",
+          "컨비니언스",
+          "드라이브 와이즈",
+          "8인치 내비게이션",
+          "선루프"
+        ],
+        "exterior_colors": {
+          "UD": "클리어 화이트",
+          "KCS": "스파클링 실버",
+          "BEG": "시그널 레드",
+          "A2G": "어드벤쳐러스 그린",
+          "M7G": "아스트로 그레이",
+          "ABP": "오로라 블랙 펄",
+          "M9Y": "밀키 베이지"
+        },
+        "interior_colors": [
+          "블랙 (직물)",
+          "블랙 (인조가죽)",
+          "브라운 (인조가죽)",
+          "다크 그린 (인조가죽)"
+        ]
+      },
+      "레이": {
+        "official_name": "레이",
+        "year": "2025",
+        "aliases": ["레이", "RAY"],
+        "trims": {
+          "트렌디": {"aliases": ["트렌디", "TRENDY"]},
+          "프레스티지": {"aliases": ["프레스티지", "PRESTIGE"]},
+          "시그니처": {"aliases": ["시그니처", "SIGNATURE"]},
+          "X-Line": {"aliases": ["X라인", "X LINE", "엑스라인"]}
+        },
+        "options": [
+          "버튼시동 스마트키",
+          "스타일",
+          "컴포트Ⅰ",
+          "컴포트Ⅱ",
+          "드라이브 와이즈",
+          "8인치 디스플레이 오디오",
+          "8인치 내비게이션"
+        ],
+        "exterior_colors": {
+          "UD": "클리어 화이트",
+          "M9Y": "밀키 베이지",
+          "M7G": "아스트로 그레이",
+          "ABP": "오로라 블랙 펄",
+          "AEQ": "아쿠아 민트",
+          "EU3": "스모크 블루",
+          "A2G": "어드벤쳐러스 그린"
+        },
+        "interior_colors": [
+          "라이트 그레이",
+          "블랙"
+        ]
+      },
+      "레이 EV": {
+        "official_name": "레이 EV",
+        "year": "2025",
+        "aliases": ["레이EV", "레이 이브이", "RAY EV"],
+        "battery_capacity": "35.2kWh",
+        "vehicle_types": {
+          "4인승 승용": {
+            "trims": {
+              "라이트": {"aliases": ["라이트", "LIGHT"]},
+              "에어": {"aliases": ["에어", "AIR"]}
+            }
+          },
+          "2인승 밴": {
+            "trims": {
+              "라이트": {"aliases": ["라이트", "LIGHT"]},
+              "에어": {"aliases": ["에어", "AIR"]}
+            }
+          },
+          "1인승 밴": {
+            "trims": {
+              "라이트": {"aliases": ["라이트", "LIGHT"]},
+              "에어": {"aliases": ["에어", "AIR"]}
+            }
+          }
+        },
+        "options": [
+          "스타일",
+          "컴포트Ⅰ",
+          "컴포트Ⅱ",
+          "드라이브 와이즈",
+          "8인치 디스플레이 오디오",
+          "8인치 내비게이션"
+        ],
+        "exterior_colors": {
+          "UD": "클리어 화이트",
+          "M9Y": "밀키 베이지",
+          "P3W": "세라믹 실버",
+          "M7G": "아스트로 그레이",
+          "ABP": "오로라 블랙 펄"
+        },
+        "interior_colors": [
+          "라이트 그레이",
+          "블랙"
+        ]
+      },
+      "K3": {
+        "official_name": "K3",
+        "aliases": ["K3"],
+        "trims": {
+          "트렌디": {"aliases": ["트렌디", "TRENDY"]},
+          "프레스티지": {"aliases": ["프레스티지", "PRESTIGE"]},
+          "노블레스": {"aliases": ["노블레스", "NOBLESSE"]},
+          "시그니처": {"aliases": ["시그니처", "SIGNATURE"]},
+          "GT-Line": {"aliases": ["GT라인", "GT LINE", "지티라인"]}
+        }
+      },
+      "더 뉴 K5": {
+        "official_name": "더 뉴 K5",
+        "year": "2025",
+        "aliases": ["K5", "더뉴K5", "THE NEW K5", "DL3"],
+        "engine_types": {
+          "하이브리드": {
+            "trims": {
+              "프레스티지": {"aliases": ["프레스티지", "PRESTIGE"]},
+              "베스트 셀렉션": {"aliases": ["베스트셀렉션", "BEST SELECTION"]},
+              "노블레스": {"aliases": ["노블레스", "NOBLESSE"]},
+              "시그니처": {"aliases": ["시그니처", "SIGNATURE"]}
+            }
+          },
+          "2.0 가솔린": {
+            "trims": {
+              "스마트 셀렉션": {"aliases": ["스마트셀렉션", "SMART SELECTION"]},
+              "프레스티지": {"aliases": ["프레스티지", "PRESTIGE"]},
+              "베스트 셀렉션": {"aliases": ["베스트셀렉션", "BEST SELECTION"]},
+              "노블레스": {"aliases": ["노블레스", "NOBLESSE"]},
+              "시그니처": {"aliases": ["시그니처", "SIGNATURE"]}
+            }
+          },
+          "1.6 터보 가솔린": {
+            "trims": {
+              "프레스티지": {"aliases": ["프레스티지", "PRESTIGE"]},
+              "베스트 셀렉션": {"aliases": ["베스트셀렉션", "BEST SELECTION"]},
+              "노블레스": {"aliases": ["노블레스", "NOBLESSE"]},
+              "시그니처": {"aliases": ["시그니처", "SIGNATURE"]},
+              "GT-Line": {"aliases": ["GT라인", "GT LINE", "지티라인"]}
+            }
+          },
+          "2.0 LPG": {
+            "trims": {
+              "스마트 셀렉션": {"aliases": ["스마트셀렉션", "SMART SELECTION"]},
+              "프레스티지": {"aliases": ["프레스티지", "PRESTIGE"]},
+              "베스트 셀렉션": {"aliases": ["베스트셀렉션", "BEST SELECTION"]},
+              "노블레스": {"aliases": ["노블레스", "NOBLESSE"]},
+              "시그니처": {"aliases": ["시그니처", "SIGNATURE"]}
+            }
+          }
+        },
+        "options": [
+          "스타일",
+          "컴포트",
+          "드라이브 와이즈",
+          "빌트인 캠 2",
+          "12.3인치 클러스터 팩",
+          "HUD+빌트인 캠 2",
+          "KRELL 프리미엄 사운드",
+          "스마트 커넥트",
+          "블랙 핏",
+          "파노라마 선루프"
+        ],
+        "exterior_colors": {
+          "SWP": "스노우 화이트 펄",
+          "AGT": "인터스텔라 그레이",
+          "ABP": "오로라 블랙 펄",
+          "C7S": "울프 그레이",
+          "B4U": "그래비티 블루",
+          "GLB": "글래시어",
+          "DU3": "요트 블루",
+          "KLM": "문스케이프 매트 그레이"
+        },
+        "interior_colors": [
+          "블랙",
+          "마션 브라운",
+          "샌드"
+        ]
+      },
+      "K8": {
+        "official_name": "K8",
+        "year": "2025",
+        "aliases": ["K8"],
+        "engine_types": {
+          "터보 하이브리드": {
+            "trims": {
+              "노블레스 라이트": {"aliases": ["노블레스라이트", "NOBLESSE LITE"]},
+              "베스트 셀렉션": {"aliases": ["베스트셀렉션", "BEST SELECTION"]},
+              "노블레스": {"aliases": ["노블레스", "NOBLESSE"]},
+              "시그니처": {"aliases": ["시그니처", "SIGNATURE"]},
+              "시그니처 블랙": {"aliases": ["시그니처블랙", "SIGNATURE BLACK"]}
+            }
+          },
+          "2.5 가솔린": {
+            "trims": {
+              "노블레스 라이트": {"aliases": ["노블레스라이트", "NOBLESSE LITE"]},
+              "베스트 셀렉션": {"aliases": ["베스트셀렉션", "BEST SELECTION"]},
+              "노블레스": {"aliases": ["노블레스", "NOBLESSE"]},
+              "시그니처": {"aliases": ["시그니처", "SIGNATURE"]},
+              "시그니처 블랙": {"aliases": ["시그니처블랙", "SIGNATURE BLACK"]}
+            }
+          },
+          "3.5 가솔린": {
+            "trims": {
+              "노블레스 라이트": {"aliases": ["노블레스라이트", "NOBLESSE LITE"]},
+              "베스트 셀렉션": {"aliases": ["베스트셀렉션", "BEST SELECTION"]},
+              "노블레스": {"aliases": ["노블레스", "NOBLESSE"]},
+              "시그니처": {"aliases": ["시그니처", "SIGNATURE"]},
+              "시그니처 블랙": {"aliases": ["시그니처블랙", "SIGNATURE BLACK"]}
+            }
+          },
+          "3.5 LPG": {
+            "trims": {
+              "노블레스 라이트": {"aliases": ["노블레스라이트", "NOBLESSE LITE"]},
+              "베스트 셀렉션": {"aliases": ["베스트셀렉션", "BEST SELECTION"]},
+              "노블레스": {"aliases": ["노블레스", "NOBLESSE"]},
+              "시그니처": {"aliases": ["시그니처", "SIGNATURE"]},
+              "시그니처 블랙": {"aliases": ["시그니처블랙", "SIGNATURE BLACK"]}
+            }
+          }
+        },
+        "options": [
+          "파노라마 선루프",
+          "헤드업 디스플레이",
+          "프리뷰 전자제어 서스펜션Ⅰ",
+          "프리뷰 전자제어 서스펜션Ⅱ",
+          "메리디안 프리미엄 사운드",
+          "스타일",
+          "드라이브 와이즈",
+          "프리미엄",
+          "스마트 커넥트",
+          "AWD"
+        ],
+        "exterior_colors": {
+          "SWP": "스노우 화이트 펄",
+          "ISG": "아이보리 실버",
+          "KLM": "문스케이프 매트 그레이",
+          "BYG": "선셋 베이지",
+          "AGT": "인터스텔라 그레이",
+          "ABP": "오로라 블랙 펄"
+        },
+        "interior_colors": [
+          "블랙 원톤",
+          "라운지 브라운 투톤",
+          "뉴트럴 베이지 투톤",
+          "딥씨 네이비 투톤"
+        ]
+      },
+      "셀토스": {
+        "official_name": "셀토스",
+        "year": "2025",
+        "aliases": ["셀토스", "SELTOS"],
+        "engine_types": {
+          "1.6 가솔린 터보": {
+            "trims": {
+              "트렌디": {"aliases": ["트렌디", "TRENDY"]},
+              "프레스티지": {"aliases": ["프레스티지", "PRESTIGE"]},
+              "시그니처": {"aliases": ["시그니처", "SIGNATURE"]},
+              "X-Line": {"aliases": ["X라인", "X LINE", "엑스라인"]}
+            }
+          },
+          "2.0 가솔린": {
+            "trims": {
+              "트렌디": {"aliases": ["트렌디", "TRENDY"]},
+              "프레스티지": {"aliases": ["프레스티지", "PRESTIGE"]},
+              "시그니처": {"aliases": ["시그니처", "SIGNATURE"]},
+              "X-Line": {"aliases": ["X라인", "X LINE", "엑스라인"]}
+            }
+          }
+        },
+        "options": [
+          "전자식 4WD",
+          "드라이브 와이즈",
+          "컨비니언스",
+          "스타일",
+          "컴포트",
+          "10.25인치 내비게이션",
+          "HUD",
+          "스마트 커넥트",
+          "모니터링 팩",
+          "Bose 프리미엄 사운드",
+          "투톤루프",
+          "선루프"
+        ],
+        "exterior_colors": {
+          "SWP": "스노우 화이트 펄",
+          "KDG": "그래비티 그레이",
+          "FSB": "퓨전 블랙",
+          "PLU": "플루톤 블루",
+          "BU3": "다크 오션블루",
+          "F1D": "퓨전 블랙 + 클리어 화이트",
+          "F1A": "퓨전 블랙 + 플루톤 블루"
+        },
+        "interior_colors": [
+          "블랙",
+          "캐러멜",
+          "미드나잇 그린"
+        ]
+      },
+      "더 뉴 스포티지": {
+        "official_name": "더 뉴 스포티지",
+        "year": "2025",
+        "aliases": ["스포티지", "더뉴스포티지", "THE NEW SPORTAGE", "SPORTAGE", "NQ5"],
+        "engine_types": {
+          "1.6 가솔린 터보": {
+            "trims": {
+              "프레스티지": {"aliases": ["프레스티지", "PRESTIGE"]},
+              "노블레스": {"aliases": ["노블레스", "NOBLESSE"]},
+              "시그니처": {"aliases": ["시그니처", "SIGNATURE"]},
+              "X-Line": {"aliases": ["X라인", "X LINE", "엑스라인"]}
+            }
+          },
+          "2.0 LPG": {
+            "trims": {
+              "프레스티지": {"aliases": ["프레스티지", "PRESTIGE"]},
+              "노블레스": {"aliases": ["노블레스", "NOBLESSE"]},
+              "시그니처": {"aliases": ["시그니처", "SIGNATURE"]},
+              "X-Line": {"aliases": ["X라인", "X LINE", "엑스라인"]}
+            }
+          },
+          "터보 하이브리드": {
+            "trims": {
+              "프레스티지": {"aliases": ["프레스티지", "PRESTIGE"]},
+              "노블레스": {"aliases": ["노블레스", "NOBLESSE"]},
+              "시그니처": {"aliases": ["시그니처", "SIGNATURE"]},
+              "X-Line": {"aliases": ["X라인", "X LINE", "엑스라인"]}
+            }
+          }
+        },
+        "options": [
+          "전자식 4WD",
+          "스타일",
+          "19인치 전면가공 휠",
+          "컴포트",
+          "프리미엄",
+          "드라이브 와이즈",
+          "12.3인치 내비게이션",
+          "빌트인 캠 2",
+          "모니터링",
+          "KRELL 프리미엄 사운드",
+          "스마트 커넥트",
+          "파노라마 선루프"
+        ],
+        "exterior_colors": {
+          "SWP": "스노우 화이트 펄",
+          "HRB": "헤리티지 블루",
+          "C7A": "울프 그레이",
+          "KDG": "그래비티 그레이",
+          "BB2": "베스타 블루",
+          "FSB": "퓨전 블랙",
+          "JUG": "정글 우드 그린",
+          "MGG": "쉐도우 매트 그레이"
+        },
+        "interior_colors": [
+          "블랙",
+          "네이비 그레이",
+          "라운지 브라운"
+        ]
+      },
+      "더 뉴 쏘렌토": {
+        "official_name": "더 뉴 쏘렌토",
+        "year": "2025",
+        "aliases": ["쏘렌토", "더뉴쏘렌토", "THE NEW SORENTO", "SORENTO", "MQ4", "SORENTO MQ4"],
+        "engine_types": {
+          "2.5 가솔린 터보": {
+            "trims": {
+              "프레스티지": {"aliases": ["프레스티지", "PRESTIGE"]},
+              "노블레스": {"aliases": ["노블레스", "NOBLESSE"]},
+              "시그니처": {"aliases": ["시그니처", "SIGNATURE"]},
+              "X-Line": {"aliases": ["X라인", "X LINE", "엑스라인"]}
+            }
+          },
+          "2.2 디젤": {
+            "trims": {
+              "프레스티지": {"aliases": ["프레스티지", "PRESTIGE"]},
+              "노블레스": {"aliases": ["노블레스", "NOBLESSE"]},
+              "시그니처": {"aliases": ["시그니처", "SIGNATURE"]},
+              "X-Line": {"aliases": ["X라인", "X LINE", "엑스라인"]}
+            }
+          },
+          "터보 하이브리드": {
+            "trims": {
+              "프레스티지": {"aliases": ["프레스티지", "PRESTIGE"]},
+              "노블레스": {"aliases": ["노블레스", "NOBLESSE"]},
+              "시그니처": {"aliases": ["시그니처", "SIGNATURE"]},
+              "X-Line": {"aliases": ["X라인", "X LINE", "엑스라인"]}
+            }
+          }
+        },
+        "seating_options": ["5인승", "6인승", "7인승"],
+        "options": [
+          "전자식 4WD",
+          "6인승",
+          "7인승",
+          "스타일",
+          "컴포트",
+          "12.3인치 클러스터",
+          "드라이브 와이즈",
+          "HUD + 빌트인 캠 2",
+          "스마트 커넥트",
+          "KRELL 프리미엄 사운드",
+          "파노라마 선루프"
+        ],
+        "exterior_colors": {
+          "SWP": "스노우 화이트 펄",
+          "BN4": "볼캐닉 샌드 브라운",
+          "CGE": "시티스케이프 그린",
+          "AGT": "인터스텔라 그레이",
+          "ABP": "오로라 블랙 펄"
+        },
+        "interior_colors": [
+          "올리브 브라운",
+          "블랙",
+          "네이비 그레이"
+        ]
+      },
+      "더 뉴 카니발": {
+        "official_name": "더 뉴 카니발",
+        "year": "2025",
+        "aliases": ["카니발", "더뉴카니발", "THE NEW CARNIVAL", "CARNIVAL", "KA4", "CARNIVAL KA4"],
+        "engine_types": {
+          "3.5 가솔린": {
+            "seating_options": {
+              "9인승": {
+                "프레스티지": {"aliases": ["프레스티지", "PRESTIGE"]},
+                "노블레스": {"aliases": ["노블레스", "NOBLESSE"]},
+                "시그니처": {"aliases": ["시그니처", "SIGNATURE"]},
+                "X-Line": {"aliases": ["X라인", "X LINE", "엑스라인"]}
+              },
+              "7인승": {
+                "노블레스": {"aliases": ["노블레스", "NOBLESSE"]},
+                "아웃도어": {"aliases": ["아웃도어", "OUTDOOR"]},
+                "시그니처": {"aliases": ["시그니처", "SIGNATURE"]},
+                "X-Line": {"aliases": ["X라인", "X LINE", "엑스라인"]}
+              }
+            }
+          },
+          "터보 하이브리드": {
+            "seating_options": {
+              "9인승": {
+                "프레스티지": {"aliases": ["프레스티지", "PRESTIGE"]},
+                "노블레스": {"aliases": ["노블레스", "NOBLESSE"]},
+                "시그니처": {"aliases": ["시그니처", "SIGNATURE"]},
+                "X-Line": {"aliases": ["X라인", "X LINE", "엑스라인"]}
+              },
+              "7인승": {
+                "노블레스": {"aliases": ["노블레스", "NOBLESSE"]},
+                "아웃도어": {"aliases": ["아웃도어", "OUTDOOR"]},
+                "시그니처": {"aliases": ["시그니처", "SIGNATURE"]},
+                "X-Line": {"aliases": ["X라인", "X LINE", "엑스라인"]}
+              }
+            }
+          }
+        },
+        "seating_options": ["7인승", "9인승"],
+        "options": [
+          "컨비니언스",
+          "스타일",
+          "컴포트",
+          "스마트 커넥트",
+          "12.3인치 클러스터",
+          "드라이브 와이즈",
+          "모니터링 팩",
+          "HUD + 빌트인 캠 2",
+          "BOSE 프리미엄 사운드",
+          "듀얼 선루프"
+        ],
+        "exterior_colors": {
+          "ISG": "아이보리 실버",
+          "SWP": "스노우 화이트 펄",
+          "ABP": "오로라 블랙 펄",
+          "P2M": "판테라 메탈",
+          "C4S": "세라믹 실버"
+        },
+        "interior_colors": [
+          "토프",
+          "코튼 베이지",
+          "네이비 그레이"
+        ]
+      },
+      "카니발 하이리무진": {
+        "official_name": "카니발 하이리무진",
+        "year": "2025",
+        "aliases": ["카니발 하이리무진", "CARNIVAL HI-LIMOUSINE", "하이리무진", "카니발하이리무진"],
+        "engine_types": {
+          "3.5 가솔린": {
+            "seating_options": {
+              "9인승": {
+                "노블레스": {"aliases": ["노블레스", "NOBLESSE"]},
+                "시그니처": {"aliases": ["시그니처", "SIGNATURE"]}
+              },
+              "7인승": {
+                "시그니처": {"aliases": ["시그니처", "SIGNATURE"]}
+              },
+              "4인승": {
+                "시그니처": {"aliases": ["시그니처", "SIGNATURE"]}
+              }
+            }
+          },
+          "터보 하이브리드": {
+            "seating_options": {
+              "9인승": {
+                "노블레스": {"aliases": ["노블레스", "NOBLESSE"]},
+                "시그니처": {"aliases": ["시그니처", "SIGNATURE"]}
+              },
+              "7인승": {
+                "시그니처": {"aliases": ["시그니처", "SIGNATURE"]}
+              },
+              "4인승": {
+                "시그니처": {"aliases": ["시그니처", "SIGNATURE"]}
+              }
+            }
+          }
+        },
+        "seating_options": ["4인승", "7인승", "9인승"],
+        "options": [
+          "스마트커넥트 & HUD+빌트인캠2 & BOSE 사운드",
+          "프리미엄 팩",
+          "프리미엄 팩2"
+        ],
+        "exterior_colors": {
+          "SWP": "스노우 화이트 펄",
+          "ABP": "오로라 블랙 펄"
+        },
+        "interior_colors": [
+          "코튼 베이지 (가죽/나파가죽)",
+          "코튼 베이지 (퀼팅 나파가죽 - 4인승 후석 전용)"
+        ]
+      },
+      "타스만": {
+        "official_name": "타스만",
+        "year": "2025",
+        "aliases": ["타스만", "TASMAN", "THE KIA TASMAN"],
+        "engine_types": {
+          "2.5 가솔린 터보": {
+            "trims": {
+              "다이내믹": {"aliases": ["다이내믹", "DYNAMIC"]},
+              "어드벤처": {"aliases": ["어드벤처", "ADVENTURE"]},
+              "익스트림": {"aliases": ["익스트림", "EXTREME"]},
+              "X-Pro": {"aliases": ["엑스프로", "X PRO", "XPRO"]}
+            }
+          }
+        },
+        "options": [
+          "전자식 4WD",
+          "스타일",
+          "12.3인치 클러스터",
+          "드라이브 와이즈",
+          "모니터링",
+          "하이테크",
+          "하만카돈 프리미엄 사운드",
+          "선루프"
+        ],
+        "exterior_colors": {
+          "SWP": "스노우 화이트 펄",
+          "ABP": "오로라 블랙 펄",
+          "AGT": "인터스텔라 그레이",
+          "KLG": "스틸 그레이",
+          "CGE": "시티스케이프 그린",
+          "CR5": "런웨이 레드",
+          "DNB": "데님 블루",
+          "TAM": "탠 베이지"
+        },
+        "interior_colors": [
+          "블랙 인테리어",
+          "브라운 인테리어",
+          "딥 그린 인테리어",
+          "딥 그린&테라코타 브라운 인테리어 (X-Pro 전용)"
+        ]
+      },
+      "EV3": {
+        "official_name": "EV3",
+        "year": "2025",
+        "aliases": ["EV3", "이브이3", "EV 3"],
+        "battery_options": {
+          "스탠다드": {
+            "battery_capacity": "58.3kWh",
+            "trims": {
+              "에어": {"aliases": ["에어", "AIR", "Air"]},
+              "어스": {"aliases": ["어스", "EARTH", "Earth"]},
+              "GT-Line": {"aliases": ["GT라인", "GT LINE", "지티라인"]}
+            }
+          },
+          "롱레인지": {
+            "battery_capacity": "81.4kWh",
+            "trims": {
+              "에어": {"aliases": ["에어", "AIR", "Air"]},
+              "어스": {"aliases": ["어스", "EARTH", "Earth"]},
+              "GT-Line": {"aliases": ["GT라인", "GT LINE", "지티라인"]}
+            }
+          }
+        },
+        "options": [
+          "스타일",
+          "컴포트",
+          "컨비니언스",
+          "19인치 휠 & 타이어",
+          "모니터링",
+          "드라이브 와이즈",
+          "와이드 선루프",
+          "하만카돈 프리미엄 사운드",
+          "빌트인 캠 2",
+          "헤드업 디스플레이"
+        ],
+        "exterior_colors": {
+          "SWP": "스노우 화이트 펄",
+          "ISG": "아이보리 실버",
+          "ISM": "아이보리 매트 실버",
+          "ABP": "오로라 블랙 펄",
+          "EBD": "셰일 그레이",
+          "AG3": "어벤쳐린 그린",
+          "EBB": "프로스트 블루"
+        },
+        "interior_colors": [
+          "미디움 그레이",
+          "네이비",
+          "라이트 그레이",
+          "차콜&화이트 (GT-Line 전용)"
+        ]
+      },
+      "EV4": {
+        "official_name": "EV4",
+        "year": "2025",
+        "aliases": ["EV4", "이브이4", "EV 4"],
+        "battery_options": {
+          "스탠다드": {
+            "battery_capacity": "58.3kWh",
+            "trims": {
+              "에어": {"aliases": ["에어", "AIR", "Air"]},
+              "어스": {"aliases": ["어스", "EARTH", "Earth"]},
+              "GT-Line": {"aliases": ["GT라인", "GT LINE", "지티라인"]}
+            }
+          },
+          "롱레인지": {
+            "battery_capacity": "81.4kWh",
+            "trims": {
+              "에어": {"aliases": ["에어", "AIR", "Air"]},
+              "어스": {"aliases": ["어스", "EARTH", "Earth"]},
+              "GT-Line": {"aliases": ["GT라인", "GT LINE", "지티라인"]}
+            }
+          }
+        },
+        "options": [
+          "스타일",
+          "컴포트",
+          "컨비니언스",
+          "19인치 휠 & 타이어",
+          "모니터링",
+          "드라이브 와이즈",
+          "유틸리티",
+          "와이드 선루프",
+          "하만카돈 프리미엄 사운드",
+          "빌트인 캠 2 플러스",
+          "헤드업 디스플레이"
+        ],
+        "exterior_colors": {
+          "SWP": "스노우 화이트 펄",
+          "ISG": "아이보리 실버",
+          "ISM": "아이보리 매트 실버",
+          "EBD": "셰일 그레이",
+          "ABP": "오로라 블랙 펄",
+          "ACW": "모닝 헤이즈",
+          "OVR": "마그마 레드",
+          "ACY": "요트 매트 블루"
+        },
+        "interior_colors": [
+          "블랙 인테리어",
+          "브라운 인테리어",
+          "그레이 인테리어",
+          "블랙&화이트 인테리어 (GT-Line 전용)"
+        ]
+      },
+      "EV5": {
+        "official_name": "EV5",
+        "year": "2025",
+        "aliases": ["EV5", "이브이5", "EV 5"],
+        "battery_options": {
+          "롱레인지": {
+            "battery_capacity": "81.4kWh",
+            "trims": {
+              "에어": {"aliases": ["에어", "AIR", "Air"]},
+              "어스": {"aliases": ["어스", "EARTH", "Earth"]},
+              "GT-Line": {"aliases": ["GT라인", "GT LINE", "지티라인"]}
+            }
+          }
+        },
+        "options": [
+          "스타일",
+          "컴포트 I",
+          "컴포트 II",
+          "19인치 휠 & 타이어",
+          "스마트 커넥트",
+          "모니터링",
+          "드라이브 와이즈",
+          "파노라마 선루프",
+          "하만카돈 프리미엄 사운드",
+          "빌트인 캠 2 플러스"
+        ],
+        "exterior_colors": {
+          "SWP": "스노우 화이트 펄",
+          "ISG": "아이보리 실버",
+          "IEG": "아이스버그 그린",
+          "EBB": "프로스트 블루",
+          "BU3": "다크 오션 블루",
+          "OVR": "마그마 레드",
+          "KDG": "그래비티 그레이",
+          "FSB": "퓨전 블랙",
+          "IEB": "아이스버그 매트 그린"
+        },
+        "interior_colors": [
+          "블랙 인테리어",
+          "브라운 인테리어",
+          "그레이 인테리어",
+          "블랙&화이트 인테리어 (GT-Line 전용)"
+        ]
+      },
+      "EV6": {
+        "official_name": "EV6",
+        "year": "2025",
+        "aliases": ["EV6", "이브이6", "EV 6"],
+        "battery_options": {
+          "스탠다드": {
+            "battery_capacity": "63.0kWh",
+            "trims": {
+              "라이트": {"aliases": ["라이트", "LIGHT", "Light"]},
+              "에어": {"aliases": ["에어", "AIR", "Air"]},
+              "어스": {"aliases": ["어스", "EARTH", "Earth"]}
+            }
+          },
+          "롱레인지": {
+            "battery_capacity": "84.0kWh",
+            "trims": {
+              "라이트": {"aliases": ["라이트", "LIGHT", "Light"]},
+              "에어": {"aliases": ["에어", "AIR", "Air"]},
+              "어스": {"aliases": ["어스", "EARTH", "Earth"]},
+              "GT-Line": {"aliases": ["GT라인", "GT LINE", "지티라인"]}
+            }
+          }
+        },
+        "drivetrain_options": ["2WD", "4WD"],
+        "options": [
+          "스마트 파워테일게이트",
+          "드라이브 와이즈",
+          "컴포트",
+          "컨비니언스 I",
+          "컨비니언스 II",
+          "하이테크",
+          "프리미엄",
+          "모니터링",
+          "메리디안 프리미엄 사운드",
+          "와이드 선루프",
+          "빌트인 캠 2",
+          "듀얼 모터 4WD",
+          "스마트 커넥트",
+          "20인치 휠 & 타이어",
+          "스웨이드 컬렉션"
+        ],
+        "exterior_colors": {
+          "SWP": "스노우 화이트 펄",
+          "ABP": "오로라 블랙 펄",
+          "AGT": "인터스텔라 그레이",
+          "CR5": "런웨이 레드",
+          "KLM": "문스케이프 매트 그레이",
+          "GLB": "글래시어",
+          "DU3": "요트 블루",
+          "ISM": "아이보리 매트 실버",
+          "C7S": "울프 그레이",
+          "DUM": "요트 매트 블루"
+        },
+        "interior_colors": [
+          "블랙",
+          "미디움 그레이",
+          "토피 브라운",
+          "그린&라이트 그레이",
+          "블랙&화이트 (GT-Line 전용)"
+        ]
+      },
+      "EV6 GT": {
+        "official_name": "EV6 GT",
+        "year": "2025",
+        "aliases": ["EV6GT", "이브이6GT", "EV6 지티", "EV 6 GT"],
+        "battery_capacity": "84.0kWh",
+        "drivetrain": "4WD",
+        "trims": {
+          "GT": {"aliases": ["지티", "GT"]}
+        },
+        "motor_output": {
+          "max_power": "448kW (609ps)",
+          "max_power_launch": "478kW (650ps)",
+          "max_torque": "740Nm",
+          "max_torque_launch": "770Nm"
+        },
+        "options": [
+          "와이드 선루프",
+          "스마트 커넥트"
+        ],
+        "exterior_colors": {
+          "SWP": "스노우 화이트 펄",
+          "ABP": "오로라 블랙 펄",
+          "CR5": "런웨이 레드",
+          "C7S": "울프 그레이",
+          "DUM": "요트 매트 블루"
+        },
+        "interior_colors": [
+          "블랙&네온 인테리어 (GT 전용)"
+        ]
+      },
+      "EV9": {
+        "official_name": "EV9",
+        "year": "2025",
+        "aliases": ["EV9", "이브이9", "EV 9"],
+        "drivetrain_options": {
+          "2WD": {
+            "battery_options": {
+              "스탠다드": {
+                "battery_capacity": "76.1kWh",
+                "trims": {
+                  "에어": {"aliases": ["에어", "AIR", "Air"]},
+                  "어스": {"aliases": ["어스", "EARTH", "Earth"]}
+                }
+              },
+              "롱레인지": {
+                "battery_capacity": "99.8kWh",
+                "trims": {
+                  "에어": {"aliases": ["에어", "AIR", "Air"]},
+                  "어스": {"aliases": ["어스", "EARTH", "Earth"]}
+                }
+              }
+            }
+          },
+          "4WD": {
+            "battery_options": {
+              "롱레인지": {
+                "battery_capacity": "99.8kWh",
+                "trims": {
+                  "에어": {"aliases": ["에어", "AIR", "Air"]},
+                  "어스": {"aliases": ["어스", "EARTH", "Earth"]},
+                  "GT-Line": {"aliases": ["GT라인", "GT LINE", "지티라인"]}
+                }
+              }
+            }
+          }
+        },
+        "seating_options": ["6인승", "7인승"],
+        "options": [
+          "6인승",
+          "6인승 스위블",
+          "6인승 릴렉션",
+          "컨비니언스",
+          "헤드업 디스플레이",
+          "스타일",
+          "20인치 휠",
+          "21인치 휠",
+          "메리디안 프리미엄 사운드",
+          "빌트인 캠 2",
+          "듀얼 선루프",
+          "하이테크"
+        ],
+        "exterior_colors": {
+          "SWP": "스노우 화이트 펄",
+          "DFG": "페블 그레이",
+          "P2M": "판테라 메탈",
+          "ABP": "오로라 블랙 펄",
+          "IEG": "아이스버그 그린",
+          "OBG": "오션 블루",
+          "C7R": "플레어 레드",
+          "ISM": "아이보리 매트 실버",
+          "OBM": "오션 매트 블루"
+        },
+        "interior_colors": [
+          "블랙",
+          "라이트 그레이",
+          "브라운",
+          "블랙&화이트 (GT-Line 전용)",
+          "네이비 (GT-Line 전용)"
+        ]
+      },
+      "EV9 GT": {
+        "official_name": "EV9 GT",
+        "year": "2025",
+        "aliases": ["EV9GT", "이브이9GT", "EV9 지티", "EV 9 GT"],
+        "battery_capacity": "99.8kWh",
+        "drivetrain": "4WD",
+        "trims": {
+          "GT": {"aliases": ["지티", "GT"]}
+        },
+        "motor_output": {
+          "max_power": "374kW (509ps)",
+          "max_torque": "740Nm"
+        },
+        "seating_options": ["6인승"],
+        "options": [
+          "스타일",
+          "듀얼 선루프"
+        ],
+        "exterior_colors": {
+          "SWP": "스노우 화이트 펄",
+          "DFG": "페블 그레이",
+          "P2M": "판테라 메탈",
+          "ABP": "오로라 블랙 펄",
+          "C7R": "플레어 레드",
+          "PT9": "판테라 매트 메탈"
+        },
+        "interior_colors": [
+          "블랙&네온 인테리어 (GT 전용)"
+        ]
+      },
+      "니로": {
+        "official_name": "니로",
+        "year": "2025",
+        "aliases": ["니로", "NIRO", "니로 하이브리드", "NIRO HEV"],
+        "trims": {
+          "트렌디": {"aliases": ["트렌디", "TRENDY"]},
+          "프레스티지": {"aliases": ["프레스티지", "PRESTIGE"]},
+          "베스트 셀렉션": {"aliases": ["베스트셀렉션", "BEST SELECTION"]},
+          "시그니처": {"aliases": ["시그니처", "SIGNATURE"]}
+        },
+        "options": [
+          "컨비니언스",
+          "드라이브 와이즈",
+          "스타일",
+          "내비게이션",
+          "스마트 커넥트",
+          "하만카돈 사운드",
+          "하이테크",
+          "HUD",
+          "컴포트",
+          "선루프 + LED 실내등",
+          "엣지 팩"
+        ],
+        "exterior_colors": {
+          "SWP": "스노우 화이트 펄",
+          "CGE": "시티스케이프 그린",
+          "M4B": "미네랄 블루",
+          "KLG": "스틸 그레이",
+          "AGT": "인터스텔라 그레이",
+          "ABP": "오로라 블랙 펄"
+        },
+        "interior_colors": [
+          "차콜",
+          "미디움 그레이",
+          "페트롤"
+        ]
+      },
+      "니로 EV": {
+        "official_name": "니로 EV",
+        "year": "2025",
+        "aliases": ["니로EV", "니로 EV", "NIRO EV", "니로이브이", "NIRO ELECTRIC"],
+        "battery_capacity": "64.8kWh",
+        "trims": {
+          "에어": {"aliases": ["에어", "AIR", "Air"]},
+          "어스": {"aliases": ["어스", "EARTH", "Earth"]}
+        },
+        "options": [
+          "드라이브 와이즈",
+          "원격 스마트 주차 보조",
+          "스타일",
+          "스마트 커넥트",
+          "하만카돈 사운드",
+          "하이테크",
+          "HUD",
+          "컴포트",
+          "선루프 + LED 실내등",
+          "엣지 팩"
+        ],
+        "exterior_colors": {
+          "SWP": "스노우 화이트 펄",
+          "CGE": "시티스케이프 그린",
+          "M4B": "미네랄 블루",
+          "KLG": "스틸 그레이",
+          "AGT": "인터스텔라 그레이",
+          "ABP": "오로라 블랙 펄"
+        },
+        "interior_colors": [
+          "차콜",
+          "라이트 그레이 투톤",
+          "페트롤"
+        ]
+      },
+      "K9": {
+        "official_name": "K9",
+        "year": "2025",
+        "aliases": ["K9", "더 K9", "THE K9"],
+        "engine_types": {
+          "3.8 가솔린": {
+            "trims": {
+              "플래티넘": {"aliases": ["플래티넘", "PLATINUM"]},
+              "베스트 셀렉션 Ⅰ": {"aliases": ["베스트셀렉션1", "BEST SELECTION 1"]},
+              "마스터즈": {"aliases": ["마스터즈", "MASTERS"]},
+              "베스트 셀렉션 Ⅱ": {"aliases": ["베스트셀렉션2", "BEST SELECTION 2"]}
+            }
+          },
+          "3.3 가솔린 터보": {
+            "trims": {
+              "플래티넘": {"aliases": ["플래티넘", "PLATINUM"]},
+              "베스트 셀렉션 Ⅰ": {"aliases": ["베스트셀렉션1", "BEST SELECTION 1"]},
+              "마스터즈": {"aliases": ["마스터즈", "MASTERS"]},
+              "베스트 셀렉션 Ⅱ": {"aliases": ["베스트셀렉션2", "BEST SELECTION 2"]}
+            }
+          }
+        },
+        "options": [
+          "모니터링 팩",
+          "컴포트 팩",
+          "19인치 휠&타이어",
+          "헤드업 디스플레이",
+          "AWD",
+          "프리미엄 팩",
+          "Lexicon 프리미엄 사운드",
+          "VIP컬렉션",
+          "프리뷰 전자제어 서스펜션",
+          "뒷좌석 듀얼 모니터",
+          "선루프",
+          "빌트인캠"
+        ],
+        "exterior_colors": {
+          "SWP": "스노우 화이트 펄",
+          "DFG": "페블 그레이",
+          "P2M": "판테라 메탈",
+          "D9B": "딥 크로마 블루",
+          "ABP": "오로라 블랙 펄"
+        },
+        "interior_colors": [
+          "블랙",
+          "마션 브라운",
+          "베이지",
+          "미스티 그레이"
+        ]
+      },
+      "봉고III EV": {
+        "official_name": "봉고III EV",
+        "year": "2025",
+        "aliases": ["봉고3 EV", "봉고III EV", "BONGO III EV", "봉고3EV", "봉고 EV"],
+        "battery_capacity": "60.4kWh",
+        "trims": {
+          "스마트 셀렉션": {"aliases": ["스마트셀렉션", "SMART SELECTION"]},
+          "GL": {"aliases": ["GL", "지엘"]},
+          "GLS": {"aliases": ["GLS", "지엘에스"]}
+        },
+        "motor_output": {
+          "max_power": "135kW",
+          "max_torque": "395Nm"
+        },
+        "range": "217km (복합)",
+        "options": [
+          "적재함 평바닥",
+          "운전석 통풍시트",
+          "하이패스 자동결제 시스템"
+        ],
+        "exterior_colors": {
+          "UD": "순백색",
+          "MA": "진감청"
+        },
+        "interior_colors": [
+          "블랙"
+        ]
+      },
+      "PV5 패신저": {
+        "official_name": "PV5 패신저",
+        "year": "2025",
+        "aliases": ["PV5 패신저", "PV5 PASSENGER", "피브이5 패신저", "PV5패신저"],
+        "battery_capacity": "71.2kWh",
+        "seating": "5인승",
+        "trims": {
+          "베이직": {"aliases": ["베이직", "BASIC"]},
+          "플러스": {"aliases": ["플러스", "PLUS"]}
+        },
+        "motor_output": {
+          "max_power": "120kW (163ps)",
+          "max_torque": "250Nm"
+        },
+        "range": "358km (복합)",
+        "options": [
+          "컨비니언스",
+          "파워도어",
+          "스마트 커넥트",
+          "드라이브 와이즈",
+          "모니터링",
+          "유틸리티",
+          "아웃도어 팩"
+        ],
+        "exterior_colors": {
+          "UD": "클리어 화이트",
+          "KLG": "스틸 그레이",
+          "ABP": "오로라 블랙 펄",
+          "EBB": "프로스트 블루",
+          "CGE": "시티스케이프 그린",
+          "SML": "소프트 민트",
+          "LHG": "레이크하우스 그레이"
+        },
+        "interior_colors": [
+          "네이비 인테리어",
+          "네이비&그레이 인테리어",
+          "브라운 인테리어 (플러스 전용)"
+        ]
+      },
+      "PV5 카고": {
+        "official_name": "PV5 카고",
+        "year": "2025",
+        "aliases": ["PV5 카고", "PV5 CARGO", "피브이5 카고", "PV5카고"],
+        "battery_options": {
+          "스탠다드": {
+            "battery_capacity": "51.5kWh",
+            "range": "280km (3도어), 271km (4도어)"
+          },
+          "롱레인지": {
+            "battery_capacity": "71.2kWh",
+            "range": "377km"
+          }
+        },
+        "trims": {
+          "베이직": {"aliases": ["베이직", "BASIC"]}
+        },
+        "motor_output": {
+          "스탠다드": {"max_power": "89.4kW (121ps)", "max_torque": "250Nm"},
+          "롱레인지": {"max_power": "120kW (163ps)", "max_torque": "250Nm"}
+        },
+        "options": [
+          "컨비니언스",
+          "스마트 커넥트",
+          "드라이브 와이즈",
+          "모니터링",
+          "유틸리티",
+          "카고룸 평탄화 플로어",
+          "카고룸 바닥",
+          "휠하우징 커버 스토리지",
+          "L-Track 패키지"
+        ],
+        "exterior_colors": {
+          "UD": "클리어 화이트",
+          "KLG": "스틸 그레이",
+          "ABP": "오로라 블랙 펄"
+        },
+        "interior_colors": [
+          "네이비 인테리어"
+        ]
+      }
+    }
+  },
+
+  "option_normalizations": {
+    "_description": "금융사 데이터의 다양한 옵션명 표기를 제조사 공식 명칭으로 정규화",
+
+    "드라이브 와이즈": {
+      "official": "드라이브 와이즈",
+      "variants": ["드라이브와이즈", "DRIVE WISE", "DriveWise"]
+    },
+    "드라이브 와이즈Ⅰ": {
+      "official": "드라이브 와이즈Ⅰ",
+      "variants": ["드라이브 와이즈1", "드라이브 와이즈 1", "드라이브와이즈1", "드라이브 와이즈 I"]
+    },
+    "드라이브 와이즈Ⅱ": {
+      "official": "드라이브 와이즈Ⅱ",
+      "variants": ["드라이브 와이즈2", "드라이브 와이즈 2", "드라이브와이즈2", "드라이브 와이즈 II"]
+    },
+    "선루프": {
+      "official": "선루프",
+      "variants": [
+        "썬루프", "SUNROOF",
+        "파노라마 선루프", "파노라마선루프", "파노라마 썬루프", "파노라마썬루프", "PANORAMA SUNROOF",
+        "듀얼 선루프", "듀얼선루프", "듀얼 썬루프", "듀얼썬루프",
+        "듀얼 와이드 선루프", "듀얼와이드선루프",
+        "와이드 선루프", "와이드선루프", "와이드 썬루프", "와이드썬루프"
+      ]
+    },
+    "헤드업 디스플레이": {
+      "official": "헤드업 디스플레이",
+      "variants": ["헤드업디스플레이", "HUD", "HEAD UP DISPLAY"]
+    },
+    "빌트인 캠": {
+      "official": "빌트인 캠",
+      "variants": [
+        "빌트인캠", "BUILT-IN CAM", "블랙박스",
+        "빌트인 캠 2", "빌트인캠2", "빌트인 캠2", "BUILT-IN CAM 2",
+        "빌트인 캠 2 플러스", "빌트인캠2플러스", "빌트인 캠2플러스", "BUILT-IN CAM 2 PLUS",
+        "빌트인 캠 2 Plus", "빌트인캠 2.0"
+      ]
+    },
+    "컴포트": {
+      "official": "컴포트",
+      "variants": ["컴포트팩", "COMFORT"]
+    },
+    "컴포트Ⅰ": {
+      "official": "컴포트Ⅰ",
+      "variants": ["컴포트1", "컴포트 1", "COMFORT 1", "COMFORT I"]
+    },
+    "컴포트Ⅱ": {
+      "official": "컴포트Ⅱ",
+      "variants": ["컴포트2", "컴포트 2", "COMFORT 2", "COMFORT II"]
+    },
+    "컨비니언스": {
+      "official": "컨비니언스",
+      "variants": ["컨비니언스팩", "CONVENIENCE"]
+    },
+    "프리미엄": {
+      "official": "프리미엄",
+      "variants": ["프리미엄팩", "PREMIUM"]
+    },
+    "스타일": {
+      "official": "스타일",
+      "variants": ["스타일팩", "STYLE"]
+    },
+    "스마트 커넥트": {
+      "official": "스마트 커넥트",
+      "variants": ["스마트커넥트", "SMART CONNECT"]
+    },
+    "모니터링": {
+      "official": "모니터링",
+      "variants": ["모니터링팩", "MONITORING"]
+    },
+    "하이테크": {
+      "official": "하이테크",
+      "variants": ["하이테크팩", "HIGH TECH", "HIGHTECH"]
+    },
+    "유틸리티": {
+      "official": "유틸리티",
+      "variants": ["유틸리티팩", "UTILITY"]
+    },
+    "하만카돈 프리미엄 사운드": {
+      "official": "하만카돈 프리미엄 사운드",
+      "variants": ["하만카돈", "하만카돈사운드", "HARMAN KARDON", "하만카돈 사운드"]
+    },
+    "메리디안 프리미엄 사운드": {
+      "official": "메리디안 프리미엄 사운드",
+      "variants": ["메리디안", "메리디안사운드", "MERIDIAN", "메리디안 사운드"]
+    },
+    "KRELL 프리미엄 사운드": {
+      "official": "KRELL 프리미엄 사운드",
+      "variants": ["크렐", "크렐사운드", "KRELL", "크렐 사운드"]
+    },
+    "BOSE 프리미엄 사운드": {
+      "official": "BOSE 프리미엄 사운드",
+      "variants": ["보스", "보스사운드", "BOSE", "보스 사운드"]
+    }
+  }
+}

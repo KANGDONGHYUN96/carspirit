@@ -1,0 +1,185 @@
+{
+  "brand": "르노코리아",
+  "vehicles": {
+    "그랑 콜레오스": {
+      "official_name": "그랑 콜레오스",
+      "year": "2026",
+      "aliases": ["grand koleos", "koleos", "콜레오스"],
+      "fuel_types": {
+        "하이브리드 E-Tech": {
+          "engine": "1.5 터보 하이브리드",
+          "fuel": "하이브리드",
+          "motor": "100kW 구동모터 + 60kW 보조모터"
+        },
+        "가솔린 2.0 터보": {
+          "engine": "2.0 터보",
+          "fuel": "가솔린"
+        },
+        "가솔린 2.0 터보 4WD": {
+          "engine": "2.0 터보",
+          "fuel": "가솔린",
+          "drivetrain": "4WD"
+        }
+      },
+      "trims": {
+        "techno": {"korean": "테크노", "aliases": ["테크노"]},
+        "iconic": {"korean": "아이코닉", "aliases": ["아이코닉"]},
+        "esprit Alpine": {"korean": "에스프리 알핀", "aliases": ["에스프리알핀", "알핀"]},
+        "iconic 4WD": {"korean": "아이코닉 4WD", "aliases": ["아이코닉4WD"]},
+        "escapade": {"korean": "에스카파드", "aliases": ["에스카파드"]},
+        "escapade 4WD": {"korean": "에스카파드 4WD", "aliases": ["에스카파드4WD"]}
+      },
+      "options": [
+        "12.3인치 동승석 디스플레이",
+        "FULL 오토 파킹 보조",
+        "후방 긴급 제동 보조",
+        "파노라마 선루프",
+        "BOSE 서라운드 사운드 시스템(10스피커)",
+        "액티브 노이즈 캔슬레이션",
+        "증강현실 헤드업 디스플레이(AR-HUD)",
+        "차음 윈드 쉴드 글라스",
+        "프레임리스 룸미러",
+        "20인치 투톤 하이랜드 알로이 휠"
+      ],
+      "exterior_colors": {
+        "새틴 유니버스 화이트": "Satin Universe White",
+        "새틴 어반 그레이": "Satin Urban Grey",
+        "클라우드 펄": "Cloud Pearl",
+        "어반 그레이": "Urban Grey",
+        "메탈릭 블랙": "Metallic Black",
+        "미네랄 코퍼": "Mineral Copper"
+      },
+      "interior_colors": [
+        "다크 블루 인조 가죽 시트",
+        "다크 블루 나파 인조 가죽 시트",
+        "퀼팅 라이트 브라운 나파 인조 가죽 시트",
+        "블랙 나파 인조 가죽 시트",
+        "퓨어 라이트 그레이 나파 인조 가죽 시트"
+      ]
+    },
+    "아르카나": {
+      "official_name": "아르카나",
+      "year": "2026",
+      "aliases": ["arkana"],
+      "fuel_types": {
+        "하이브리드 E-Tech": {
+          "engine": "1.6 터보 하이브리드",
+          "fuel": "하이브리드",
+          "motor": "36kW 구동모터 + 15kW 보조모터"
+        },
+        "가솔린 1.6": {
+          "engine": "1.6",
+          "fuel": "가솔린"
+        }
+      },
+      "trims": {
+        "techno": {"korean": "테크노", "aliases": ["테크노"]},
+        "iconic": {"korean": "아이코닉", "aliases": ["아이코닉"]},
+        "esprit Alpine": {"korean": "에스프리 알핀", "aliases": ["에스프리알핀", "알핀"]},
+        "컬러패키지": {"korean": "컬러패키지", "aliases": ["컬러패키지"]}
+      },
+      "options": [
+        "블랙 인조 가죽 시트 패키지 + 하이패스",
+        "카멜 브라운 인조 가죽 시트 패키지",
+        "EA 시트 플러스 패키지",
+        "360도 어라운드 뷰 모니터",
+        "BOSE 서라운드 사운드 시스템(9스피커)",
+        "LED 도어 스팟 램프",
+        "파워 테일게이트",
+        "컨비니언스 패키지",
+        "17인치 다크 그레이 알로이 휠"
+      ],
+      "exterior_colors": {
+        "새틴 어반 그레이": "Satin Urban Grey",
+        "클라우드 펄": "Cloud Pearl",
+        "솔리드 화이트": "Solid White",
+        "어반 그레이": "Urban Grey",
+        "메탈릭 블랙": "Metallic Black",
+        "녹턴 블루": "Nocturn Blue"
+      },
+      "interior_colors": [
+        "직물 시트",
+        "블랙 인조 가죽 시트",
+        "카멜 브라운 인조 가죽 시트",
+        "esprit Alpine 프리미엄 마이크로 화이버 시트"
+      ]
+    },
+    "세닉": {
+      "official_name": "세닉",
+      "year": "2025",
+      "aliases": ["scenic", "세닉 E-Tech"],
+      "fuel_types": {
+        "전기 E-Tech": {
+          "engine": "전기모터 160kW",
+          "fuel": "전기",
+          "battery": "87kWh"
+        }
+      },
+      "trims": {
+        "techno": {"korean": "테크노", "aliases": ["테크노"]},
+        "techno+": {"korean": "테크노 플러스", "aliases": ["테크노플러스", "테크노+"]},
+        "iconic": {"korean": "아이코닉", "aliases": ["아이코닉"]}
+      },
+      "options": [
+        "파킹 어시스트 팩",
+        "360도 3D 어라운드 뷰",
+        "주차 조향보조 시스템(EPA)",
+        "스마트 룸미러",
+        "solarbay 파노라믹 선루프",
+        "Harman Kardon 프리미엄 사운드(9스피커)"
+      ],
+      "exterior_colors": {
+        "클라우드 펄": "Cloud Pearl",
+        "어반 그레이": "Urban Grey",
+        "메탈릭 블랙": "Metallic Black"
+      },
+      "interior_colors": [
+        "멜란지 그레이 리사이클 직물 시트",
+        "티타늄 블랙 바이오 소재 시트",
+        "블랙 인조 가죽 대시보드"
+      ]
+    },
+    "필랑트": {
+      "official_name": "필랑트",
+      "year": "2026",
+      "aliases": ["filante", "filante hybrid"],
+      "fuel_types": {
+        "하이브리드 E-Tech": {
+          "engine": "1.5 터보 하이브리드",
+          "fuel": "하이브리드",
+          "motor": "100kW 구동모터 + 60kW 보조모터"
+        }
+      },
+      "trims": {
+        "techno": {"korean": "테크노", "aliases": ["테크노"]},
+        "iconic": {"korean": "아이코닉", "aliases": ["아이코닉"]},
+        "esprit Alpine": {"korean": "에스프리 알핀", "aliases": ["에스프리알핀", "알핀"]},
+        "esprit Alpine 1955": {"korean": "에스프리 알핀 1955", "aliases": ["에스프리알핀1955", "알핀1955"]}
+      },
+      "options": [
+        "12.3인치 동승석 디스플레이",
+        "FULL 오토 파킹 보조",
+        "후방 긴급 제동 보조",
+        "증강현실 헤드업 디스플레이(AR-HUD)",
+        "스마트 룸미러",
+        "시그니처 패키지",
+        "BOSE 서라운드 사운드 시스템(10스피커)",
+        "액티브 노이즈 캔슬레이션",
+        "퓨어 라이트 그레이 프리미엄 인테리어"
+      ],
+      "exterior_colors": {
+        "새틴 유니버스 화이트": "Satin Universe White",
+        "새틴 포레스트 블랙": "Satin Forest Black",
+        "클라우드 펄": "Cloud Pearl",
+        "어반 그레이": "Urban Grey",
+        "메탈릭 블랙": "Metallic Black"
+      },
+      "interior_colors": [
+        "다크 블루 나파 인조 가죽 시트",
+        "모던 브라운 나파 인조 가죽 시트",
+        "블랙 나파 인조 가죽 시트",
+        "퓨어 라이트 그레이 나파 인조 가죽 시트"
+      ]
+    }
+  }
+}

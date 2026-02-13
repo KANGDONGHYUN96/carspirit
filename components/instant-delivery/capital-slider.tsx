@@ -2,78 +2,71 @@
 
 import Image from 'next/image'
 
-const CAPITAL_LOGOS = [
-  { name: 'BNK캐피탈', src: '/capital-logos/bnk.png' },
-  { name: 'JB우리캐피탈', src: '/capital-logos/jb.png' },
-  { name: '기아', src: '/capital-logos/kia.png' },
-  { name: '농협캐피탈', src: '/capital-logos/nh.png' },
-  { name: '롯데캐피탈', src: '/capital-logos/lotte-capital.png' },
-  { name: '롯데렌터카', src: '/capital-logos/lotte-rent.png' },
-  { name: '현대캐피탈', src: '/capital-logos/hyundai-capital.png' },
-  { name: '현대', src: '/capital-logos/hyundai.png' },
-  { name: '우리금융캐피탈', src: '/capital-logos/woori.png' },
-  { name: '오릭스캐피탈', src: '/capital-logos/orix.png' },
-  { name: 'KB캐피탈', src: '/capital-logos/kb.png' },
-  { name: '신한카드', src: '/capital-logos/shinhan.png' },
-  { name: 'IM캐피탈', src: '/capital-logos/im.png' },
-  { name: 'MG캐피탈', src: '/capital-logos/mg.png' },
+// 슬라이더에 표시할 금융사 로고 (중복 제거)
+const UNIQUE_LOGOS = [
+  { source: 'KB캐피탈', logo: '/company-logos/kb.png', width: 100, height: 45, offsetY: 0 },
+  { source: '현대캐피탈', logo: '/company-logos/hyundai-capital.png', width: 100, height: 45, offsetY: 0 },
+  { source: 'BNK캐피탈', logo: '/company-logos/bnk.png', width: 100, height: 45, offsetY: 0 },
+  { source: 'IM캐피탈', logo: '/company-logos/im.png', width: 100, height: 45, offsetY: 0 },
+  { source: 'MG캐피탈', logo: '/company-logos/mg.png', width: 100, height: 45, offsetY: 0 },
+  { source: '메리츠캐피탈', logo: '/company-logos/meritz.png', width: 100, height: 45, offsetY: 0 },
+  { source: 'JB우리캐피탈', logo: '/company-logos/jb.png', width: 100, height: 45, offsetY: 0 },
+  { source: '롯데렌터카', logo: '/company-logos/lotte-rent.png', width: 100, height: 45, offsetY: 0 },
+  { source: '롯데캐피탈', logo: '/company-logos/lotte-capital.png', width: 100, height: 45, offsetY: 0 },
+  { source: '오릭스캐피탈', logo: '/company-logos/orix.png', width: 100, height: 45, offsetY: 0 },
+  { source: '신한카드', logo: '/company-logos/shinhan.png', width: 100, height: 45, offsetY: 0 },
+  { source: 'SK렌터카', logo: '/company-logos/sk.png', width: 80, height: 36, offsetY: -8 },
+  { source: '농협캐피탈', logo: '/company-logos/nh.png', width: 100, height: 45, offsetY: 0 },
+  { source: '우리금융캐피탈', logo: '/company-logos/woori.png', width: 100, height: 45, offsetY: 0 },
+  { source: '하나캐피탈', logo: '/company-logos/hana.png', width: 120, height: 55, offsetY: 0 },
 ]
 
 export default function CapitalSlider() {
-  // 3번 복사해서 더 부드럽게
-  const allLogos = [...CAPITAL_LOGOS, ...CAPITAL_LOGOS, ...CAPITAL_LOGOS]
+  // 무한 스크롤을 위해 로고 배열 복제
+  const duplicatedLogos = [...UNIQUE_LOGOS, ...UNIQUE_LOGOS]
 
   return (
-    <div className="bg-white rounded-xl p-6 mb-8 shadow-sm overflow-hidden">
-      <div className="slider-wrapper">
-        <div className="slider-track">
-          {allLogos.map((capital, index) => (
-            <div key={index} className="slide">
-              <div className="flex items-center justify-center">
-                <div className="relative w-32 h-24">
-                  <Image
-                    src={capital.src}
-                    alt={capital.name}
-                    fill
-                    className="object-contain"
-                    sizes="128px"
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+    <div className="relative w-full overflow-hidden bg-gray-50 py-6 rounded-xl mb-6">
+      <div
+        className="flex gap-12 animate-scroll"
+        style={{
+          width: `${duplicatedLogos.length * 140}px`
+        }}
+      >
+        {duplicatedLogos.map((item, index) => (
+          <div
+            key={`${item.source}-${index}`}
+            className="flex-shrink-0 w-[120px] h-[50px] flex items-center justify-center transition-all duration-300 hover:scale-110"
+            style={{ transform: `translateY(${item.offsetY}px)` }}
+          >
+            <Image
+              src={item.logo}
+              alt={item.source}
+              width={item.width}
+              height={item.height}
+              className="object-contain"
+            />
+          </div>
+        ))}
       </div>
 
+      {/* 좌우 그라데이션 */}
+      <div className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-gray-50 to-transparent pointer-events-none" />
+      <div className="absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-gray-50 to-transparent pointer-events-none" />
+
       <style jsx>{`
-        .slider-wrapper {
-          overflow: hidden;
-          position: relative;
-          width: 100%;
-        }
-
-        .slider-track {
-          display: flex;
-          width: fit-content;
-          animation: scroll 30s linear infinite;
-        }
-
-        .slide {
-          flex-shrink: 0;
-          width: 200px;
-          padding: 10px;
-        }
-
         @keyframes scroll {
           0% {
             transform: translateX(0);
           }
           100% {
-            transform: translateX(calc(-200px * 14)); /* 14개 로고 너비만큼 이동 */
+            transform: translateX(-50%);
           }
         }
-
-        .slider-wrapper:hover .slider-track {
+        .animate-scroll {
+          animation: scroll 25s linear infinite;
+        }
+        .animate-scroll:hover {
           animation-play-state: paused;
         }
       `}</style>

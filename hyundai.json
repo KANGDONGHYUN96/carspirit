@@ -1,0 +1,1023 @@
+{
+  "brand": "현대",
+  "vehicles": {
+    "쏘나타 디 엣지": {
+      "official_name": "쏘나타 디 엣지",
+      "year": "2026",
+      "aliases": ["쏘나타", "소나타", "sonata", "sonata the edge"],
+      "fuel_types": {
+        "가솔린 1.6 터보": {
+          "engine": "1.6 터보",
+          "fuel": "가솔린"
+        },
+        "가솔린 2.0": {
+          "engine": "2.0",
+          "fuel": "가솔린"
+        },
+        "LPG 2.0": {
+          "engine": "2.0",
+          "fuel": "LPG"
+        }
+      },
+      "trims": {
+        "Premium": {"korean": "프리미엄", "aliases": ["프리미엄"]},
+        "S": {"korean": "에스", "aliases": ["에스"]},
+        "Exclusive": {"korean": "익스클루시브", "aliases": ["익스클루시브"]},
+        "Inspiration": {"korean": "인스퍼레이션", "aliases": ["인스퍼레이션"]},
+        "N Line": {"korean": "N 라인", "aliases": ["N라인", "엔라인"]}
+      },
+      "options": [
+        "빌트인 캠(보조배터리 포함)",
+        "파노라마 선루프",
+        "에어 서스펜션(후륜)",
+        "컨비니언스 패키지",
+        "듀얼 풀오토 에어컨",
+        "18인치 알로이 휠 & 미쉐린 타이어",
+        "19인치 알로이 휠 & 미쉐린 타이어",
+        "보스(BOSE) 프리미엄 사운드",
+        "빌트인 공기청정기",
+        "에어 서스펜션(후륜, 자동제어)"
+      ],
+      "exterior_colors": {
+        "W6H": "세레니티 화이트 펄",
+        "A2B": "어비스 블랙 펄",
+        "NY9": "트랜스미션 블루 펄",
+        "T2G": "녹턴 그레이 메탈릭",
+        "T9M": "녹턴 그레이 매트",
+        "T4M": "에어로 실버 매트",
+        "XB9": "바이오 필릭 블루 펄",
+        "R2P": "얼티메이트 레드 메탈릭"
+      },
+      "interior_colors": ["블랙 모노톤", "네이비 투톤", "브라운 투톤"]
+    },
+    "쏘나타 디 엣지 하이브리드": {
+      "official_name": "쏘나타 디 엣지 하이브리드",
+      "year": "2026",
+      "aliases": ["쏘나타 하이브리드", "소나타 하이브리드", "sonata hybrid", "sonata the edge hybrid"],
+      "fuel_types": {
+        "하이브리드 1.6 터보": {
+          "engine": "1.6 터보 하이브리드",
+          "fuel": "하이브리드"
+        },
+        "하이브리드 2.0": {
+          "engine": "2.0 하이브리드",
+          "fuel": "하이브리드"
+        }
+      },
+      "trims": {
+        "Premium": {"korean": "프리미엄", "aliases": ["프리미엄"]},
+        "Exclusive": {"korean": "익스클루시브", "aliases": ["익스클루시브"]},
+        "Inspiration": {"korean": "인스퍼레이션", "aliases": ["인스퍼레이션"]}
+      },
+      "options": [
+        "빌트인 캠(보조배터리 포함)",
+        "파노라마 선루프",
+        "에어 서스펜션(후륜)",
+        "컨비니언스 패키지",
+        "듀얼 풀오토 에어컨",
+        "18인치 알로이 휠 & 미쉐린 타이어",
+        "19인치 알로이 휠 & 미쉐린 타이어",
+        "보스(BOSE) 프리미엄 사운드",
+        "빌트인 공기청정기"
+      ],
+      "exterior_colors": {
+        "W6H": "세레니티 화이트 펄",
+        "A2B": "어비스 블랙 펄",
+        "NY9": "트랜스미션 블루 펄",
+        "T2G": "녹턴 그레이 메탈릭",
+        "T9M": "녹턴 그레이 매트",
+        "T4M": "에어로 실버 매트",
+        "XB9": "바이오 필릭 블루 펄"
+      },
+      "interior_colors": ["블랙 모노톤", "네이비 투톤", "브라운 투톤"]
+    },
+    "그랜저": {
+      "official_name": "그랜저",
+      "year": "2026",
+      "aliases": ["grandeur", "그랜져"],
+      "fuel_types": {
+        "가솔린 2.5": {
+          "engine": "2.5",
+          "fuel": "가솔린"
+        },
+        "가솔린 3.5": {
+          "engine": "3.5",
+          "fuel": "가솔린"
+        },
+        "LPG 3.5": {
+          "engine": "3.5",
+          "fuel": "LPG"
+        }
+      },
+      "trims": {
+        "Premium": {"korean": "프리미엄", "aliases": ["프리미엄"]},
+        "Exclusive": {"korean": "익스클루시브", "aliases": ["익스클루시브"]},
+        "Honors": {"korean": "아너스", "aliases": ["아너스"]},
+        "Calligraphy": {"korean": "캘리그래피", "aliases": ["캘리그라피", "캘리"]},
+        "Black Exterior": {"korean": "블랙 익스테리어", "aliases": ["블랙익스테리어"]},
+        "Black Ink": {"korean": "블랙 잉크", "aliases": ["블랙잉크"]}
+      },
+      "options": [
+        "빌트인 캠(보조배터리 포함)",
+        "파노라마 선루프",
+        "하이패스/룸미러 통합형",
+        "컨비니언스 패키지",
+        "어드밴스드 컨비니언스 패키지",
+        "사운드 패키지(보스 프리미엄 사운드+고속도로 주행 보조2)",
+        "18인치 알로이 휠 & 미쉐린 타이어",
+        "19인치 알로이 휠 & 미쉐린 타이어",
+        "20인치 알로이 휠 & 미쉐린 타이어"
+      ],
+      "exterior_colors": {
+        "W6H": "세레니티 화이트 펄",
+        "A2B": "어비스 블랙 펄",
+        "NY9": "트랜스미션 블루 펄",
+        "T2G": "녹턴 그레이 메탈릭",
+        "T9M": "녹턴 그레이 매트",
+        "T4A": "에어로 실버 메탈릭",
+        "XB9": "바이오 필릭 블루 펄"
+      },
+      "interior_colors": ["블랙 모노톤", "네이비 투톤", "글로리 브라운 투톤"]
+    },
+    "그랜저 하이브리드": {
+      "official_name": "그랜저 하이브리드",
+      "year": "2026",
+      "aliases": ["grandeur hybrid", "그랜져 하이브리드"],
+      "fuel_types": {
+        "하이브리드 1.6 터보": {
+          "engine": "1.6 터보 하이브리드",
+          "fuel": "하이브리드"
+        }
+      },
+      "trims": {
+        "Premium": {"korean": "프리미엄", "aliases": ["프리미엄"]},
+        "Exclusive": {"korean": "익스클루시브", "aliases": ["익스클루시브"]},
+        "Calligraphy": {"korean": "캘리그래피", "aliases": ["캘리그라피", "캘리"]}
+      },
+      "options": [
+        "빌트인 캠(보조배터리 포함)",
+        "파노라마 선루프",
+        "하이패스/룸미러 통합형",
+        "컨비니언스 패키지",
+        "어드밴스드 컨비니언스 패키지",
+        "19인치 알로이 휠 & 미쉐린 타이어",
+        "20인치 알로이 휠 & 미쉐린 타이어"
+      ],
+      "exterior_colors": {
+        "W6H": "세레니티 화이트 펄",
+        "A2B": "어비스 블랙 펄",
+        "NY9": "트랜스미션 블루 펄",
+        "T2G": "녹턴 그레이 메탈릭",
+        "T4A": "에어로 실버 메탈릭"
+      },
+      "interior_colors": ["블랙 모노톤", "네이비 투톤"]
+    },
+    "아반떼": {
+      "official_name": "아반떼",
+      "year": "2026",
+      "aliases": ["avante", "elantra", "아반테"],
+      "fuel_types": {
+        "가솔린 1.6": {
+          "engine": "1.6",
+          "fuel": "가솔린"
+        },
+        "LPi 1.6": {
+          "engine": "1.6",
+          "fuel": "LPG"
+        }
+      },
+      "trims": {
+        "Smart": {"korean": "스마트", "aliases": ["스마트"]},
+        "Modern": {"korean": "모던", "aliases": ["모던"]},
+        "Inspiration": {"korean": "인스퍼레이션", "aliases": ["인스퍼레이션"]},
+        "N Line": {"korean": "N 라인", "aliases": ["N라인", "엔라인"]}
+      },
+      "options": [
+        "빌트인 캠(룸미러+전방)",
+        "빌트인 캠2(전/후방)",
+        "파노라마 선루프",
+        "컨비니언스 패키지",
+        "17인치 알로이 휠",
+        "18인치 알로이 휠 & 미쉐린 타이어",
+        "보스(BOSE) 프리미엄 사운드"
+      ],
+      "exterior_colors": {
+        "SAW": "아틀라스 화이트",
+        "A5G": "아마존 그레이 메탈릭",
+        "A2B": "어비스 블랙 펄",
+        "C5G": "사이버 그레이 메탈릭",
+        "PE2": "에코트로닉 그레이 펄",
+        "PM2": "메타 블루 펄",
+        "RRR": "미라지 그린"
+      },
+      "interior_colors": ["블랙 모노톤", "라이트 그레이 투톤"]
+    },
+    "아반떼 하이브리드": {
+      "official_name": "아반떼 하이브리드",
+      "year": "2026",
+      "aliases": ["avante hybrid", "elantra hybrid", "아반테 하이브리드"],
+      "fuel_types": {
+        "하이브리드 1.6": {
+          "engine": "1.6 하이브리드",
+          "fuel": "하이브리드"
+        }
+      },
+      "trims": {
+        "Smart": {"korean": "스마트", "aliases": ["스마트"]},
+        "Modern": {"korean": "모던", "aliases": ["모던"]},
+        "Inspiration": {"korean": "인스퍼레이션", "aliases": ["인스퍼레이션"]}
+      },
+      "options": [
+        "빌트인 캠(룸미러+전방)",
+        "파노라마 선루프",
+        "컨비니언스 패키지",
+        "17인치 알로이 휠",
+        "보스(BOSE) 프리미엄 사운드"
+      ],
+      "exterior_colors": {
+        "SAW": "아틀라스 화이트",
+        "A5G": "아마존 그레이 메탈릭",
+        "A2B": "어비스 블랙 펄",
+        "C5G": "사이버 그레이 메탈릭",
+        "PE2": "에코트로닉 그레이 펄",
+        "PM2": "메타 블루 펄"
+      },
+      "interior_colors": ["블랙 모노톤", "라이트 그레이 투톤"]
+    },
+    "아반떼 N": {
+      "official_name": "아반떼 N",
+      "year": "2026",
+      "aliases": ["avante n", "elantra n", "아반테 N"],
+      "fuel_types": {
+        "가솔린 2.0 터보": {
+          "engine": "2.0 터보",
+          "fuel": "가솔린"
+        }
+      },
+      "trims": {
+        "N Standard": {"korean": "N 스탠다드", "aliases": ["스탠다드"]},
+        "N Performance": {"korean": "N 퍼포먼스", "aliases": ["퍼포먼스"]}
+      },
+      "options": [
+        "빌트인 캠(룸미러+전방)",
+        "N 퍼포먼스 패키지",
+        "N 라이트 스포츠 버킷시트",
+        "선루프",
+        "보스(BOSE) 프리미엄 사운드"
+      ],
+      "exterior_colors": {
+        "SAW": "아틀라스 화이트",
+        "A2B": "어비스 블랙 펄",
+        "YAC": "퍼포먼스 블루",
+        "R2P": "얼티메이트 레드 메탈릭",
+        "C5G": "사이버 그레이 메탈릭"
+      },
+      "interior_colors": ["블랙 모노톤", "퍼포먼스 블루 투톤"]
+    },
+    "싼타페": {
+      "official_name": "싼타페",
+      "year": "2026",
+      "aliases": ["santafe", "santa fe"],
+      "fuel_types": {
+        "가솔린 2.5": {
+          "engine": "2.5",
+          "fuel": "가솔린"
+        },
+        "가솔린 2.5 터보": {
+          "engine": "2.5 터보",
+          "fuel": "가솔린"
+        },
+        "디젤 2.2": {
+          "engine": "2.2",
+          "fuel": "디젤"
+        }
+      },
+      "trims": {
+        "Premium": {"korean": "프리미엄", "aliases": ["프리미엄"]},
+        "Exclusive": {"korean": "익스클루시브", "aliases": ["익스클루시브"]},
+        "Prestige": {"korean": "프레스티지", "aliases": ["프레스티지"]},
+        "Calligraphy": {"korean": "캘리그래피", "aliases": ["캘리그라피", "캘리"]}
+      },
+      "options": [
+        "빌트인 캠(보조배터리 포함)",
+        "파노라마 선루프",
+        "컨비니언스 패키지",
+        "듀얼 풀오토 에어컨",
+        "19인치 알로이 휠",
+        "20인치 알로이 휠",
+        "21인치 알로이 휠",
+        "보스(BOSE) 프리미엄 사운드",
+        "빌트인 공기청정기",
+        "어드밴스드 컨비니언스 패키지"
+      ],
+      "exterior_colors": {
+        "WC9": "크리미 화이트 펄",
+        "A2B": "어비스 블랙 펄",
+        "R2P": "얼티메이트 레드 메탈릭",
+        "V6S": "발리 바이올렛 펄",
+        "T2G": "녹턴 그레이 메탈릭",
+        "T4A": "에어로 실버 메탈릭",
+        "N9W": "펀지 화이트 매트",
+        "T3G": "테라 그레이 매트"
+      },
+      "interior_colors": ["블랙 모노톤", "브라운 투톤", "버건디 투톤"]
+    },
+    "싼타페 하이브리드": {
+      "official_name": "싼타페 하이브리드",
+      "year": "2026",
+      "aliases": ["santafe hybrid", "santa fe hybrid"],
+      "fuel_types": {
+        "하이브리드 1.6 터보": {
+          "engine": "1.6 터보 하이브리드",
+          "fuel": "하이브리드"
+        }
+      },
+      "trims": {
+        "Premium": {"korean": "프리미엄", "aliases": ["프리미엄"]},
+        "Exclusive": {"korean": "익스클루시브", "aliases": ["익스클루시브"]},
+        "Prestige": {"korean": "프레스티지", "aliases": ["프레스티지"]},
+        "Calligraphy": {"korean": "캘리그래피", "aliases": ["캘리그라피", "캘리"]}
+      },
+      "options": [
+        "빌트인 캠(보조배터리 포함)",
+        "파노라마 선루프",
+        "컨비니언스 패키지",
+        "듀얼 풀오토 에어컨",
+        "19인치 알로이 휠",
+        "20인치 알로이 휠",
+        "21인치 알로이 휠",
+        "보스(BOSE) 프리미엄 사운드",
+        "빌트인 공기청정기"
+      ],
+      "exterior_colors": {
+        "WC9": "크리미 화이트 펄",
+        "A2B": "어비스 블랙 펄",
+        "R2P": "얼티메이트 레드 메탈릭",
+        "V6S": "발리 바이올렛 펄",
+        "T2G": "녹턴 그레이 메탈릭",
+        "T4A": "에어로 실버 메탈릭"
+      },
+      "interior_colors": ["블랙 모노톤", "브라운 투톤"]
+    },
+    "투싼": {
+      "official_name": "투싼",
+      "year": "2026",
+      "aliases": ["tucson"],
+      "fuel_types": {
+        "가솔린 1.6 터보": {
+          "engine": "1.6 터보",
+          "fuel": "가솔린"
+        },
+        "디젤 2.0": {
+          "engine": "2.0",
+          "fuel": "디젤"
+        }
+      },
+      "trims": {
+        "Modern": {"korean": "모던", "aliases": ["모던"]},
+        "Premium": {"korean": "프리미엄", "aliases": ["프리미엄"]},
+        "Inspiration": {"korean": "인스퍼레이션", "aliases": ["인스퍼레이션"]},
+        "N Line": {"korean": "N 라인", "aliases": ["N라인", "엔라인"]}
+      },
+      "options": [
+        "빌트인 캠(보조배터리 포함)",
+        "파노라마 선루프",
+        "컨비니언스 패키지",
+        "듀얼 풀오토 에어컨",
+        "18인치 알로이 휠",
+        "19인치 알로이 휠",
+        "보스(BOSE) 프리미엄 사운드",
+        "빌트인 공기청정기"
+      ],
+      "exterior_colors": {
+        "WW2": "아이보리 화이트 투톤",
+        "A2B": "어비스 블랙 펄",
+        "R2P": "얼티메이트 레드 메탈릭",
+        "T2G": "녹턴 그레이 메탈릭",
+        "T4A": "에어로 실버 메탈릭",
+        "PE2": "에코트로닉 그레이 펄"
+      },
+      "interior_colors": ["블랙 모노톤", "네이비 투톤"]
+    },
+    "투싼 하이브리드": {
+      "official_name": "투싼 하이브리드",
+      "year": "2026",
+      "aliases": ["tucson hybrid"],
+      "fuel_types": {
+        "하이브리드 1.6 터보": {
+          "engine": "1.6 터보 하이브리드",
+          "fuel": "하이브리드"
+        }
+      },
+      "trims": {
+        "Modern": {"korean": "모던", "aliases": ["모던"]},
+        "Premium": {"korean": "프리미엄", "aliases": ["프리미엄"]},
+        "Inspiration": {"korean": "인스퍼레이션", "aliases": ["인스퍼레이션"]}
+      },
+      "options": [
+        "빌트인 캠(보조배터리 포함)",
+        "파노라마 선루프",
+        "컨비니언스 패키지",
+        "듀얼 풀오토 에어컨",
+        "18인치 알로이 휠",
+        "19인치 알로이 휠",
+        "보스(BOSE) 프리미엄 사운드"
+      ],
+      "exterior_colors": {
+        "WW2": "아이보리 화이트 투톤",
+        "A2B": "어비스 블랙 펄",
+        "T2G": "녹턴 그레이 메탈릭",
+        "T4A": "에어로 실버 메탈릭",
+        "PE2": "에코트로닉 그레이 펄"
+      },
+      "interior_colors": ["블랙 모노톤", "네이비 투톤"]
+    },
+    "코나": {
+      "official_name": "코나",
+      "year": "2025",
+      "aliases": ["kona"],
+      "fuel_types": {
+        "가솔린 1.6 터보": {
+          "engine": "1.6 터보",
+          "fuel": "가솔린"
+        }
+      },
+      "trims": {
+        "Modern": {"korean": "모던", "aliases": ["모던"]},
+        "Inspiration": {"korean": "인스퍼레이션", "aliases": ["인스퍼레이션"]},
+        "N Line": {"korean": "N 라인", "aliases": ["N라인", "엔라인"]}
+      },
+      "options": [
+        "빌트인 캠(룸미러+전방)",
+        "선루프",
+        "컨비니언스 패키지",
+        "17인치 알로이 휠",
+        "18인치 알로이 휠",
+        "보스(BOSE) 프리미엄 사운드"
+      ],
+      "exterior_colors": {
+        "SAW": "아틀라스 화이트",
+        "A2B": "어비스 블랙 펄",
+        "C5G": "사이버 그레이 메탈릭",
+        "D2S": "데님 블루 메탈릭",
+        "PE2": "에코트로닉 그레이 펄",
+        "NEB": "네온 그린 매트"
+      },
+      "interior_colors": ["블랙 모노톤", "다크 그레이 투톤"]
+    },
+    "코나 하이브리드": {
+      "official_name": "코나 하이브리드",
+      "year": "2025",
+      "aliases": ["kona hybrid"],
+      "fuel_types": {
+        "하이브리드 1.6": {
+          "engine": "1.6 하이브리드",
+          "fuel": "하이브리드"
+        }
+      },
+      "trims": {
+        "Modern": {"korean": "모던", "aliases": ["모던"]},
+        "Inspiration": {"korean": "인스퍼레이션", "aliases": ["인스퍼레이션"]}
+      },
+      "options": [
+        "빌트인 캠(룸미러+전방)",
+        "선루프",
+        "컨비니언스 패키지",
+        "17인치 알로이 휠",
+        "보스(BOSE) 프리미엄 사운드"
+      ],
+      "exterior_colors": {
+        "SAW": "아틀라스 화이트",
+        "A2B": "어비스 블랙 펄",
+        "C5G": "사이버 그레이 메탈릭",
+        "D2S": "데님 블루 메탈릭",
+        "PE2": "에코트로닉 그레이 펄"
+      },
+      "interior_colors": ["블랙 모노톤", "다크 그레이 투톤"]
+    },
+    "코나 일렉트릭": {
+      "official_name": "코나 일렉트릭",
+      "year": "2025",
+      "aliases": ["kona electric", "kona ev", "코나 EV"],
+      "fuel_types": {
+        "전기": {
+          "engine": "전기모터",
+          "fuel": "전기",
+          "battery": "64.8kWh"
+        }
+      },
+      "trims": {
+        "Modern Standard": {"korean": "모던 스탠다드", "aliases": ["모던스탠다드"]},
+        "Modern Long Range": {"korean": "모던 롱레인지", "aliases": ["모던롱레인지"]},
+        "Inspiration Long Range": {"korean": "인스퍼레이션 롱레인지", "aliases": ["인스퍼레이션롱레인지"]}
+      },
+      "options": [
+        "빌트인 캠(룸미러+전방)",
+        "선루프",
+        "컨비니언스 패키지",
+        "17인치 알로이 휠",
+        "19인치 알로이 휠",
+        "보스(BOSE) 프리미엄 사운드",
+        "Vehicle to Load(V2L)"
+      ],
+      "exterior_colors": {
+        "SAW": "아틀라스 화이트",
+        "A2B": "어비스 블랙 펄",
+        "C5G": "사이버 그레이 메탈릭",
+        "PE2": "에코트로닉 그레이 펄",
+        "D2S": "데님 블루 메탈릭"
+      },
+      "interior_colors": ["블랙 모노톤", "라이트 그레이 투톤"]
+    },
+    "베뉴": {
+      "official_name": "베뉴",
+      "year": "2025",
+      "aliases": ["venue"],
+      "fuel_types": {
+        "가솔린 1.6": {
+          "engine": "1.6",
+          "fuel": "가솔린"
+        }
+      },
+      "trims": {
+        "Smart": {"korean": "스마트", "aliases": ["스마트"]},
+        "Modern": {"korean": "모던", "aliases": ["모던"]},
+        "Inspiration": {"korean": "인스퍼레이션", "aliases": ["인스퍼레이션"]}
+      },
+      "options": [
+        "빌트인 캠(룸미러+전방)",
+        "선루프",
+        "컨비니언스 패키지",
+        "16인치 알로이 휠",
+        "17인치 알로이 휠",
+        "보스(BOSE) 프리미엄 사운드"
+      ],
+      "exterior_colors": {
+        "SAW": "아틀라스 화이트",
+        "A2B": "어비스 블랙 펄",
+        "R2P": "얼티메이트 레드 메탈릭",
+        "C5G": "사이버 그레이 메탈릭",
+        "PE2": "에코트로닉 그레이 펄",
+        "W9Y": "코즈믹 블루 투톤"
+      },
+      "interior_colors": ["블랙 모노톤", "라이트 그레이 투톤"]
+    },
+    "디 올 뉴 팰리세이드": {
+      "official_name": "디 올 뉴 팰리세이드",
+      "year": "2025",
+      "aliases": ["palisade", "팰리세이드"],
+      "fuel_types": {
+        "가솔린 3.5": {
+          "engine": "3.5",
+          "fuel": "가솔린"
+        },
+        "디젤 2.2": {
+          "engine": "2.2",
+          "fuel": "디젤"
+        }
+      },
+      "trims": {
+        "Exclusive": {"korean": "익스클루시브", "aliases": ["익스클루시브"]},
+        "Prestige": {"korean": "프레스티지", "aliases": ["프레스티지"]},
+        "Calligraphy": {"korean": "캘리그래피", "aliases": ["캘리그라피", "캘리"]}
+      },
+      "options": [
+        "빌트인 캠(보조배터리 포함)",
+        "파노라마 선루프",
+        "컨비니언스 패키지",
+        "어드밴스드 컨비니언스 패키지",
+        "20인치 알로이 휠",
+        "21인치 알로이 휠",
+        "보스(BOSE) 프리미엄 사운드",
+        "빌트인 공기청정기",
+        "VIP 릴렉션 시트(2열)"
+      ],
+      "exterior_colors": {
+        "WC9": "크리미 화이트 펄",
+        "A2B": "어비스 블랙 펄",
+        "T2G": "녹턴 그레이 메탈릭",
+        "T4A": "에어로 실버 메탈릭",
+        "R2P": "얼티메이트 레드 메탈릭",
+        "N9W": "펀지 화이트 매트",
+        "T3G": "테라 그레이 매트"
+      },
+      "interior_colors": ["블랙 모노톤", "브라운 투톤", "버건디 투톤", "그레이 투톤"]
+    },
+    "디 올 뉴 팰리세이드 하이브리드": {
+      "official_name": "디 올 뉴 팰리세이드 하이브리드",
+      "year": "2025",
+      "aliases": ["palisade hybrid", "팰리세이드 하이브리드"],
+      "fuel_types": {
+        "하이브리드 1.6 터보": {
+          "engine": "1.6 터보 하이브리드",
+          "fuel": "하이브리드"
+        }
+      },
+      "trims": {
+        "Exclusive": {"korean": "익스클루시브", "aliases": ["익스클루시브"]},
+        "Prestige": {"korean": "프레스티지", "aliases": ["프레스티지"]},
+        "Calligraphy": {"korean": "캘리그래피", "aliases": ["캘리그라피", "캘리"]}
+      },
+      "options": [
+        "빌트인 캠(보조배터리 포함)",
+        "파노라마 선루프",
+        "컨비니언스 패키지",
+        "어드밴스드 컨비니언스 패키지",
+        "20인치 알로이 휠",
+        "21인치 알로이 휠",
+        "보스(BOSE) 프리미엄 사운드",
+        "빌트인 공기청정기"
+      ],
+      "exterior_colors": {
+        "WC9": "크리미 화이트 펄",
+        "A2B": "어비스 블랙 펄",
+        "T2G": "녹턴 그레이 메탈릭",
+        "T4A": "에어로 실버 메탈릭",
+        "R2P": "얼티메이트 레드 메탈릭"
+      },
+      "interior_colors": ["블랙 모노톤", "브라운 투톤"]
+    },
+    "더 뉴 스타리아 라운지": {
+      "official_name": "더 뉴 스타리아 라운지",
+      "year": "2025",
+      "aliases": ["staria lounge", "스타리아 라운지"],
+      "fuel_types": {
+        "디젤 2.2": {
+          "engine": "2.2",
+          "fuel": "디젤"
+        }
+      },
+      "trims": {
+        "Tourer 7인승": {"korean": "투어러 7인승", "aliases": ["투어러7인승"]},
+        "Tourer 9인승": {"korean": "투어러 9인승", "aliases": ["투어러9인승"]},
+        "Prestige 7인승": {"korean": "프레스티지 7인승", "aliases": ["프레스티지7인승"]},
+        "Prestige 9인승": {"korean": "프레스티지 9인승", "aliases": ["프레스티지9인승"]},
+        "Calligraphy 7인승": {"korean": "캘리그래피 7인승", "aliases": ["캘리그래피7인승"]}
+      },
+      "options": [
+        "빌트인 캠(보조배터리 포함)",
+        "컨비니언스 패키지",
+        "듀얼 풀오토 에어컨",
+        "18인치 알로이 휠",
+        "보스(BOSE) 프리미엄 사운드",
+        "빌트인 공기청정기"
+      ],
+      "exterior_colors": {
+        "WC9": "크리미 화이트 펄",
+        "A2B": "어비스 블랙 펄",
+        "T2G": "녹턴 그레이 메탈릭"
+      },
+      "interior_colors": ["블랙 모노톤", "네이비 투톤", "카키 투톤"]
+    },
+    "더 뉴 스타리아 라운지 하이브리드": {
+      "official_name": "더 뉴 스타리아 라운지 하이브리드",
+      "year": "2025",
+      "aliases": ["staria lounge hybrid", "스타리아 라운지 하이브리드"],
+      "fuel_types": {
+        "하이브리드 1.6 터보": {
+          "engine": "1.6 터보 하이브리드",
+          "fuel": "하이브리드"
+        }
+      },
+      "trims": {
+        "Tourer 7인승": {"korean": "투어러 7인승", "aliases": ["투어러7인승"]},
+        "Prestige 7인승": {"korean": "프레스티지 7인승", "aliases": ["프레스티지7인승"]},
+        "Calligraphy 7인승": {"korean": "캘리그래피 7인승", "aliases": ["캘리그래피7인승"]}
+      },
+      "options": [
+        "빌트인 캠(보조배터리 포함)",
+        "컨비니언스 패키지",
+        "듀얼 풀오토 에어컨",
+        "18인치 알로이 휠",
+        "보스(BOSE) 프리미엄 사운드"
+      ],
+      "exterior_colors": {
+        "WC9": "크리미 화이트 펄",
+        "A2B": "어비스 블랙 펄",
+        "T2G": "녹턴 그레이 메탈릭"
+      },
+      "interior_colors": ["블랙 모노톤", "네이비 투톤"]
+    },
+    "더 뉴 스타리아": {
+      "official_name": "더 뉴 스타리아",
+      "year": "2025",
+      "aliases": ["staria", "스타리아"],
+      "fuel_types": {
+        "디젤 2.2": {
+          "engine": "2.2",
+          "fuel": "디젤"
+        }
+      },
+      "trims": {
+        "Smart 3인승": {"korean": "스마트 3인승", "aliases": ["스마트3인승"]},
+        "Modern 3인승": {"korean": "모던 3인승", "aliases": ["모던3인승"]},
+        "Smart 5인승": {"korean": "스마트 5인승", "aliases": ["스마트5인승"]},
+        "Modern 5인승": {"korean": "모던 5인승", "aliases": ["모던5인승"]},
+        "Smart 9인승": {"korean": "스마트 9인승", "aliases": ["스마트9인승"]},
+        "Modern 9인승": {"korean": "모던 9인승", "aliases": ["모던9인승"]},
+        "Smart 11인승": {"korean": "스마트 11인승", "aliases": ["스마트11인승"]},
+        "Modern 11인승": {"korean": "모던 11인승", "aliases": ["모던11인승"]}
+      },
+      "options": [
+        "빌트인 캠(룸미러+전방)",
+        "컨비니언스 패키지",
+        "17인치 알로이 휠",
+        "18인치 알로이 휠"
+      ],
+      "exterior_colors": {
+        "WC9": "크리미 화이트 펄",
+        "A2B": "어비스 블랙 펄",
+        "T2G": "녹턴 그레이 메탈릭",
+        "SAW": "아틀라스 화이트"
+      },
+      "interior_colors": ["블랙 모노톤"]
+    },
+    "더 뉴 스타리아 하이브리드": {
+      "official_name": "더 뉴 스타리아 하이브리드",
+      "year": "2025",
+      "aliases": ["staria hybrid", "스타리아 하이브리드"],
+      "fuel_types": {
+        "하이브리드 1.6 터보": {
+          "engine": "1.6 터보 하이브리드",
+          "fuel": "하이브리드"
+        }
+      },
+      "trims": {
+        "Smart 3인승": {"korean": "스마트 3인승", "aliases": ["스마트3인승"]},
+        "Modern 3인승": {"korean": "모던 3인승", "aliases": ["모던3인승"]},
+        "Smart 5인승": {"korean": "스마트 5인승", "aliases": ["스마트5인승"]},
+        "Modern 5인승": {"korean": "모던 5인승", "aliases": ["모던5인승"]}
+      },
+      "options": [
+        "빌트인 캠(룸미러+전방)",
+        "컨비니언스 패키지",
+        "17인치 알로이 휠",
+        "18인치 알로이 휠"
+      ],
+      "exterior_colors": {
+        "WC9": "크리미 화이트 펄",
+        "A2B": "어비스 블랙 펄",
+        "T2G": "녹턴 그레이 메탈릭",
+        "SAW": "아틀라스 화이트"
+      },
+      "interior_colors": ["블랙 모노톤"]
+    },
+    "아이오닉 5": {
+      "official_name": "아이오닉 5",
+      "year": "2025",
+      "aliases": ["ioniq 5", "ioniq5", "아이오닉5"],
+      "fuel_types": {
+        "전기 스탠다드": {
+          "engine": "전기모터",
+          "fuel": "전기",
+          "battery": "63kWh"
+        },
+        "전기 롱레인지": {
+          "engine": "전기모터",
+          "fuel": "전기",
+          "battery": "84kWh"
+        }
+      },
+      "trims": {
+        "E-Value+ Standard": {"korean": "E-밸류+ 스탠다드", "aliases": ["이밸류스탠다드"]},
+        "E-Value+ Long Range": {"korean": "E-밸류+ 롱레인지", "aliases": ["이밸류롱레인지"]},
+        "Exclusive": {"korean": "익스클루시브", "aliases": ["익스클루시브"]},
+        "N Line Exclusive": {"korean": "N 라인 익스클루시브", "aliases": ["엔라인 익스클루시브"]},
+        "Prestige": {"korean": "프레스티지", "aliases": ["프레스티지"]},
+        "N Line Prestige": {"korean": "N 라인 프레스티지", "aliases": ["엔라인 프레스티지"]},
+        "E-Lite": {"korean": "E-라이트", "aliases": ["이라이트"]}
+      },
+      "options": [
+        "빌트인 캠(보조배터리 포함)",
+        "파노라마 선루프",
+        "컨비니언스 패키지",
+        "Vision Roof",
+        "20인치 알로이 휠",
+        "21인치 알로이 휠",
+        "보스(BOSE) 프리미엄 사운드",
+        "Vehicle to Load(V2L)",
+        "히트펌프"
+      ],
+      "exterior_colors": {
+        "SAW": "아틀라스 화이트",
+        "A2B": "어비스 블랙 펄",
+        "PE2": "에코트로닉 그레이 펄",
+        "P6W": "디지털 티 화이트 펄",
+        "M6T": "가이아 브라운 매트",
+        "C5G": "사이버 그레이 메탈릭",
+        "D2S": "데님 블루 메탈릭"
+      },
+      "interior_colors": ["블랙 모노톤", "다크 그레이 투톤", "다크 티 그린 투톤"]
+    },
+    "아이오닉 5 N": {
+      "official_name": "아이오닉 5 N",
+      "year": "2026",
+      "aliases": ["ioniq 5 n", "ioniq5n", "아이오닉5N"],
+      "fuel_types": {
+        "전기": {
+          "engine": "전기모터 듀얼",
+          "fuel": "전기",
+          "battery": "84kWh"
+        }
+      },
+      "trims": {
+        "Essential": {"korean": "에센셜", "aliases": ["에센셜"]},
+        "IONIQ 5 N": {"korean": "아이오닉 5 N", "aliases": ["아이오닉5N"]}
+      },
+      "options": [
+        "빌트인 캠(보조배터리 포함)",
+        "N 퍼포먼스 패키지",
+        "21인치 알로이 휠",
+        "보스(BOSE) 프리미엄 사운드",
+        "N 버킷시트",
+        "히트펌프"
+      ],
+      "exterior_colors": {
+        "SAW": "아틀라스 화이트",
+        "A2B": "어비스 블랙 펄",
+        "YAC": "퍼포먼스 블루",
+        "C5G": "사이버 그레이 메탈릭"
+      },
+      "interior_colors": ["블랙 모노톤", "퍼포먼스 블루 투톤"]
+    },
+    "더 뉴 아이오닉 6": {
+      "official_name": "더 뉴 아이오닉 6",
+      "year": "2025",
+      "aliases": ["ioniq 6", "ioniq6", "아이오닉6"],
+      "fuel_types": {
+        "전기 스탠다드": {
+          "engine": "전기모터",
+          "fuel": "전기",
+          "battery": "63kWh"
+        },
+        "전기 롱레인지": {
+          "engine": "전기모터",
+          "fuel": "전기",
+          "battery": "84kWh"
+        }
+      },
+      "trims": {
+        "E-Value+ Standard": {"korean": "E-밸류+ 스탠다드", "aliases": ["이밸류스탠다드"]},
+        "E-Value+ Long Range": {"korean": "E-밸류+ 롱레인지", "aliases": ["이밸류롱레인지"]},
+        "Exclusive": {"korean": "익스클루시브", "aliases": ["익스클루시브"]},
+        "N Line": {"korean": "N 라인", "aliases": ["N라인", "엔라인"]},
+        "Prestige": {"korean": "프레스티지", "aliases": ["프레스티지"]},
+        "E-Lite": {"korean": "E-라이트", "aliases": ["이라이트"]}
+      },
+      "options": [
+        "빌트인 캠(보조배터리 포함)",
+        "파노라마 선루프",
+        "컨비니언스 패키지",
+        "20인치 알로이 휠",
+        "보스(BOSE) 프리미엄 사운드",
+        "Vehicle to Load(V2L)",
+        "히트펌프",
+        "릴렉션 컴포트 시트"
+      ],
+      "exterior_colors": {
+        "SAW": "아틀라스 화이트",
+        "A2B": "어비스 블랙 펄",
+        "PE2": "에코트로닉 그레이 펄",
+        "C5G": "사이버 그레이 메탈릭",
+        "T2G": "녹턴 그레이 메탈릭",
+        "D2S": "데님 블루 메탈릭"
+      },
+      "interior_colors": ["블랙 모노톤", "다크 그레이 투톤"]
+    },
+    "아이오닉 6 N": {
+      "official_name": "아이오닉 6 N",
+      "year": "2025",
+      "aliases": ["ioniq 6 n", "ioniq6n", "아이오닉6N"],
+      "fuel_types": {
+        "전기": {
+          "engine": "전기모터 듀얼",
+          "fuel": "전기",
+          "battery": "84kWh"
+        }
+      },
+      "trims": {
+        "IONIQ 6 N": {"korean": "아이오닉 6 N", "aliases": ["아이오닉6N"]}
+      },
+      "options": [
+        "빌트인 캠(보조배터리 포함)",
+        "N 퍼포먼스 패키지",
+        "21인치 알로이 휠",
+        "보스(BOSE) 프리미엄 사운드",
+        "N 버킷시트",
+        "히트펌프"
+      ],
+      "exterior_colors": {
+        "SAW": "아틀라스 화이트",
+        "A2B": "어비스 블랙 펄",
+        "YAC": "퍼포먼스 블루",
+        "C5G": "사이버 그레이 메탈릭"
+      },
+      "interior_colors": ["블랙 모노톤", "퍼포먼스 블루 투톤"]
+    },
+    "아이오닉 9": {
+      "official_name": "아이오닉 9",
+      "year": "2025",
+      "aliases": ["ioniq 9", "ioniq9", "아이오닉9"],
+      "fuel_types": {
+        "전기 롱레인지": {
+          "engine": "전기모터",
+          "fuel": "전기",
+          "battery": "110.3kWh"
+        },
+        "전기 롱레인지 AWD": {
+          "engine": "전기모터 듀얼",
+          "fuel": "전기",
+          "battery": "110.3kWh"
+        }
+      },
+      "trims": {
+        "Exclusive 7인승": {"korean": "익스클루시브 7인승", "aliases": ["익스클루시브7인승"]},
+        "Exclusive 6인승": {"korean": "익스클루시브 6인승", "aliases": ["익스클루시브6인승"]},
+        "Prestige 7인승": {"korean": "프레스티지 7인승", "aliases": ["프레스티지7인승"]},
+        "Prestige 6인승": {"korean": "프레스티지 6인승", "aliases": ["프레스티지6인승"]},
+        "Calligraphy 7인승": {"korean": "캘리그래피 7인승", "aliases": ["캘리그래피7인승"]},
+        "Calligraphy 6인승": {"korean": "캘리그래피 6인승", "aliases": ["캘리그래피6인승"]}
+      },
+      "options": [
+        "빌트인 캠(보조배터리 포함)",
+        "파노라마 선루프",
+        "컨비니언스 패키지",
+        "어드밴스드 컨비니언스 패키지",
+        "21인치 알로이 휠",
+        "보스(BOSE) 프리미엄 사운드",
+        "Vehicle to Load(V2L)",
+        "히트펌프",
+        "VIP 릴렉션 시트(2열)"
+      ],
+      "exterior_colors": {
+        "WC9": "크리미 화이트 펄",
+        "A2B": "어비스 블랙 펄",
+        "T2G": "녹턴 그레이 메탈릭",
+        "T4A": "에어로 실버 메탈릭",
+        "V3G": "비전 그레이 매트",
+        "PE2": "에코트로닉 그레이 펄"
+      },
+      "interior_colors": ["블랙 모노톤", "다크 그레이 투톤", "세이지 그린 투톤"]
+    },
+    "디 올 뉴 넥쏘": {
+      "official_name": "디 올 뉴 넥쏘",
+      "year": "2025",
+      "aliases": ["nexo", "넥쏘"],
+      "fuel_types": {
+        "수소전기": {
+          "engine": "수소연료전지",
+          "fuel": "수소"
+        }
+      },
+      "trims": {
+        "Exclusive": {"korean": "익스클루시브", "aliases": ["익스클루시브"]},
+        "Exclusive Special": {"korean": "익스클루시브 스페셜", "aliases": ["익스클루시브스페셜"]},
+        "Prestige": {"korean": "프레스티지", "aliases": ["프레스티지"]}
+      },
+      "options": [
+        "빌트인 캠(보조배터리 포함)",
+        "파노라마 선루프",
+        "컨비니언스 패키지",
+        "20인치 알로이 휠",
+        "보스(BOSE) 프리미엄 사운드",
+        "Vehicle to Load(V2L)"
+      ],
+      "exterior_colors": {
+        "WC9": "크리미 화이트 펄",
+        "A2B": "어비스 블랙 펄",
+        "V3G": "비전 그레이 매트",
+        "XB9": "바이오 필릭 블루 펄",
+        "T4A": "에어로 실버 메탈릭"
+      },
+      "interior_colors": ["블랙 모노톤", "네이비 투톤"]
+    },
+    "포터 II 일렉트릭": {
+      "official_name": "포터 II 일렉트릭",
+      "year": "2026",
+      "aliases": ["porter 2 electric", "porter II ev", "포터2 전기", "포터2 EV"],
+      "fuel_types": {
+        "전기": {
+          "engine": "전기모터",
+          "fuel": "전기",
+          "battery": "76.1kWh"
+        }
+      },
+      "trims": {
+        "Style Special": {"korean": "스타일 스페셜", "aliases": ["스타일스페셜"]},
+        "Smart Special": {"korean": "스마트 스페셜", "aliases": ["스마트스페셜"]},
+        "Premium Special": {"korean": "프리미엄 스페셜", "aliases": ["프리미엄스페셜"]}
+      },
+      "options": [
+        "빌트인 캠(룸미러+전방)",
+        "냉동탑차 패키지",
+        "Vehicle to Load(V2L)",
+        "히트펌프"
+      ],
+      "exterior_colors": {
+        "SAW": "아틀라스 화이트",
+        "R4G": "크리스탈 화이트"
+      },
+      "interior_colors": ["그레이 모노톤"]
+    }
+  }
+}
